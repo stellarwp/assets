@@ -26,3 +26,8 @@ parameters:
 		- '#^Function add_query_arg invoked with [123] parameters?, 0 required\.$#'
 		# Uses func_get_args()
 		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
+		- '#^Constant WP_CONTENT_DIR not found\.$#'
+		- '#^Constant WP_CONTENT_URL not found\.$#'
+		- '#^Constant WPMU_PLUGIN_URL not found\.$#'
+		- '#^Constant WP_PLUGIN_DIR not found\.$#'
+		- '#^Constant WP_PLUGIN_URL not found\.$#'

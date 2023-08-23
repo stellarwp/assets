@@ -45,7 +45,7 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected string $file;
+	protected ?string $file;
 
 	/**
 	 * The asset groups.
@@ -131,7 +131,7 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected string $min_url;
+	protected ?string $min_url;
 
 	/**
 	 * The root plugin path for this asset.
@@ -173,28 +173,28 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected string $slug;
+	protected ?string $slug;
 
 	/**
 	 * The asset type.
 	 *
 	 * @var ?string
 	 */
-	protected string $type;
+	protected ?string $type;
 
 	/**
 	 * The asset file url.
 	 *
 	 * @var ?string
 	 */
-	protected string $url;
+	protected ?string $url;
 
 	/**
 	 * The asset version.
 	 *
 	 * @var ?string
 	 */
-	protected string $version;
+	protected ?string $version;
 
 	/**
 	 * Constructor.
@@ -310,7 +310,7 @@ class Asset {
 	 * @since 1.0.0
 	 */
 	public function enqueue() {
-		Assets::instance()->register_in_wp( $this );
+		Assets::init()->register_in_wp( $this );
 	}
 
 	/**
@@ -470,7 +470,7 @@ class Asset {
 			if ( filter_var( $this->file, FILTER_VALIDATE_URL ) ) {
 				$this->url = $this->file;
 			} else {
-				$this->url = stellarwp_asset_url( $this->file, $this->plugin_path, $this->is_vendor() ? '' : null );
+				$this->url = Assets::init()->asset_url( $this->file, $this->plugin_path, $this->is_vendor() ? '' : null );
 			}
 		}
 
@@ -692,7 +692,7 @@ class Asset {
 			return false;
 		}
 
-		$script_debug = defined( 'SCRIPT_DEBUG' ) && stellarwp_is_truthy( SCRIPT_DEBUG );
+		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
 		// Strip the plugin URL and make this relative.
 		$relative_location = str_replace( $base_url, '', $url );
@@ -779,7 +779,7 @@ class Asset {
 	 * @param string|null $plugin_path The path to the root of the plugin.
 	 */
 	public static function register( string $slug, string $file, string $version = null, $plugin_path = null ) {
-		return Assets::instance()->register( new self( $slug, $file, $version, $plugin_path ) );
+		return Assets::init()->register( new self( $slug, $file, $version, $plugin_path ) );
 	}
 
 	/**

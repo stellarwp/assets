@@ -49,9 +49,9 @@ class Assets {
 	 *
 	 * @return Assets
 	 */
-	public static function instance() {
+	public static function init() {
 		if ( ! isset( static::$instance ) ) {
-			static::$instance = new static();
+			static::$instance = new self();
 		}
 
 		return static::$instance;
@@ -99,6 +99,64 @@ class Assets {
 		// Enqueue late.
 		add_filter( 'script_loader_tag', [ $this, 'filter_add_localization_data' ], 500, 2 );
 	}
+
+	/**
+	 * Returns or echoes a url to a file in the plugin assets directory.
+	 *
+	 * @param string $resource The filename of the resource.
+	 * @param string|null $plugin_path Path to the root of the plugin.
+	 * @param string|null $relative_path_to_assets Relative path to the assets directory.
+	 *
+	 * @return string
+	 **/
+	public function asset_url( string $resource, string $plugin_path = null, string $relative_path_to_assets = null ): string {
+		static $_plugin_url = [];
+
+		if ( $plugin_path === null ) {
+			$plugin_path = Config::get_path();
+		}
+
+		if ( ! isset( $_plugin_url[ $plugin_path ] ) ) {
+			$_plugin_url[ $plugin_path ] = trailingslashit( plugins_url( basename( $plugin_path ), $plugin_path ) );
+		}
+
+		$plugin_base_url = $_plugin_url[ $plugin_path ];
+		$hook_prefix     = Config::get_hook_prefix();
+		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
+		$resource_path   = $relative_path_to_assets;
+
+		if ( is_null( $resource_path ) ) {
+			$resources_path = 'src/assets/';
+			switch ( $extension ) {
+				case 'css':
+					$resource_path = $resources_path . 'css/';
+					break;
+				case 'js':
+					$resource_path = $resources_path . 'js/';
+					break;
+				case 'scss':
+					$resource_path = $resources_path . 'scss/';
+					break;
+				case 'pcss':
+					$resource_path = $resources_path . 'postcss/';
+					break;
+				default:
+					$resource_path = $resources_path;
+					break;
+			}
+		}
+
+		$url = $plugin_base_url . $resource_path . $resource;
+
+		/**
+		 * Filters the resource URL
+		 *
+		 * @param string $url
+		 * @param string $resource
+		 */
+		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_url", $url, $resource );
+	}
+
 
 	/**
 	 * Registers a script with WordPress.
@@ -552,6 +610,8 @@ class Assets {
 			$assets = $this->get();
 		}
 
+		$hook_prefix = Config::get_hook_prefix();
+
 		foreach ( $assets as $asset ) {
 			$slug = $asset->get_slug();
 			// Should this asset be enqueued regardless of the current filter/any conditional requirements?
@@ -595,7 +655,7 @@ class Assets {
 			 * @param bool   $enqueue If we should enqueue or not a given asset.
 			 * @param object $asset   Which asset we are dealing with.
 			 */
-			$enqueue = (bool) apply_filters( 'stellarwp/assets/enqueue', $enqueue, $asset );
+			$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue", $enqueue, $asset );
 
 			/**
 			 * Allows developers to hook-in and prevent an asset from being loaded.
@@ -605,7 +665,7 @@ class Assets {
 			 * @param bool   $enqueue If we should enqueue or not a given asset.
 			 * @param object $asset   Which asset we are dealing with.
 			 */
-			$enqueue = (bool) apply_filters( "stellarwp/assets/enqueue_{$slug}", $enqueue, $asset );
+			$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue_{$slug}", $enqueue, $asset );
 
 			if ( ! $enqueue && ! $should_enqueue_no_matter_what ) {
 				continue;
@@ -673,7 +733,7 @@ class Assets {
 	 * @param string|null $plugin_path The path to the root of the plugin.
 	 */
 	public static function asset( string $slug, string $file, string $version = null, string $plugin_path = null ) {
-		return static::instance()->register( new Asset( $slug, $file, $version, $plugin_path ) );
+		return static::init()->register( new Asset( $slug, $file, $version, $plugin_path ) );
 	}
 
 	/**
@@ -706,6 +766,8 @@ class Assets {
 	 *                           it was not in the array of objects.
 	 */
 	public function get( $slug = null, $sort = true ) {
+		$obj = $this;
+
 		if ( is_null( $slug ) ) {
 			if ( $sort ) {
 				$cache_key_count = __METHOD__ . ':count';
@@ -714,8 +776,8 @@ class Assets {
 				$count       = count( $this->assets );
 
 				if ( $count !== $cache_count ) {
-					uasort( $this->assets, static function( $a, $b ) {
-						return stellarwp_sort_by_priority( $a, $b, 'get_priority' );
+					uasort( $this->assets, static function( $a, $b ) use ( $obj ) {
+						return $obj->sort_by_priority( $a, $b, 'get_priority' );
 					} );
 					$this->set_var( $cache_key_count, $count );
 				}
@@ -742,8 +804,8 @@ class Assets {
 
 			if ( $sort ) {
 				// Sorts by priority.
-				uasort( $assets, static function( $a, $b ) {
-					return stellarwp_sort_by_priority( $a, $b, 'get_priority' );
+				uasort( $assets, static function( $a, $b ) use ( $obj ) {
+					return $obj->sort_by_priority( $a, $b, 'get_priority' );
 				} );
 			}
 
@@ -845,4 +907,36 @@ class Assets {
 	public function set_var( string $var, $value = null ) {
 		$this->memoized[ $var ] = $value;
 	}
+
+	/**
+	 * Sorting function based on Priority
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object|array $b Second subject to compare.
+	 * @param object|array $a First Subject to compare.
+	 * @param string $method Method to use for sorting.
+	 *
+	 * @return int
+	 */
+	public function sort_by_priority( $a, $b, $method = null ) {
+		if ( is_array( $a ) ) {
+			$a_priority = $a['priority'];
+		} else {
+			$a_priority = $method ? $a->$method() : $a->priority;
+		}
+
+		if ( is_array( $b ) ) {
+			$b_priority = $b['priority'];
+		} else {
+			$b_priority = $method ? $b->$method() : $b->priority;
+		}
+
+		if ( (int) $a_priority === (int) $b_priority ) {
+			return 0;
+		}
+
+		return (int) $a_priority > (int) $b_priority ? 1 : -1;
+	}
+
 }
