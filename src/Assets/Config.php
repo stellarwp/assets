@@ -6,17 +6,22 @@ class Config {
 	/**
 	 * @var string
 	 */
-	protected static $hook_prefix = '';
+	protected static string $hook_prefix = '';
 
 	/**
 	 * @var string
 	 */
-	protected static $root_path = '';
+	protected static string $relative_asset_path = 'src/assets/';
 
 	/**
 	 * @var string
 	 */
-	protected static $version = '';
+	protected static string $root_path = '';
+
+	/**
+	 * @var string
+	 */
+	protected static string $version = '';
 
 	/**
 	 * Gets the hook prefix.
@@ -37,6 +42,15 @@ class Config {
 	}
 
 	/**
+	 * Gets the relative asset path of the project.
+	 *
+	 * @return string
+	 */
+	public static function get_relative_asset_path(): string {
+		return static::$relative_asset_path;
+	}
+
+	/**
 	 * Gets the version of the project.
 	 *
 	 * @return string
@@ -49,9 +63,10 @@ class Config {
 	 * Resets this class back to the defaults.
 	 */
 	public static function reset() {
-		static::$hook_prefix = '';
-		static::$root_path   = '';
-		static::$version     = '';
+		static::$hook_prefix         = '';
+		static::$relative_asset_path = 'src/assets/';
+		static::$root_path           = '';
+		static::$version             = '';
 	}
 
 	/**
@@ -66,6 +81,17 @@ class Config {
 	}
 
 	/**
+	 * Sets the relative asset path of the project.
+	 *
+	 * @param string $path The root path of the project.
+	 *
+	 * @return void
+	 */
+	public static function set_relative_asset_path( string $path ) {
+		static::$relative_asset_path = trailingslashit( $path );
+	}
+
+	/**
 	 * Sets the root path of the project.
 	 *
 	 * @param string $path The root path of the project.
@@ -73,7 +99,7 @@ class Config {
 	 * @return void
 	 */
 	public static function set_path( string $path ) {
-		static::$root_path = $path;
+		static::$root_path = trailingslashit( $path );
 	}
 
 	/**

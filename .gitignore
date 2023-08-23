@@ -2,7 +2,7 @@ composer.lock
 files/
 repo/
 vendor/
-tests/support/_generated/
+tests/_support/_generated
 
 # Dev tools
 .buildpath

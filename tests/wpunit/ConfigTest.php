@@ -29,7 +29,16 @@ class ConfigTest extends AssetTestCase {
 	public function should_set_path() {
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
 
-		$this->assertEquals( dirname( dirname( __DIR__ ) ), Config::get_path() );
+		$this->assertEquals( dirname( dirname( __DIR__ ) ) . '/', Config::get_path() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function should_set_relative_asset_path() {
+		Config::set_relative_asset_path( 'src/resources' );
+
+		$this->assertEquals( 'src/resources/', Config::get_relative_asset_path() );
 	}
 
 	/**
@@ -48,10 +57,12 @@ class ConfigTest extends AssetTestCase {
 		Config::set_hook_prefix( 'bork' );
 		Config::set_version( '1.1.0' );
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
+		Config::set_relative_asset_path( 'src/resources/' );
 		Config::reset();
 
-		$this->assertEquals( null, Config::get_hook_prefix() );
-		$this->assertEquals( null, Config::get_path() );
-		$this->assertEquals( null, Config::get_version() );
+		$this->assertEquals( '', Config::get_hook_prefix() );
+		$this->assertEquals( '', Config::get_path() );
+		$this->assertEquals( 'src/assets/', Config::get_relative_asset_path() );
+		$this->assertEquals( '', Config::get_version() );
 	}
 }
