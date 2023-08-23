@@ -9,6 +9,11 @@ class Assets {
 	protected static $instance;
 
 	/**
+	 * @var ?Controller
+	 */
+	protected Controller $controller;
+
+	/**
 	 * @var array Array of memoized key value pairs.
 	 */
 	protected array $memoized = [];
@@ -16,17 +21,17 @@ class Assets {
 	/**
 	 * @var string
 	 */
-	private string $base_path;
+	protected string $base_path;
 
 	/**
 	 * @var string
 	 */
-	private string $assets_url;
+	protected string $assets_url;
 
 	/**
 	 * @var string
 	 */
-	private string $version;
+	protected string $version;
 
 	/**
 	 * Stores all the Assets and it's configurations.
@@ -40,7 +45,7 @@ class Assets {
 	 *
 	 * @var array
 	 */
-	private $localized = [];
+	protected $localized = [];
 
 	/**
 	 * Singleton instance.
@@ -49,12 +54,23 @@ class Assets {
 	 *
 	 * @return Assets
 	 */
-	public static function init() {
+	public static function init(): Assets {
 		if ( ! isset( static::$instance ) ) {
 			static::$instance = new self();
 		}
 
 		return static::$instance;
+	}
+
+	/**
+	 * Helper method to get the instance object. Alias of ::init().
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Assets
+	 */
+	public static function instance(): Assets {
+		return static::init();
 	}
 
 	/**
@@ -69,35 +85,8 @@ class Assets {
 		$this->base_path  = $base_path ?? Config::get_path();
 		$this->assets_url = $assets_url ?? trailingslashit( plugins_url( $this->base_path ) );
 		$this->version    = Config::get_version();
-		$this->add_actions();
-		$this->add_filters();
-	}
-
-	/**
-	 * Add actions for the Assets.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function add_actions() {
-		add_action( 'init', [ $this, 'register_in_wp' ], 1, 0 );
-	}
-
-	/**
-	 * Add filters for the Assets.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function add_filters() {
-		add_filter( 'script_loader_tag', [ $this, 'filter_tag_async_defer' ], 50, 2 );
-		add_filter( 'script_loader_tag', [ $this, 'filter_modify_to_module' ], 50, 2 );
-		add_filter( 'script_loader_tag', [ $this, 'filter_print_before_after_script' ], 100, 2 );
-
-		// Enqueue late.
-		add_filter( 'script_loader_tag', [ $this, 'filter_add_localization_data' ], 500, 2 );
+		$this->controller = new Controller( $this );
+		$this->controller->register();
 	}
 
 	/**

@@ -9,6 +9,25 @@ A library for managing asset registration and enqueuing in WordPress.
 * [Installation](#installation)
 * [Notes on examples](#notes-on-examples)
 * [Configuration](#configuration)
+* [Register and enqueue assets](#register-and-enqueue-assets)
+  * [Simple examples](#simple-examples)
+    * [A simple registration](#a-simple-registration)
+    * [A URL-based asset registration](#a-url-based-asset-registration)
+    * [Specifying the version](#specifying-the-version)
+    * [Specifying the root path](#specifying-the-root-path)
+    * [Assets with no file extension](#assets-with-no-file-extension)
+    * [Dependencies](#dependencies)
+    * [Auto-enqueuing on an action](#auto-enqueuing-on-an-action)
+  * [Comprehensive CSS example](#comprehensive-css-example)
+  * [Comprehensive JS example](#comprehensive-js-example)
+  * [Enqueuing manually](#enqueuing-manually)
+    * [Enqueuing a whole group](#enqueuing-a-whole-group)
+* [Advanced topics](#advanced-topics)
+  * [Conditional enqueuing](#conditional-enqueuing)
+  * [Firing a callback after enqueuing occurs](#firing-a-callback-after-enqueuing-occurs)
+  * [Output JS data](#output-js-data)
+  * [Output content before/after a JS asset is output](#output-content-beforeafter-a-js-asset-is-output)
+  * [Style meta data](#style-meta-data)
 
 ## Installation
 
@@ -44,7 +63,118 @@ add_action( 'plugins_loaded', function() {
 } );
 ```
 
-## Comprehensive JS example
+## Register and enqueue assets
+
+There are a lot of options that are available for handling assets
+
+### Simple examples
+
+For all examples, assume that the following `use` statement is being used:
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+```
+
+#### A simple registration
+
+```php
+Asset::register( 'my-style', 'css/my-style.css' );
+```
+
+#### A URL-based asset registration
+
+```php
+Asset::register( 'remote-js', 'https://someplace.com/script.js' );
+```
+
+#### Specifying the version
+By default, assets inherit the version of that set in Config::get_version(), but you
+can specify a version manually:
+
+```php
+Asset::register( 'another-style', 'css/another.css', '1.2.3' );
+```
+
+#### Specifying the root path
+By default, assets are searched for/found from the root path of your project based on
+the value set in Config::get_path(), but you can specify a root path manually:
+
+```php
+Asset::register( 'another-style', 'css/another.css', null, $my_path );
+```
+
+#### Assets with no file extension
+
+If you need to register an asset where the asset does not have an extension,
+you can do so by manually setting the asset type, like so:
+
+```php
+Asset::register( 'extension-less', 'https://someplace.com/a/style' )
+	->set_type( 'css' );
+
+// or:
+
+Asset::register( 'extension-less', 'https://someplace.com/a/script' )
+	->set_type( 'js' );
+```
+
+#### Setting priority order
+
+You can set scripts to enqueue in a specific order via the `::set_priority()` method. This method takes an integer and
+works similar to the action/filter priorities in WP:
+
+```php
+Asset::register( 'my-style', 'css/my-style.css' )
+	->set_priority( 20 );
+```
+
+#### Dependencies
+If your asset has dependencies, you can specify those like so:
+
+```php
+Asset::register( 'script-with-dependencies', 'js/something.js' )
+	->set_dependencies( [
+		'jquery',
+	] );
+```
+
+#### Auto-enqueuing on an action
+To specify when to enqueue the asset, you can indicate it like so:
+
+```php
+Asset::register( 'yet-another-style', 'css/yet-another.css' )
+	->set_action( 'wp_enqueue_scripts' );
+```
+
+### Comprehensive CSS example
+
+The following example shows all of the options available during the registration of an asset.
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+
+Asset::register( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional_path_to_project_root )
+	->add_style_data( 'rtl', true )
+	->add_style_data( 'suffix', '.rtl' )
+	->add_to_group( 'my-assets' ) // You can have more than one of these.
+	->call_after_enqueue( // This can be any callable.
+		static function() {
+			// Do something after the asset is enqueued.
+		}
+	)
+	->set_action( 'wp_enqueue_scripts' )
+	->set_condition( // This can be any callable that returns a boolean.
+		static function() {
+			return is_front_page() || is_single();
+		}
+	)
+	->set_dependencies( [ 'some-css' ] )
+	->set_media( 'screen' )
+	->set_priority( 50 )
+	->set_type( 'css' ); // Technically unneeded due to the .js extension.
+```
+
+### Comprehensive JS example
 
 ```php
 use Boomshakalaka\StellarWP\Assets\Asset;
@@ -66,103 +196,169 @@ Asset::register( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optio
 	->set_as_async( true )
 	->set_as_deferred( true )
 	->set_as_module( true )
-	->set_condition( // This can be any callable.
+	->set_condition( // This can be any callable that returns a boolean.
 		static function() {
 			return is_front_page() || is_single();
 		}
 	)
 	->set_dependencies( [ 'jquery' ] )
+	->print_before( '<b>Before</b>' )
+	->print_after( '<b>After</b>' )
 	->set_priority( 50 )
 	->set_type( 'js' ); // Technically unneeded due to the .js extension.
 ```
 
-## Comprehensive CSS example
+### Enqueuing manually
+
+Sometimes you don't wish to set an asset to enqueue automatically on a specific action. In these cases, you can
+trigger a manual enqueue:
+
+```php
+use Boomshakalaka\StellarWP\Assets\Assets;
+
+Assets::instance()->enqueue(
+	[
+		'my-style',
+		'my-script',
+		'something-else',
+	]
+);
+
+/**
+ * If you want to force the enqueue to happen and ignore any conditions,
+ * you can pass `true` to the second argument.
+ */
+
+Assets::instance()->enqueue(
+	[
+		'my-style',
+		'my-script',
+		'something-else',
+	],
+	true
+);
+```
+
+#### Enqueuing a whole group
+
+If you have a group of assets that you want to enqueue, you can do so like this:
+
+```php
+use Boomshakalaka\StellarWP\Assets\Assets;
+
+// You can do single groups:
+Assets::instance()->enqueue_group( 'group-name' );
+
+// or multiple:
+Assets::instance()->enqueue_group( [ 'group-one', 'group-two' ] );
+
+// or if you want to force the enqueuing despite conditions:
+Assets::instance()->enqueue_group( 'group-name', true );
+```
+
+## Advanced topics
+
+### Conditional enqueuing
+
+It is rare that you will want to enqueue an asset on every page load. Luckily, you can specify a condition for when an
+asset should be enqueued using the `::set_condition()` method. This method takes a callable that should return a boolean
+that represents whether the asset should be enqueued or not.
 
 ```php
 use Boomshakalaka\StellarWP\Assets\Asset;
 
-Asset::register( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional_path_to_project_root )
-	->add_to_group( 'my-assets' ) // You can have more than one of these.
-	->call_after_enqueue( // This can be any callable.
-		static function() {
-			// Do something after the asset is enqueued.
-		}
+// Simple condition.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->set_condition( 'is_single' );
+
+// Class-based method.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->set_condition( [ $my_class, 'my_method_that_returns_boolean' ] );
+
+// Anonymous function.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->set_condition( static function() {
+		// You can do whatever you want here as long as it returns a boolean!
+		return is_single() || is_home();
+	} );
+```
+
+### Firing a callback after enqueuing occurs
+
+Sometimes you need to know when enqueuing happens. You can specify a callback to be fired once enequeuing occurs using
+the `::call_after_enqueue()` method. Like the `::set_condition()` method, this method takes a callable.
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+
+// Simple function execution.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->call_after_enqueue( 'do_some_global_function' );
+
+// Class-based method.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->call_after_enqueue( [ $my_class, 'my_callback' ] );
+
+// Anonymous function.
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->call_after_enqueue( static function() {
+		// Do whatever in here.
+	} );
+```
+
+### Output JS data
+
+If you wish to output JS data to the page after enqueuing (similar to `wp_localize_script()`), you can make use of the
+`::add_localize_script()` method. This method takes two arguments: the first is the name of the JS variable to be
+output and the second argument is the data to be assigned to the JS variable. You can chain this method as many times
+as you wish!
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->add_localize_script(
+		'boomshakalaka_animal',
+		[
+			'animal' => 'cat',
+			'color'  => 'orange',
+		]
 	)
-	->set_action( 'wp_enqueue_scripts' )
-	->set_condition( // This can be any callable.
-		static function() {
-			return is_front_page() || is_single();
-		}
-	)
-	->set_dependencies( [ 'some-css' ] )
-	->set_media( 'screen' )
-	->set_priority( 50 )
-	->set_type( 'css' ); // Technically unneeded due to the .js extension.
+	->add_localize_script(
+		'boomshakalaka_food',
+		[
+			'breakfast' => 'eggs',
+			'lunch'     => 'sandwich',
+			'dinner'    => 'enchiladas',
+		]
+	);
 ```
 
-## Registering an asset
+### Output content before/after a JS asset is output
 
-There are a lot of options that are available for handling assets. Here is a comprehensive example. You can dig into the
-details of each chainable method in the documentation below.
-
-### Registering a JS file with a `.js` extension
-
-The following example registers a JS file with the `.js` extension. Due to the presence of that extension, the file
-will be identified and handled like a JS file.
+There may be times when you wish to output markup or text immediately before or immediately after outputting the JS
+asset. You can make use of `::print_before()` and `::print_after()` to do this.
 
 ```php
 use Boomshakalaka\StellarWP\Assets\Asset;
 
-Asset::register( 'my-script', 'js/my-script.js' );
+Asset::register( 'my-asset', 'js/some-asset.js' )
+	->print_before( '<b>Before</b>' )
+	->print_after( '<b>After</b>' );
 ```
 
-### Registering a CSS file with a `.css` extension
+### Style meta data
 
-The following example registers a CSS file with the `.css` extension. Due to the presence of that extension, the file
-will be identified and handled like a CSS file.
+Assets support adding meta data to stylesheets. This is done via the `::add_style_data()` method. This method takes two
+arguments: the first is the name of the meta data and the second is the value of the meta data. You can chain this and
+call this method multiple times.
+
+This works similar to the [`wp_style_add_data()`](https://developer.wordpress.org/reference/functions/wp_style_add_data/) function.
 
 ```php
 use Boomshakalaka\StellarWP\Assets\Asset;
 
-Asset::register( 'my-style', 'css/my-style.css' );
-```
-
-### Registering a file or URL without an extension
-
-Sometimes you need to register an asset that doesn't have an extension. In these cases, you need to let the library know
-what type of asset it is. You can do this by adding the `set_type()` method to the chain.
-
-```php
-use Boomshakalaka\StellarWP\Assets\Asset;
-
-// Register it as a JS file.
-Asset::register( 'something', 'https://somewhere.com/a/resource/' )
-	->set_type( 'js' );
-
-// Register it as a CSS file.
-Asset::register( 'something-else', 'https://somewhere.com/another/resource/' )
-	->set_type( 'css' );
-```
-
-## Enqueuing an asset
-
-To set an asset to enqueue during a specific action, you add `set_action()` to the chain, like so:
-
-```php
-use Boomshakalaka\StellarWP\Assets\Asset;
-
-Asset::register( 'my-asset', 'css/my-style.css' )
-	->set_action( 'wp_enqueue_scripts' );
-```
-
-## Setting dependencies
-
-You can set dependencies for an asset by adding `set_dependencies()` to the chain. This method accepts an array of asset
-handles.
-
-```php
-use Boomshakalaka\StellarWP\Assets\Asset;
-
-Asset::register( 'my-asset', 'js/my-script.js' )
-	->set_dependencies( [ 'jquery' ] );
+Asset::register( 'my-asset', 'css/some-asset.css' )
+	->add_style_data( 'rtl', true )
+	->add_style_data( 'suffix', '.rtl' );
 ```
