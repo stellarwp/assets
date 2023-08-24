@@ -140,9 +140,7 @@ If your asset has dependencies, you can specify those like so:
 
 ```php
 Asset::add( 'script-with-dependencies', 'js/something.js' )
-	->set_dependencies( [
-		'jquery',
-	] )
+	->set_dependencies( 'jquery', 'jquery-ui', 'some-other-thing' )
 	->register();
 ```
 
@@ -177,7 +175,7 @@ Asset::add( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional
 			return is_front_page() || is_single();
 		}
 	)
-	->set_dependencies( [ 'some-css' ] )
+	->set_dependencies( 'some-css' ) // Each dependency becomes a parameter in this method.
 	->set_media( 'screen' )
 	->set_min_path( 'src/assets/build/' )
 	->set_type( 'css' ) // Technically unneeded due to the .js extension.
@@ -213,7 +211,7 @@ Asset::add( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optional_p
 			return is_front_page() || is_single();
 		}
 	)
-	->set_dependencies( [ 'jquery' ] )
+	->set_dependencies( 'jquery' ) // Each dependency becomes a parameter in this method.
 	->set_min_path( 'src/assets/build/' )
 	->set_type( 'js' ) // Technically unneeded due to the .js extension.
 	->register();

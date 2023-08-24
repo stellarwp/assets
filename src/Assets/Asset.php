@@ -1044,11 +1044,11 @@ class Asset {
 	/**
 	 * @since 1.0.0
 	 *
-	 * @param array $dependencies
+	 * @param ...string $dependencies
 	 *
 	 * @return static
 	 */
-	public function set_dependencies( array $dependencies ) {
+	public function set_dependencies( string ...$dependencies ) {
 		$this->dependencies = [];
 
 		foreach ( $dependencies as $dependency ) {
