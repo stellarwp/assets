@@ -81,9 +81,9 @@ class Assets {
 	 * @param string|null $base_path  Base path to the directory.
 	 * @param string|null $assets_url Directory to the assets.
 	 */
-	public function __construct( $base_path = null, $assets_url = null ) {
-		$this->base_path  = $base_path ?? Config::get_path();
-		$this->assets_url = $assets_url ?? trailingslashit( plugins_url( $this->base_path ) );
+	public function __construct( ?string $base_path = null, ?string $assets_url = null ) {
+		$this->base_path  = $base_path ?: Config::get_path();
+		$this->assets_url = $assets_url ?: trailingslashit( plugins_url( $this->base_path ) );
 		$this->version    = Config::get_version();
 		$this->controller = new Controller( $this );
 		$this->controller->register();

@@ -484,7 +484,7 @@ class Asset {
 		}
 
 		if ( $this->min_url === null ) {
-			$this->min_url = static::maybe_get_min_file( $this->url );
+			$this->min_url = $this->maybe_get_min_file( $this->url );
 		}
 
 		if ( $use_min_if_available && $this->min_url ) {
@@ -651,7 +651,7 @@ class Asset {
 	 *
 	 * @return string|false The url to the minified version or false, if file not found.
 	 */
-	public static function maybe_get_min_file( $url ) {
+	public function maybe_get_min_file( $url ) {
 		static $wpmu_plugin_url;
 		static $wp_plugin_url;
 		static $wp_content_url;
@@ -704,18 +704,64 @@ class Asset {
 		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
 		// Strip the plugin URL and make this relative.
-		$relative_location = str_replace( $base_url, '', $url );
+		$relative_location = str_replace( $base_url . '/', '', $url );
 
 		if ( $script_debug ) {
 			// Add the actual url after having the min file added.
 			$urls[] = $relative_location;
 		}
 
+		$hook_prefix = Config::get_hook_prefix();
+
 		// If needed add the Min Files.
 		if ( substr( $relative_location, -3, 3 ) === '.js' ) {
-			$urls[] = preg_replace( '#(.*src/assets/js/).*/([a-zA-Z0-0\-\_\.]+.js)#', '$1dist/$2', $relative_location );
+			/**
+			 * Filter the path to the minified js files.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param string $min_js_path       The path to the minified js files.
+			 * @param string $slug              The asset slug.
+			 * @param string $relative_location The relative location to the file.
+			 */
+			$min_js_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/min-js-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
+
+			/**
+			 * Filter the path to the js files.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param string $js_path           The path to the minified js files.
+			 * @param string $slug              The asset slug.
+			 * @param string $relative_location The relative location to the file.
+			 */
+			$js_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/js-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
+
+			$urls[] = preg_replace( '#(.*)(' . preg_quote( $js_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).js#', '$1' . $min_js_path . '$3.min.js', $relative_location );
 		} elseif ( substr( $relative_location, -4, 4 ) === '.css' ) {
-			$urls[] = preg_replace( '#(.*src/assets/css/).*/([a-zA-Z0-0\-\_\.]+.css)#', '$1dist/$2', $relative_location );
+			/**
+			 * Filter the path to the minified css files.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param string $min_css_path      The path to the minified css files.
+			 * @param string $slug              The asset slug.
+			 * @param string $relative_location The relative location to the file.
+			 */
+			$min_css_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/min-css-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
+
+			/**
+			 * Filter the path to the css files.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param string $css_path          The path to the minified css files.
+			 * @param string $slug              The asset slug.
+			 * @param string $relative_location The relative location to the file.
+			 */
+			$css_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/css-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
+
+			$urls[] = preg_replace( '#(.*)(' . preg_quote( $css_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).css#', '$1' . $min_css_path . '$3.min.css', $relative_location );
 		}
 
 		if ( ! $script_debug ) {
@@ -725,8 +771,8 @@ class Asset {
 
 		// Check for all Urls added to the array.
 		foreach ( $urls as $partial_path ) {
-			$file_path = wp_normalize_path( $base_dir . $partial_path );
-			$file_url  = $base_url . $partial_path;
+			$file_path = wp_normalize_path( "{$base_dir}/{$partial_path}" );
+			$file_url  = "{$base_url}/{$partial_path}";
 
 			if ( file_exists( $file_path ) ) {
 				return $file_url;

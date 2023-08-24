@@ -60,4 +60,26 @@ class ConditionCest {
 		$I->amOnPage( '/wp-admin' );
 		$I->dontSeeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
 	}
+
+	public function it_should_ignore_conditions_if_forced( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::register( 'fake-js', 'fake.js' )
+				->set_action( 'wp_enqueue_scripts' )
+				->set_condition( static function() {
+					return ! is_home();
+				} )
+				->enqueue();
+
+			Assets::init()->enqueue( 'fake-js', true );
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
+	}
 }
