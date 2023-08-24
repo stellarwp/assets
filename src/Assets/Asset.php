@@ -298,6 +298,69 @@ class Asset {
 	}
 
 	/**
+	 * Builds the base asset URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	protected function build_asset_url(): string {
+		$resource                = $this->get_file();
+		$plugin_path             = $this->get_plugin_path();
+		$relative_path_to_assets = $this->is_vendor() ? '' : null;
+
+		if ( $plugin_path === null ) {
+			$plugin_path = Config::get_path();
+		}
+
+		$plugin_base_url = Config::get_url( $plugin_path );
+		$hook_prefix     = Config::get_hook_prefix();
+		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
+		$resource_path   = $relative_path_to_assets;
+		$type            = $this->get_type();
+
+		if ( ! $extension && $type ) {
+			$extension = $type;
+		}
+
+		if ( is_null( $resource_path ) ) {
+			$resources_path = $this->get_path();
+			switch ( $extension ) {
+				case 'css':
+					$resources_path = preg_replace( '#/css/$#', '/', $resources_path );
+					$resource_path  = "{$resources_path}css/";
+					break;
+				case 'js':
+					$resources_path = preg_replace( '#/js/$#', '/', $resources_path );
+					$resource_path  = "{$resources_path}js/";
+					break;
+				case 'scss':
+					$resources_path = preg_replace( '#/scss/$#', '/', $resources_path );
+					$resource_path  = "{$resources_path}scss/";
+					break;
+				case 'pcss':
+					$resources_path = preg_replace( '#/postcss/$#', '/', $resources_path );
+					$resource_path  = "{$resources_path}postcss/";
+					break;
+				default:
+					$resource_path = $resources_path;
+					break;
+			}
+		}
+
+		$url = $plugin_base_url . $resource_path . $resource;
+
+		/**
+		 * Filters the asset URL
+		 *
+		 * @param string $url   Asset URL.
+		 * @param string $slug  Asset slug.
+		 * @param Asset  $asset The Asset object.
+		 */
+		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_url", $url, $this->get_slug(), $this );
+	}
+
+	/**
 	 * Set a callable that should fire after enqueuing.
 	 *
 	 * @since 1.0.0
@@ -554,7 +617,7 @@ class Asset {
 			if ( filter_var( $this->file, FILTER_VALIDATE_URL ) ) {
 				$this->url = $this->file;
 			} else {
-				$this->url = Assets::init()->asset_url( $this );
+				$this->url = $this->build_asset_url();
 			}
 		}
 
