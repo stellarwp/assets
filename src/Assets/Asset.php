@@ -45,7 +45,7 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected ?string $file;
+	protected ?string $file = null;
 
 	/**
 	 * The asset groups.
@@ -131,7 +131,7 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected ?string $min_url;
+	protected ?string $min_url = null;
 
 	/**
 	 * The root plugin path for this asset.
@@ -173,28 +173,28 @@ class Asset {
 	 *
 	 * @var ?string
 	 */
-	protected ?string $slug;
+	protected ?string $slug = null;
 
 	/**
 	 * The asset type.
 	 *
 	 * @var ?string
 	 */
-	protected ?string $type;
+	protected ?string $type = null;
 
 	/**
 	 * The asset file url.
 	 *
 	 * @var ?string
 	 */
-	protected ?string $url;
+	protected ?string $url = null;
 
 	/**
 	 * The asset version.
 	 *
 	 * @var ?string
 	 */
-	protected ?string $version;
+	protected ?string $version = null;
 
 	/**
 	 * Constructor.

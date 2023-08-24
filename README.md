@@ -78,13 +78,15 @@ use Boomshakalaka\StellarWP\Assets\Asset;
 #### A simple registration
 
 ```php
-Asset::register( 'my-style', 'css/my-style.css' );
+Asset::register( 'my-style', 'css/my-style.css' )
+	->enqueue();
 ```
 
 #### A URL-based asset registration
 
 ```php
-Asset::register( 'remote-js', 'https://someplace.com/script.js' );
+Asset::register( 'remote-js', 'https://someplace.com/script.js' )
+	->enqueue();
 ```
 
 #### Specifying the version
@@ -92,7 +94,8 @@ By default, assets inherit the version of that set in Config::get_version(), but
 can specify a version manually:
 
 ```php
-Asset::register( 'another-style', 'css/another.css', '1.2.3' );
+Asset::register( 'another-style', 'css/another.css', '1.2.3' )
+	->enqueue();
 ```
 
 #### Specifying the root path
@@ -100,7 +103,8 @@ By default, assets are searched for/found from the root path of your project bas
 the value set in Config::get_path(), but you can specify a root path manually:
 
 ```php
-Asset::register( 'another-style', 'css/another.css', null, $my_path );
+Asset::register( 'another-style', 'css/another.css', null, $my_path )
+	->enqueue();
 ```
 
 #### Assets with no file extension
@@ -110,12 +114,14 @@ you can do so by manually setting the asset type, like so:
 
 ```php
 Asset::register( 'extension-less', 'https://someplace.com/a/style' )
-	->set_type( 'css' );
+	->set_type( 'css' )
+	->enqueue();
 
 // or:
 
 Asset::register( 'extension-less', 'https://someplace.com/a/script' )
-	->set_type( 'js' );
+	->set_type( 'js' )
+	->enqueue();
 ```
 
 #### Setting priority order
@@ -125,7 +131,8 @@ works similar to the action/filter priorities in WP:
 
 ```php
 Asset::register( 'my-style', 'css/my-style.css' )
-	->set_priority( 20 );
+	->set_priority( 20 )
+	->enqueue();
 ```
 
 #### Dependencies
@@ -135,7 +142,8 @@ If your asset has dependencies, you can specify those like so:
 Asset::register( 'script-with-dependencies', 'js/something.js' )
 	->set_dependencies( [
 		'jquery',
-	] );
+	] )
+	->enqueue();
 ```
 
 #### Auto-enqueuing on an action
@@ -143,7 +151,8 @@ To specify when to enqueue the asset, you can indicate it like so:
 
 ```php
 Asset::register( 'yet-another-style', 'css/yet-another.css' )
-	->set_action( 'wp_enqueue_scripts' );
+	->set_action( 'wp_enqueue_scripts' )
+	->enqueue();
 ```
 
 ### Comprehensive CSS example
@@ -171,7 +180,8 @@ Asset::register( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_opt
 	->set_dependencies( [ 'some-css' ] )
 	->set_media( 'screen' )
 	->set_priority( 50 )
-	->set_type( 'css' ); // Technically unneeded due to the .js extension.
+	->set_type( 'css' )
+	->enqueue(); // Technically unneeded due to the .js extension.
 ```
 
 ### Comprehensive JS example
@@ -205,7 +215,8 @@ Asset::register( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optio
 	->print_before( '<b>Before</b>' )
 	->print_after( '<b>After</b>' )
 	->set_priority( 50 )
-	->set_type( 'js' ); // Technically unneeded due to the .js extension.
+	->set_type( 'js' )
+	->enqueue(); // Technically unneeded due to the .js extension.
 ```
 
 ### Enqueuing manually
@@ -269,18 +280,21 @@ use Boomshakalaka\StellarWP\Assets\Asset;
 
 // Simple condition.
 Asset::register( 'my-asset', 'css/some-asset.css' )
-	->set_condition( 'is_single' );
+	->set_condition( 'is_single' )
+	->enqueue();
 
 // Class-based method.
 Asset::register( 'my-asset', 'css/some-asset.css' )
-	->set_condition( [ $my_class, 'my_method_that_returns_boolean' ] );
+	->set_condition( [ $my_class, 'my_method_that_returns_boolean' ] )
+	->enqueue();
 
 // Anonymous function.
 Asset::register( 'my-asset', 'css/some-asset.css' )
 	->set_condition( static function() {
 		// You can do whatever you want here as long as it returns a boolean!
 		return is_single() || is_home();
-	} );
+	} )
+	->enqueue();
 ```
 
 ### Firing a callback after enqueuing occurs
@@ -293,17 +307,20 @@ use Boomshakalaka\StellarWP\Assets\Asset;
 
 // Simple function execution.
 Asset::register( 'my-asset', 'css/some-asset.css' )
-	->call_after_enqueue( 'do_some_global_function' );
+	->call_after_enqueue( 'do_some_global_function' )
+	->enqueue();
 
 // Class-based method.
 Asset::register( 'my-asset', 'css/some-asset.css' )
-	->call_after_enqueue( [ $my_class, 'my_callback' ] );
+	->call_after_enqueue( [ $my_class, 'my_callback' ] )
+	->enqueue();
 
 // Anonymous function.
 Asset::register( 'my-asset', 'css/some-asset.css' )
 	->call_after_enqueue( static function() {
 		// Do whatever in here.
-	} );
+	} )
+	->enqueue();
 ```
 
 ### Output JS data
@@ -331,7 +348,8 @@ Asset::register( 'my-asset', 'css/some-asset.css' )
 			'lunch'     => 'sandwich',
 			'dinner'    => 'enchiladas',
 		]
-	);
+	)
+	->enqueue();
 ```
 
 ### Output content before/after a JS asset is output
@@ -344,7 +362,8 @@ use Boomshakalaka\StellarWP\Assets\Asset;
 
 Asset::register( 'my-asset', 'js/some-asset.js' )
 	->print_before( '<b>Before</b>' )
-	->print_after( '<b>After</b>' );
+	->print_after( '<b>After</b>' )
+	->enqueue();
 ```
 
 ### Style meta data
@@ -360,5 +379,6 @@ use Boomshakalaka\StellarWP\Assets\Asset;
 
 Asset::register( 'my-asset', 'css/some-asset.css' )
 	->add_style_data( 'rtl', true )
-	->add_style_data( 'suffix', '.rtl' );
+	->add_style_data( 'suffix', '.rtl' )
+	->enqueue();
 ```
