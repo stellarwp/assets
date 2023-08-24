@@ -22,6 +22,24 @@ class EnqueueJSCest {
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
 	}
 
+	public function it_should_enqueue_from_alternate_path( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'fake-js', 'fake-alt.js' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->set_path( 'tests/_data/other-asset-root' )
+				->register();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/other-asset-root/js/fake-alt.js?ver=1.0.0' ] );
+	}
+
 	public function it_should_enqueue_min( AcceptanceTester $I ) {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP

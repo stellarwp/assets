@@ -178,6 +178,7 @@ Asset::add( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional
 	->set_dependencies( 'some-css' ) // Each dependency becomes a parameter in this method.
 	->set_media( 'screen' )
 	->set_min_path( 'src/assets/build/' )
+	->set_path( 'src/assets' )
 	->set_type( 'css' ) // Technically unneeded due to the .js extension.
 	->register();
 ```
@@ -213,6 +214,7 @@ Asset::add( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optional_p
 	)
 	->set_dependencies( 'jquery' ) // Each dependency becomes a parameter in this method.
 	->set_min_path( 'src/assets/build/' )
+	->set_path( 'src/assets' )
 	->set_type( 'js' ) // Technically unneeded due to the .js extension.
 	->register();
 ```

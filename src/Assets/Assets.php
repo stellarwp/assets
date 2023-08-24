@@ -122,7 +122,7 @@ class Assets {
 		}
 
 		if ( is_null( $resource_path ) ) {
-			$resources_path = Config::get_relative_asset_path();
+			$resources_path = $asset->get_path();
 			switch ( $extension ) {
 				case 'css':
 					$resource_path = $resources_path . 'css/';

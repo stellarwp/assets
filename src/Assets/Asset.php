@@ -141,6 +141,13 @@ class Asset {
 	protected ?string $min_url = null;
 
 	/**
+	 * The relative path to the asset.
+	 *
+	 * @var ?string
+	 */
+	protected ?string $path = null;
+
+	/**
 	 * The root plugin path for this asset.
 	 *
 	 * @var string
@@ -432,7 +439,7 @@ class Asset {
 	 */
 	public function get_min_path(): string {
 		if ( $this->min_path === null ) {
-			return Config::get_relative_asset_path();
+			return $this->get_path();
 		}
 
 		return $this->min_path;
@@ -453,6 +460,21 @@ class Asset {
 		}
 
 		return $this->min_url;
+	}
+
+	/**
+	 * Get the asset min path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_path(): string {
+		if ( $this->path === null ) {
+			return Config::get_relative_asset_path();
+		}
+
+		return $this->path;
 	}
 
 	/**
@@ -764,7 +786,7 @@ class Asset {
 			$urls[] = $relative_location;
 		}
 
-		$relative_asset_path = Config::get_relative_asset_path();
+		$relative_asset_path = $this->get_path();
 		$min_asset_path      = $this->get_min_path();
 
 		// If needed add the Min Files.
@@ -910,6 +932,20 @@ class Asset {
 	 */
 	public function set_as_enqueued() {
 		$this->is_enqueued = true;
+		return $this;
+	}
+
+	/**
+	 * Set the directory where asset should be retrieved.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $path The path to the minified file.
+	 *
+	 * @return $this
+	 */
+	public function set_path( ?string $path = null ) {
+		$this->path = trailingslashit( $path );
 		return $this;
 	}
 
