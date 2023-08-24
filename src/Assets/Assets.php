@@ -92,14 +92,16 @@ class Assets {
 	/**
 	 * Returns or echoes a url to a file in the plugin assets directory.
 	 *
-	 * @param string $resource The filename of the resource.
-	 * @param string|null $plugin_path Path to the root of the plugin.
-	 * @param string|null $relative_path_to_assets Relative path to the assets directory.
+	 * @param Asset $asset The asset to fetch the URL from.
 	 *
 	 * @return string
 	 **/
-	public function asset_url( string $resource, string $plugin_path = null, string $relative_path_to_assets = null ): string {
+	public function asset_url( Asset $asset ): string {
 		static $_plugin_url = [];
+
+		$resource = $asset->get_file();
+		$plugin_path = $asset->get_plugin_path();
+		$relative_path_to_assets = $asset->is_vendor() ? '' : null;
 
 		if ( $plugin_path === null ) {
 			$plugin_path = Config::get_path();
@@ -113,6 +115,11 @@ class Assets {
 		$hook_prefix     = Config::get_hook_prefix();
 		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
 		$resource_path   = $relative_path_to_assets;
+		$type            = $asset->get_type();
+
+		if ( ! $extension && $type ) {
+			$extension = $type;
+		}
 
 		if ( is_null( $resource_path ) ) {
 			$resources_path = Config::get_relative_asset_path();
@@ -145,142 +152,6 @@ class Assets {
 		 */
 		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_url", $url, $resource );
 	}
-
-
-	/**
-	 * Registers a script with WordPress.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string      $handle
-	 * @param string      $relative_path
-	 * @param array       $deps
-	 * @param string|null $version
-	 * @param bool        $in_footer
-	 *
-	 * @return void
-	 */
-	public function register_script( string $handle, string $relative_path, array $deps = [], string $version = null, bool $in_footer = true ) {
-		$hook_prefix = Config::get_hook_prefix();
-		$file_name   = str_replace( '.js', '.asset.php', $relative_path );
-		$file        = $this->base_path . $file_name;
-		$version     = is_null( $version ) ? $this->version : $version;
-		$asset_url   = $this->get_asset_url( $relative_path );
-
-		if ( file_exists( $file ) ) {
-			$assets  = include $file;
-			$version = $assets['version'] ?? $version;
-			if ( isset( $assets['dependencies'] ) ) {
-				$deps = array_merge( $assets['dependencies'], $deps );
-			}
-		}
-
-		/**
-		 * Filter the asset URL of the script.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var string $asset_url URL of the script.
-		 * @var string $handle Handle of the script.
-		 */
-		$asset_url = (string) apply_filters( "stellarwp/assets/{$hook_prefix}/script_url", $asset_url, $handle );
-
-		/**
-		 * Filter the dependencies of a script.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var array $deps Dependencies of the script.
-		 * @var string $handle Handle of the script.
-		 */
-		$deps = (array) apply_filters( "stellarwp/assets/{$hook_prefix}/script_dependencies", $deps, $handle );
-
-		/**
-		 * Filter the version of a script.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var string $version Version of the script.
-		 * @var string $handle Handle of the script.
-		 */
-		$version = (string) apply_filters( "stellarwp/assets/{$hook_prefix}/script_version", $version, $handle );
-
-		/**
-		 * Filter whether or not the script should be in the footer.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var bool $in_footer Whether or not the script should be in the footer.
-		 * @var string $handle Handle of the script.
-		 */
-		$in_footer = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/script_in_footer", $in_footer, $handle );
-
-		wp_register_script( $handle, $asset_url, $deps, $version, $in_footer );
-	}
-
-	/**
-	 * Registers a style with WordPress.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string      $handle
-	 * @param string      $relative_path
-	 * @param array       $deps
-	 * @param string|null $version
-	 *
-	 * @return void
-	 */
-	public function register_style( string $handle, string $relative_path, array $deps = [], string $version = null ) {
-		$hook_prefix = Config::get_hook_prefix();
-		$version     = is_null( $version ) ? $this->version : $version;
-		$asset_url   = $this->get_asset_url( $relative_path );
-
-		/**
-		 * Filter the asset URL of the style.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var string $asset_url URL of the style.
-		 * @var string $handle Handle of the style.
-		 */
-		$asset_url = apply_filters( "stellarwp/assets/{$hook_prefix}/style_url", $asset_url, $handle );
-
-		/**
-		 * Filter the dependencies of the style.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var array $deps Dependencies of the style.
-		 * @var string $handle Handle of the style.
-		 */
-		$deps = apply_filters( "stellarwp/assets/{$hook_prefix}/style_dependencies", $deps, $handle );
-
-		/**
-		 * Filter the version of the style.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @var string $version Version of the style.
-		 * @var string $handle Handle of the style.
-		 */
-		$version = (string) apply_filters( "stellarwp/assets/{$hook_prefix}/script_version", $version, $handle );
-
-		wp_register_style( $handle, $asset_url, $deps, $version );
-	}
-
-	/**
-	 * Get the asset URL.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $relative_path The full path to the asset.
-	 *
-	 * @return string
-	 */
-	public function get_asset_url( string $relative_path ): string {
-		return $this->assets_url . trim( $relative_path, '/' );
-	}
-
 
 	/**
 	 * Depending on how certain scripts are loaded and how much cross-compatibility is required we need to be able to

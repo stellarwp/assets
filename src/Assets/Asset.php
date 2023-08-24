@@ -403,6 +403,15 @@ class Asset {
 	}
 
 	/**
+	 * Gets the plugin path for the resource.
+	 *
+	 * @return string
+	 */
+	public function get_plugin_path(): string {
+		return $this->plugin_path;
+	}
+
+	/**
 	 * Get the print_after value.
 	 *
 	 * @return mixed
@@ -470,7 +479,7 @@ class Asset {
 			if ( filter_var( $this->file, FILTER_VALIDATE_URL ) ) {
 				$this->url = $this->file;
 			} else {
-				$this->url = Assets::init()->asset_url( $this->file, $this->plugin_path, $this->is_vendor() ? '' : null );
+				$this->url = Assets::init()->asset_url( $this );
 			}
 		}
 
