@@ -11,7 +11,7 @@ class Assets {
 	/**
 	 * @var ?Controller
 	 */
-	protected Controller $controller;
+	protected ?Controller $controller;
 
 	/**
 	 * @var array Array of memoized key value pairs.

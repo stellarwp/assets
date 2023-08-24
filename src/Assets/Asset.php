@@ -405,9 +405,9 @@ class Asset {
 	/**
 	 * Gets the plugin path for the resource.
 	 *
-	 * @return string
+	 * @return ?string
 	 */
-	public function get_plugin_path(): string {
+	public function get_plugin_path(): ?string {
 		return $this->plugin_path;
 	}
 
