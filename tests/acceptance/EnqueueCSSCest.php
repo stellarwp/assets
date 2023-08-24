@@ -20,6 +20,23 @@ class EnqueueCSSCest {
 		$I->amOnPage( '/' );
 		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0' ] );
 	}
+	public function it_should_not_enqueue_if_dependencies_missing( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::register( 'fake-css', 'fake.css' )
+				->set_dependencies( [ 'something' ] )
+				->set_action( 'wp_enqueue_scripts' )
+				->enqueue();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->dontSeeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0' ] );
+	}
 
 	public function it_should_enqueue_with_custom_version( AcceptanceTester $I ) {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
@@ -71,5 +88,64 @@ class EnqueueCSSCest {
 
 		$I->amOnPage( '/' );
 		$I->dontSeeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0' ] );
+	}
+
+	public function it_should_replace_with_rtl( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		\$GLOBALS['text_direction'] = 'rtl';
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::register( 'fake-css', 'fake.css' )
+				->add_style_data( 'rtl', 'replace' )
+				->set_action( 'wp_enqueue_scripts' )
+				->enqueue();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->dontSeeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0' ] );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake-rtl.css?ver=1.0.0' ] );
+	}
+
+	public function it_should_add_rtl( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		\$GLOBALS['text_direction'] = 'rtl';
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::register( 'fake-css', 'fake.css' )
+				->add_style_data( 'rtl', true )
+				->set_action( 'wp_enqueue_scripts' )
+				->enqueue();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0' ] );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake-rtl.css?ver=1.0.0' ] );
+	}
+
+	public function it_should_set_media( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::register( 'fake-css', 'fake.css' )
+				->set_media( 'print' )
+				->set_action( 'wp_enqueue_scripts' )
+				->enqueue();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0', 'media' => 'print' ] );
+		$I->dontSeeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0', 'media' => 'screen' ] );
 	}
 }

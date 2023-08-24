@@ -398,6 +398,13 @@ class Assets {
 				if ( wp_style_is( $asset->get_slug(), 'registered' ) ) {
 					$asset->set_as_registered();
 				}
+
+				$style_data = $asset->get_style_data();
+				if ( $style_data ) {
+					foreach ( $style_data as $datum_key => $datum_value ) {
+						wp_style_add_data( $asset->get_slug(), $datum_key, $datum_value );
+					}
+				}
 			}
 
 			// If we don't have an action we don't even register the action to enqueue.

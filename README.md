@@ -180,8 +180,8 @@ Asset::register( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_opt
 	->set_dependencies( [ 'some-css' ] )
 	->set_media( 'screen' )
 	->set_priority( 50 )
-	->set_type( 'css' )
-	->enqueue(); // Technically unneeded due to the .js extension.
+	->set_type( 'css' ) // Technically unneeded due to the .js extension.
+	->enqueue();
 ```
 
 ### Comprehensive JS example
@@ -215,8 +215,8 @@ Asset::register( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optio
 	->print_before( '<b>Before</b>' )
 	->print_after( '<b>After</b>' )
 	->set_priority( 50 )
-	->set_type( 'js' )
-	->enqueue(); // Technically unneeded due to the .js extension.
+	->set_type( 'js' ) // Technically unneeded due to the .js extension.
+	->enqueue();
 ```
 
 ### Enqueuing manually
