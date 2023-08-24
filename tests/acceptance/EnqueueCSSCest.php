@@ -9,7 +9,7 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -26,7 +26,7 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake-with-min.css' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -44,7 +44,7 @@ class EnqueueCSSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
 				->set_dependencies( [ 'something' ] )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -61,7 +61,7 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css', '2.0.0' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -79,7 +79,7 @@ class EnqueueCSSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake-css-with-no-extension' )
 				->set_type( 'css' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -96,7 +96,7 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
-				->set_action( 'boom' )
+				->enqueue_on_action( 'boom' )
 				->register();
 		}, 100 );
 		PHP;
@@ -115,7 +115,7 @@ class EnqueueCSSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
 				->add_style_data( 'rtl', 'replace' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -135,7 +135,7 @@ class EnqueueCSSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
 				->add_style_data( 'rtl', true )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -154,7 +154,7 @@ class EnqueueCSSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-css', 'fake.css' )
 				->set_media( 'print' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;

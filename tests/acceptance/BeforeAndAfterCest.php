@@ -9,7 +9,7 @@ class BeforeAndAfterCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->call_after_enqueue( function() {
 					\$_SERVER['fake-js-after-enqueue'] = true;
 				} )
@@ -35,7 +35,7 @@ class BeforeAndAfterCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->print_before( '<strong data-before="yes"></strong>' )
 				->print_after( '<strong data-after="yes"></strong>' )
 				->register();

@@ -221,6 +221,18 @@ class Asset {
 	}
 
 	/**
+	 * Registers an asset.
+	 *
+	 * @param string      $slug        The asset slug.
+	 * @param string      $file        The asset file path.
+	 * @param string|null $version     The asset version.
+	 * @param string|null $plugin_path The path to the root of the plugin.
+	 */
+	public static function add( string $slug, string $file, string $version = null, $plugin_path = null ) {
+		return Assets::init()->add( new self( $slug, $file, $version, $plugin_path ) );
+	}
+
+	/**
 	 * @since 1.0.0
 	 *
 	 * @param string $dependency
@@ -305,12 +317,16 @@ class Asset {
 	}
 
 	/**
-	 * Enqueue the asset.
+	 * Enqueue the asset on an action. Alias of `::set_action()`.
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param string $action WordPress action that this asset will be registered to.
+	 *
+	 * @return static
 	 */
-	public function register() {
-		Assets::init()->register_in_wp( $this );
+	public function enqueue_on_action( string $action ) {
+		return $this->set_action( $action );
 	}
 
 	/**
@@ -347,6 +363,15 @@ class Asset {
 	 */
 	public function get_dependencies(): array {
 		return $this->dependencies;
+	}
+
+	/**
+	 * Get the asset's enqueue action. Alias of `::get_action()`
+	 *
+	 * @return array
+	 */
+	public function get_enqueue_on_action(): array {
+		return $this->get_action();
 	}
 
 	/**
@@ -826,15 +851,29 @@ class Asset {
 	}
 
 	/**
-	 * Registers an asset.
+	 * Enqueue the asset.
 	 *
-	 * @param string      $slug        The asset slug.
-	 * @param string      $file        The asset file path.
-	 * @param string|null $version     The asset version.
-	 * @param string|null $plugin_path The path to the root of the plugin.
+	 * @since 1.0.0
 	 */
-	public static function add( string $slug, string $file, string $version = null, $plugin_path = null ) {
-		return Assets::init()->add( new self( $slug, $file, $version, $plugin_path ) );
+	public function register() {
+		Assets::init()->register_in_wp( $this );
+	}
+
+	/**
+	 * @since 1.0.0
+	 *
+	 * @param string $group
+	 *
+	 * @return static
+	 */
+	public function remove_from_group( string $group ) {
+		if ( ! isset( $this->groups[ $group ] ) ) {
+			return $this;
+		}
+
+		unset( $this->groups[ $group ] );
+
+		return $this;
 	}
 
 	/**
@@ -1070,22 +1109,5 @@ class Asset {
 	 */
 	public function should_print(): bool {
 		return $this->should_print;
-	}
-
-	/**
-	 * @since 1.0.0
-	 *
-	 * @param string $group
-	 *
-	 * @return static
-	 */
-	public function remove_from_group( string $group ) {
-		if ( ! isset( $this->groups[ $group ] ) ) {
-			return $this;
-		}
-
-		unset( $this->groups[ $group ] );
-
-		return $this;
 	}
 }

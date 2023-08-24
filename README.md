@@ -151,7 +151,7 @@ To specify when to enqueue the asset, you can indicate it like so:
 
 ```php
 Asset::add( 'yet-another-style', 'css/yet-another.css' )
-	->set_action( 'wp_enqueue_scripts' )
+	->enqueue_on_action( 'wp_enqueue_scripts' )
 	->register();
 ```
 
@@ -171,7 +171,7 @@ Asset::add( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional
 			// Do something after the asset is enqueued.
 		}
 	)
-	->set_action( 'wp_enqueue_scripts' )
+	->enqueue_on_action( 'wp_enqueue_scripts' )
 	->set_condition( // This can be any callable that returns a boolean.
 		static function() {
 			return is_front_page() || is_single();
@@ -202,7 +202,7 @@ Asset::add( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optional_p
 			// Do something after the asset is enqueued.
 		}
 	)
-	->set_action( 'wp_enqueue_scripts' )
+	->enqueue_on_action( 'wp_enqueue_scripts' )
 	->set_as_async( true )
 	->set_as_deferred( true )
 	->set_as_module( true )

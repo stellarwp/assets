@@ -10,7 +10,7 @@ class EnqueueJSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -27,7 +27,7 @@ class EnqueueJSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake-with-min.js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -45,7 +45,7 @@ class EnqueueJSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
 				->set_dependencies( [ 'something' ] )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -62,7 +62,7 @@ class EnqueueJSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js', '2.0.0' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -80,7 +80,7 @@ class EnqueueJSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake-js-with-no-extension' )
 				->set_type( 'js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -97,7 +97,7 @@ class EnqueueJSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->set_action( 'boom' )
+				->enqueue_on_action( 'boom' )
 				->register();
 		}, 100 );
 		PHP;
@@ -115,7 +115,7 @@ class EnqueueJSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_deferred( true )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -133,7 +133,7 @@ class EnqueueJSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_async( true )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -151,7 +151,7 @@ class EnqueueJSCest {
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_module( true )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->register();
 		}, 100 );
 		PHP;
@@ -168,7 +168,7 @@ class EnqueueJSCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->set_action( 'wp_enqueue_scripts' )
+				->enqueue_on_action( 'wp_enqueue_scripts' )
 				->add_localize_script(
 					'animal',
 					[
