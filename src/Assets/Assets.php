@@ -553,6 +553,16 @@ class Assets {
 			return false;
 		}
 
+		$type = $this->get( $slug )->get_type();
+
+		if ( $type === 'css' ) {
+			wp_dequeue_style( $slug );
+			wp_deregister_style( $slug );
+		} else {
+			wp_dequeue_script( $slug );
+			wp_deregister_script( $slug );
+		}
+
 		unset( $this->assets[ $slug ] );
 		return true;
 	}
