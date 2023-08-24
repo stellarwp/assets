@@ -8,12 +8,12 @@ class BeforeAndAfterCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->call_after_enqueue( function() {
 					\$_SERVER['fake-js-after-enqueue'] = true;
 				} )
-				->enqueue();
+				->register();
 		}, 100 );
 
 		add_action( 'wp_footer', function() {
@@ -34,11 +34,11 @@ class BeforeAndAfterCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->print_before( '<strong data-before="yes"></strong>' )
 				->print_after( '<strong data-after="yes"></strong>' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 

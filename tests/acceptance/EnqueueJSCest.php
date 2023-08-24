@@ -9,9 +9,9 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -26,9 +26,9 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake-with-min.js' )
+			Asset::add( 'fake-js', 'fake-with-min.js' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -43,10 +43,10 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_dependencies( [ 'something' ] )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -61,9 +61,9 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js', '2.0.0' )
+			Asset::add( 'fake-js', 'fake.js', '2.0.0' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -78,10 +78,10 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake-js-with-no-extension' )
+			Asset::add( 'fake-js', 'fake-js-with-no-extension' )
 				->set_type( 'js' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -96,9 +96,9 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'boom' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -113,10 +113,10 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_deferred( true )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -131,10 +131,10 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_async( true )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -149,10 +149,10 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_as_module( true )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -167,7 +167,7 @@ class EnqueueJSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->add_localize_script(
 					'animal',
@@ -179,7 +179,7 @@ class EnqueueJSCest {
 					'color',
 					[ 'blue' ]
 				)
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 

@@ -576,7 +576,7 @@ class Assets {
 	 *
 	 * @return Asset|false The registered object or false on error.
 	 */
-	public function register( Asset $asset ) {
+	public function add( Asset $asset ) {
 		// Prevent weird stuff here.
 		$slug = $asset->get_slug();
 

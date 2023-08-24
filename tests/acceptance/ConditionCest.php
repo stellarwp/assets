@@ -9,10 +9,10 @@ class ConditionCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->set_condition( 'is_home' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -27,12 +27,12 @@ class ConditionCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->set_condition( static function() {
 					return ! is_home();
 				} )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -47,10 +47,10 @@ class ConditionCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->set_condition( 'is_home' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -65,12 +65,12 @@ class ConditionCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->set_action( 'wp_enqueue_scripts' )
 				->set_condition( static function() {
 					return ! is_home();
 				} )
-				->enqueue();
+				->register();
 
 			Assets::init()->enqueue( 'fake-js', true );
 		}, 100 );

@@ -9,13 +9,13 @@ class GroupCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->add_to_group( 'fake-group' )
-				->enqueue();
+				->register();
 
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->add_to_group( 'fake-group' )
-				->enqueue();
+				->register();
 
 			Assets::init()->enqueue_group( 'fake-group' );
 		}, 100 );
@@ -33,13 +33,13 @@ class GroupCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-js', 'fake.js' )
+			Asset::add( 'fake-js', 'fake.js' )
 				->add_to_group( 'fake-group' )
-				->enqueue();
+				->register();
 
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->add_to_group( 'fake-group-two' )
-				->enqueue();
+				->register();
 
 			Assets::init()->enqueue_group( [ 'fake-group', 'fake-group-two' ] );
 		}, 100 );

@@ -309,7 +309,7 @@ class Asset {
 	 *
 	 * @since 1.0.0
 	 */
-	public function enqueue() {
+	public function register() {
 		Assets::init()->register_in_wp( $this );
 	}
 
@@ -833,8 +833,8 @@ class Asset {
 	 * @param string|null $version     The asset version.
 	 * @param string|null $plugin_path The path to the root of the plugin.
 	 */
-	public static function register( string $slug, string $file, string $version = null, $plugin_path = null ) {
-		return Assets::init()->register( new self( $slug, $file, $version, $plugin_path ) );
+	public static function add( string $slug, string $file, string $version = null, $plugin_path = null ) {
+		return Assets::init()->add( new self( $slug, $file, $version, $plugin_path ) );
 	}
 
 	/**

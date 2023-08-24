@@ -8,9 +8,9 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -25,9 +25,9 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake-with-min.css' )
+			Asset::add( 'fake-css', 'fake-with-min.css' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -42,10 +42,10 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->set_dependencies( [ 'something' ] )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -60,9 +60,9 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css', '2.0.0' )
+			Asset::add( 'fake-css', 'fake.css', '2.0.0' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -77,10 +77,10 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake-css-with-no-extension' )
+			Asset::add( 'fake-css', 'fake-css-with-no-extension' )
 				->set_type( 'css' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -95,9 +95,9 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->set_action( 'boom' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -113,10 +113,10 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		\$GLOBALS['text_direction'] = 'rtl';
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->add_style_data( 'rtl', 'replace' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -133,10 +133,10 @@ class EnqueueCSSCest {
 		$code .= <<<PHP
 		\$GLOBALS['text_direction'] = 'rtl';
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->add_style_data( 'rtl', true )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
@@ -152,10 +152,10 @@ class EnqueueCSSCest {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
-			Asset::register( 'fake-css', 'fake.css' )
+			Asset::add( 'fake-css', 'fake.css' )
 				->set_media( 'print' )
 				->set_action( 'wp_enqueue_scripts' )
-				->enqueue();
+				->register();
 		}, 100 );
 		PHP;
 
