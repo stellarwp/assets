@@ -10,7 +10,7 @@ class ConditionCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->enqueue_on_action( 'wp_enqueue_scripts' )
+				->enqueue_on( 'wp_enqueue_scripts' )
 				->set_condition( 'is_home' )
 				->register();
 		}, 100 );
@@ -28,7 +28,7 @@ class ConditionCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->enqueue_on_action( 'wp_enqueue_scripts' )
+				->enqueue_on( 'wp_enqueue_scripts' )
 				->set_condition( static function() {
 					return ! is_home();
 				} )
@@ -48,7 +48,7 @@ class ConditionCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->enqueue_on_action( 'wp_enqueue_scripts' )
+				->enqueue_on( 'wp_enqueue_scripts' )
 				->set_condition( 'is_home' )
 				->register();
 		}, 100 );
@@ -66,7 +66,7 @@ class ConditionCest {
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'fake-js', 'fake.js' )
-				->enqueue_on_action( 'wp_enqueue_scripts' )
+				->enqueue_on( 'wp_enqueue_scripts' )
 				->set_condition( static function() {
 					return ! is_home();
 				} )

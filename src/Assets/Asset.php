@@ -127,6 +127,13 @@ class Asset {
 	protected string $media = 'all';
 
 	/**
+	 * The relative path to the minified version of this file.
+	 *
+	 * @var ?string
+	 */
+	protected ?string $min_path = null;
+
+	/**
 	 * The asset file min url.
 	 *
 	 * @var ?string
@@ -317,7 +324,7 @@ class Asset {
 	}
 
 	/**
-	 * Enqueue the asset on an action. Alias of `::set_action()`.
+	 * Enqueue the asset on an action.
 	 *
 	 * @since 1.0.0
 	 *
@@ -325,8 +332,14 @@ class Asset {
 	 *
 	 * @return static
 	 */
-	public function enqueue_on_action( string $action ) {
-		return $this->set_action( $action );
+	public function enqueue_on( string $action, $priority = null ) {
+		if ( ! is_null( $priority ) ) {
+			$this->set_priority( $priority );
+		}
+
+		$this->action[ $action ] = $action;
+
+		return $this;
 	}
 
 	/**
@@ -366,12 +379,12 @@ class Asset {
 	}
 
 	/**
-	 * Get the asset's enqueue action. Alias of `::get_action()`
+	 * Get the asset's enqueue action.
 	 *
 	 * @return array
 	 */
-	public function get_enqueue_on_action(): array {
-		return $this->get_action();
+	public function get_enqueue_on(): array {
+		return $this->action;
 	}
 
 	/**
@@ -408,6 +421,21 @@ class Asset {
 	 */
 	public function get_media(): string {
 		return $this->media;
+	}
+
+	/**
+	 * Get the asset min path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_min_path(): string {
+		if ( $this->min_path === null ) {
+			return Config::get_relative_asset_path();
+		}
+
+		return $this->min_path;
 	}
 
 	/**
@@ -736,57 +764,15 @@ class Asset {
 			$urls[] = $relative_location;
 		}
 
-		$hook_prefix = Config::get_hook_prefix();
+		$relative_asset_path = Config::get_relative_asset_path();
+		$min_asset_path      = $this->get_min_path();
 
 		// If needed add the Min Files.
-		if ( substr( $relative_location, -3, 3 ) === '.js' ) {
-			/**
-			 * Filter the path to the minified js files.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param string $min_js_path       The path to the minified js files.
-			 * @param string $slug              The asset slug.
-			 * @param string $relative_location The relative location to the file.
-			 */
-			$min_js_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/min-js-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
-
-			/**
-			 * Filter the path to the js files.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param string $js_path           The path to the minified js files.
-			 * @param string $slug              The asset slug.
-			 * @param string $relative_location The relative location to the file.
-			 */
-			$js_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/js-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
-
-			$urls[] = preg_replace( '#(.*)(' . preg_quote( $js_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).js#', '$1' . $min_js_path . '$3.min.js', $relative_location );
-		} elseif ( substr( $relative_location, -4, 4 ) === '.css' ) {
-			/**
-			 * Filter the path to the minified css files.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param string $min_css_path      The path to the minified css files.
-			 * @param string $slug              The asset slug.
-			 * @param string $relative_location The relative location to the file.
-			 */
-			$min_css_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/min-css-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
-
-			/**
-			 * Filter the path to the css files.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param string $css_path          The path to the minified css files.
-			 * @param string $slug              The asset slug.
-			 * @param string $relative_location The relative location to the file.
-			 */
-			$css_path = trailingslashit( apply_filters( "stellarwp/assets/{$hook_prefix}/css-path", Config::get_relative_asset_path(), $this->get_slug(), $relative_location ) );
-
-			$urls[] = preg_replace( '#(.*)(' . preg_quote( $css_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).css#', '$1' . $min_css_path . '$3.min.css', $relative_location );
+		if (
+			substr( $relative_location, -3, 3 ) === '.js'
+			|| substr( $relative_location, -4, 4 ) === '.css'
+		) {
+			$urls[] = preg_replace( '#(.*)(' . preg_quote( $relative_asset_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).(js|css)#', '$1' . $min_asset_path . '$3.min.$4', $relative_location );
 		}
 
 		if ( ! $script_debug ) {
@@ -924,6 +910,20 @@ class Asset {
 	 */
 	public function set_as_enqueued() {
 		$this->is_enqueued = true;
+		return $this;
+	}
+
+	/**
+	 * Set the directory where min files should be retrieved.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $path The path to the minified file.
+	 *
+	 * @return $this
+	 */
+	public function set_min_path( ?string $path = null ) {
+		$this->min_path = trailingslashit( $path );
 		return $this;
 	}
 

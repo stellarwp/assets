@@ -151,7 +151,7 @@ To specify when to enqueue the asset, you can indicate it like so:
 
 ```php
 Asset::add( 'yet-another-style', 'css/yet-another.css' )
-	->enqueue_on_action( 'wp_enqueue_scripts' )
+	->enqueue_on( 'wp_enqueue_scripts' )
 	->register();
 ```
 
@@ -171,7 +171,7 @@ Asset::add( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional
 			// Do something after the asset is enqueued.
 		}
 	)
-	->enqueue_on_action( 'wp_enqueue_scripts' )
+	->enqueue_on( 'wp_enqueue_scripts', 20 ) // The second arg is optional and can be set separately via `::set_priority()`.
 	->set_condition( // This can be any callable that returns a boolean.
 		static function() {
 			return is_front_page() || is_single();
@@ -179,7 +179,7 @@ Asset::add( 'my-asset', 'css/some-asset.css', $an_optional_version, $an_optional
 	)
 	->set_dependencies( [ 'some-css' ] )
 	->set_media( 'screen' )
-	->set_priority( 50 )
+	->set_min_path( 'src/assets/build/' )
 	->set_type( 'css' ) // Technically unneeded due to the .js extension.
 	->register();
 ```
@@ -202,7 +202,9 @@ Asset::add( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optional_p
 			// Do something after the asset is enqueued.
 		}
 	)
-	->enqueue_on_action( 'wp_enqueue_scripts' )
+	->enqueue_on( 'wp_enqueue_scripts', 20 ) // The second arg is optional and can be set separately via `::set_priority()`.
+	->print_before( '<b>Before</b>' )
+	->print_after( '<b>After</b>' )
 	->set_as_async( true )
 	->set_as_deferred( true )
 	->set_as_module( true )
@@ -212,9 +214,7 @@ Asset::add( 'my-asset', 'js/some-asset.js', $an_optional_version, $an_optional_p
 		}
 	)
 	->set_dependencies( [ 'jquery' ] )
-	->print_before( '<b>Before</b>' )
-	->print_after( '<b>After</b>' )
-	->set_priority( 50 )
+	->set_min_path( 'src/assets/build/' )
 	->set_type( 'js' ) // Technically unneeded due to the .js extension.
 	->register();
 ```
@@ -268,6 +268,19 @@ Assets::instance()->enqueue_group( 'group-name', true );
 ```
 
 ## Advanced topics
+
+### Minified files
+
+By default, if you register an asset and `SCRIPT_DEBUG` is not enabled, minified files will dynamically be used if present
+in the same directory as the original file. You can, however, specify a different path to look for the minified asset.
+
+The following example will look for `js/some-asset.min.js` in `src/assets/build/` (note the alteration of the file name):
+
+```php
+Asset::add( 'my-asset', 'js/some-asset.js' )
+	->set_min_path( 'src/assets/build/' )
+	->register();
+```
 
 ### Conditional enqueuing
 
