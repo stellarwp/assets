@@ -125,16 +125,20 @@ class Assets {
 			$resources_path = $asset->get_path();
 			switch ( $extension ) {
 				case 'css':
-					$resource_path = $resources_path . 'css/';
+					$resources_path = preg_replace( '#/css/$#', '/', $resources_path );
+					$resource_path = "{$resources_path}css/";
 					break;
 				case 'js':
-					$resource_path = $resources_path . 'js/';
+					$resources_path = preg_replace( '#/js/$#', '/', $resources_path );
+					$resource_path = "{$resources_path}js/";
 					break;
 				case 'scss':
-					$resource_path = $resources_path . 'scss/';
+					$resources_path = preg_replace( '#/scss/$#', '/', $resources_path );
+					$resource_path = "{$resources_path}scss/";
 					break;
 				case 'pcss':
-					$resource_path = $resources_path . 'postcss/';
+					$resources_path = preg_replace( '#/postcss/$#', '/', $resources_path );
+					$resource_path = "{$resources_path}postcss/";
 					break;
 				default:
 					$resource_path = $resources_path;
