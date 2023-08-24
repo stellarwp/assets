@@ -60,9 +60,19 @@ class ConfigTest extends AssetTestCase {
 		Config::set_relative_asset_path( 'src/resources/' );
 		Config::reset();
 
-		$this->assertEquals( '', Config::get_hook_prefix() );
-		$this->assertEquals( '', Config::get_path() );
 		$this->assertEquals( 'src/assets/', Config::get_relative_asset_path() );
 		$this->assertEquals( '', Config::get_version() );
+
+		try {
+			Config::get_hook_prefix();
+		} catch ( \Exception $e ) {
+			$this->assertInstanceOf( \RuntimeException::class, $e );
+		}
+
+		try {
+			Config::get_path();
+		} catch ( \Exception $e ) {
+			$this->assertInstanceOf( \RuntimeException::class, $e );
+		}
 	}
 }

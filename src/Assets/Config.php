@@ -2,6 +2,8 @@
 
 namespace StellarWP\Assets;
 
+use RuntimeException;
+
 class Config {
 	/**
 	 * @var string
@@ -29,6 +31,10 @@ class Config {
 	 * @return string
 	 */
 	public static function get_hook_prefix(): string {
+		if ( static::$hook_prefix === '' ) {
+			$class = __CLASS__;
+			throw new RuntimeException( "You must specify a hook prefix for your project with {$class}::set_hook_prefix()" );
+		}
 		return static::$hook_prefix;
 	}
 
@@ -38,6 +44,10 @@ class Config {
 	 * @return string
 	 */
 	public static function get_path(): string {
+		if ( static::$root_path === '' ) {
+			$class = __CLASS__;
+			throw new RuntimeException( "You must specify a path to the root of you project with {$class}::set_path()" );
+		}
 		return static::$root_path;
 	}
 

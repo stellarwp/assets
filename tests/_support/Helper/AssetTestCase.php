@@ -10,8 +10,6 @@ class AssetTestCase extends \Codeception\Test\Unit {
 	public function setUp() {
 		// before
 		parent::setUp();
-
-		Assets::init();
 	}
 }
 
