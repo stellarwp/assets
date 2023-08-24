@@ -1044,7 +1044,7 @@ class Asset {
 	/**
 	 * @since 1.0.0
 	 *
-	 * @param ...string $dependencies
+	 * @param string ...$dependencies
 	 *
 	 * @return static
 	 */
