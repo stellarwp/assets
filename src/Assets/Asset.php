@@ -394,6 +394,19 @@ class Asset {
 	}
 
 	/**
+	 * Performs the actual enqueueing of the asset.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $should_force Whether to force the enqueueing and ignore any conditionals.
+	 *
+	 * @return void
+	 */
+	public function enqueue( bool $should_force = false ) {
+		Assets::init()->enqueue( $this->get_slug(), $should_force );
+	}
+
+	/**
 	 * Enqueue the asset on an action.
 	 *
 	 * @since 1.0.0

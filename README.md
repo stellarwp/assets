@@ -22,7 +22,12 @@ A library for managing asset registration and enqueuing in WordPress.
   * [Comprehensive JS example](#comprehensive-js-example)
   * [Enqueuing manually](#enqueuing-manually)
     * [Enqueuing a whole group](#enqueuing-a-whole-group)
+* [Working with registered `Assets`](#working-with-registered-assets)
+  * [`exists()`](#exists)
+  * [`get()`](#get)
+  * [`remove()`](#remove)
 * [Advanced topics](#advanced-topics)
+  * [Minified files](#minified-files)
   * [Conditional enqueuing](#conditional-enqueuing)
   * [Firing a callback after enqueuing occurs](#firing-a-callback-after-enqueuing-occurs)
   * [Output JS data](#output-js-data)
@@ -227,6 +232,10 @@ trigger a manual enqueue:
 ```php
 use Boomshakalaka\StellarWP\Assets\Assets;
 
+// Enqueue a single asset:
+Assets::get( 'my-style' )->enqueue();
+
+// Enqueue multiple assets:
 Assets::instance()->enqueue(
 	[
 		'my-style',
@@ -239,7 +248,6 @@ Assets::instance()->enqueue(
  * If you want to force the enqueue to happen and ignore any conditions,
  * you can pass `true` to the second argument.
  */
-
 Assets::instance()->enqueue(
 	[
 		'my-style',
@@ -248,6 +256,9 @@ Assets::instance()->enqueue(
 	],
 	true
 );
+
+// And here's how you can do it with a specific asset:
+Assets::get( 'my-style' )->enqueue( true );
 ```
 
 #### Enqueuing a whole group
@@ -265,6 +276,57 @@ Assets::instance()->enqueue_group( [ 'group-one', 'group-two' ] );
 
 // or if you want to force the enqueuing despite conditions:
 Assets::instance()->enqueue_group( 'group-name', true );
+```
+
+## Working with registered `Assets`
+
+### `exists()`
+
+You can check if an asset has been registered with this library by using the `::exists()` method. This method takes the
+the asset slug as an argument and returns a `bool`.
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+use Boomshakalaka\StellarWP\Assets\Assets;
+
+Asset::add( 'my-asset', 'js/some-asset.js' )->register();
+
+$assets = Assets::instance();
+$assets->exists( 'my-asset' ); // true
+$assets->exists( 'another-asset' ); // false
+```
+
+### `get()`
+
+You can retrieve an asset object that has been registered by calling the `::get()` method. This method takes the asset
+slug as an argument and returns an `Asset` object or `null`.
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+use Boomshakalaka\StellarWP\Assets\Assets;
+
+Asset::add( 'my-asset', 'js/some-asset.js' )->register();
+
+$assets    = Assets::instance();
+$asset_obj = $assets->get( 'my-asset' );
+```
+
+### `remove()`
+
+You can remove an asset from registration and enqueueing by calling the `::remove()` method. This method takes the asset
+slug as an argument and returns an `Asset` object or `null`.
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+use Boomshakalaka\StellarWP\Assets\Assets;
+
+Asset::add( 'my-asset', 'js/some-asset.js' )->register();
+
+$assets    = Assets::instance();
+$assets->get( 'my-asset' )->enqueue();
+
+// This will wp_dequeue_*() the asset and remove it from registration.
+$assets->remove( 'my-asset' );
 ```
 
 ## Advanced topics
