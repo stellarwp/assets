@@ -6,6 +6,7 @@ jobs:
     strategy:
       matrix:
         suite:
+          - acceptance
           - wpunit
     runs-on: ubuntu-latest
     steps:
@@ -69,5 +70,5 @@ jobs:
         run: |
           ${SLIC_BIN} use assets
           ${SLIC_BIN} composer install --ignore-platform-reqs
-      - name: Run suite wpunit
+      - name: Run suites
         run: ${SLIC_BIN} run ${{ matrix.suite }} --ext DotReporter
