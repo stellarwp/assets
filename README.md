@@ -233,7 +233,7 @@ trigger a manual enqueue:
 use Boomshakalaka\StellarWP\Assets\Assets;
 
 // Enqueue a single asset:
-Assets::get( 'my-style' )->enqueue();
+Assets::instance()->get( 'my-style' )->enqueue();
 
 // Enqueue multiple assets:
 Assets::instance()->enqueue(
@@ -258,7 +258,7 @@ Assets::instance()->enqueue(
 );
 
 // And here's how you can do it with a specific asset:
-Assets::get( 'my-style' )->enqueue( true );
+Assets::instance()->get( 'my-style' )->enqueue( true );
 ```
 
 #### Enqueuing a whole group
