@@ -29,7 +29,7 @@ class ConfigTest extends AssetTestCase {
 	public function should_set_path() {
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
 
-		$this->assertEquals( dirname( dirname( __DIR__ ) ) . '/', Config::get_path() );
+		$this->assertEquals( '/wp-content/plugins/assets/', Config::get_path() );
 	}
 
 	/**

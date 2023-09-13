@@ -83,7 +83,7 @@ class Assets {
 	 */
 	public function __construct( ?string $base_path = null, ?string $assets_url = null ) {
 		$this->base_path  = $base_path ?: Config::get_path();
-		$this->assets_url = $assets_url ?: trailingslashit( plugins_url( $this->base_path ) );
+		$this->assets_url = $assets_url ?: trailingslashit( get_site_url() . $this->base_path );
 		$this->version    = Config::get_version();
 		$this->controller = new Controller( $this );
 		$this->controller->register();
@@ -402,6 +402,96 @@ class Assets {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param Asset $asset         Asset to enqueue.
+	 * @param bool  $force_enqueue Whether to ignore conditional requirements when enqueuing.
+	 */
+	protected function do_enqueue( Asset $asset, bool $force_enqueue = false ): void {
+		$hook_prefix = Config::get_hook_prefix();
+		$slug        = $asset->get_slug();
+
+		// If this asset was late called
+		if ( ! $asset->is_registered() ) {
+			$this->register_in_wp( $asset );
+		}
+
+		if ( $asset->is_enqueued() ) {
+			return;
+		}
+
+		// Default to enqueuing the asset if there are no conditionals,
+		// and default to not enqueuing it if there *are* conditionals.
+		$condition     = $asset->get_condition();
+		$has_condition = ! empty( $condition );
+		$enqueue       = ! $has_condition;
+
+		if ( $has_condition ) {
+			$enqueue = (bool) call_user_func( $condition );
+		}
+
+		/**
+		 * Allows developers to hook-in and prevent an asset from being loaded.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param bool   $enqueue If we should enqueue or not a given asset.
+		 * @param object $asset   Which asset we are dealing with.
+		 */
+		$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue", $enqueue, $asset );
+
+		/**
+		 * Allows developers to hook-in and prevent an asset from being loaded.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param bool   $enqueue If we should enqueue or not a given asset.
+		 * @param object $asset   Which asset we are dealing with.
+		 */
+		$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue_{$slug}", $enqueue, $asset );
+
+		if ( ! $enqueue && ! $force_enqueue ) {
+			return;
+		}
+
+		if ( 'js' === $asset->get_type() ) {
+			if ( $asset->should_print() && ! $asset->is_printed() ) {
+				$asset->set_as_printed();
+				wp_print_scripts( [ $slug ] );
+			}
+			// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
+			wp_enqueue_script( $slug );
+		} else {
+			if ( $asset->should_print() && ! $asset->is_printed() ) {
+				$asset->set_as_printed();
+				wp_print_styles( [ $slug ] );
+			}
+
+			// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
+			wp_enqueue_style( $slug );
+
+			$style_data = $asset->get_style_data();
+			foreach ( $style_data as $key => $value ) {
+				wp_style_add_data( $slug, $key, $value );
+			}
+		}
+
+		if ( ! empty( $asset->get_after_enqueue() ) && is_callable( $asset->get_after_enqueue() ) ) {
+			call_user_func_array( $asset->get_after_enqueue(), [ $asset ] );
+		}
+
+		$asset->set_as_enqueued();
+	}
+
+	/**
+	 * Enqueues registered assets.
+	 *
+	 * This method is called on whichever action (if any) was declared during registration.
+	 *
+	 * It can also be called directly with a list of asset slugs to forcibly enqueue, which may be
+	 * useful where an asset is required in a situation not anticipated when it was originally
+	 * registered.
+	 *
+	 * @since 1.0.0
+	 *
 	 * @param string|array $assets_to_enqueue             Which assets will be enqueued.
 	 * @param bool         $should_enqueue_no_matter_what Whether to ignore conditional requirements when enqueuing.
 	 */
@@ -413,93 +503,33 @@ class Assets {
 			$assets = $this->get();
 		}
 
-		$hook_prefix = Config::get_hook_prefix();
-
 		foreach ( $assets as $asset ) {
 			$slug = $asset->get_slug();
+
 			// Should this asset be enqueued regardless of the current filter/any conditional requirements?
 			$must_enqueue = in_array( $slug, $assets_to_enqueue );
-			$in_filter    = in_array( current_filter(), (array) $asset->get_action() );
+			$actions      = $asset->get_action();
 
-			// Skip if we are not on the correct filter (unless we are forcibly enqueuing).
-			if ( ! $in_filter && ! $must_enqueue ) {
-				continue;
+			if ( empty( $actions ) && $must_enqueue ) {
+				$this->do_enqueue( $asset, $must_enqueue );
 			}
 
-			// If any single conditional returns true, then we need to enqueue the asset.
-			if ( empty( $asset->get_action() ) && ! $must_enqueue ) {
-				continue;
-			}
+			foreach ( $asset->get_action() as $action ) {
+				$in_filter  = current_filter() === $action;
+				$did_action = did_action( $action ) > 0;
 
-			// If this asset was late called
-			if ( ! $asset->is_registered() ) {
-				$this->register_in_wp( $asset );
-			}
-
-			if ( $asset->is_enqueued() ) {
-				continue;
-			}
-
-			// Default to enqueuing the asset if there are no conditionals,
-			// and default to not enqueuing it if there *are* conditionals.
-			$condition     = $asset->get_condition();
-			$has_condition = ! empty( $condition );
-			$enqueue       = ! $has_condition;
-
-			if ( $has_condition ) {
-				$enqueue = (bool) call_user_func( $condition );
-			}
-
-			/**
-			 * Allows developers to hook-in and prevent an asset from being loaded.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param bool   $enqueue If we should enqueue or not a given asset.
-			 * @param object $asset   Which asset we are dealing with.
-			 */
-			$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue", $enqueue, $asset );
-
-			/**
-			 * Allows developers to hook-in and prevent an asset from being loaded.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param bool   $enqueue If we should enqueue or not a given asset.
-			 * @param object $asset   Which asset we are dealing with.
-			 */
-			$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue_{$slug}", $enqueue, $asset );
-
-			if ( ! $enqueue && ! $should_enqueue_no_matter_what ) {
-				continue;
-			}
-
-			if ( 'js' === $asset->get_type() ) {
-				if ( $asset->should_print() && ! $asset->is_printed() ) {
-					$asset->set_printed();
-					wp_print_scripts( [ $slug ] );
+				// Skip if we are not on the correct filter (unless we are forcibly enqueuing).
+				if ( ! $in_filter && ! $must_enqueue && ! $did_action ) {
+					continue;
 				}
-				// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
-				wp_enqueue_script( $slug );
-			} else {
-				if ( $asset->should_print() && ! $asset->is_printed() ) {
-					$asset->set_printed();
-					wp_print_styles( [ $slug ] );
+
+				// If any single conditional returns true, then we need to enqueue the asset.
+				if ( empty( $action ) && ! $must_enqueue ) {
+					continue;
 				}
-				// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
-				wp_enqueue_style( $slug );
 
-				$style_data = $asset->get_style_data();
-				foreach ( $style_data as $key => $value ) {
-					wp_style_add_data( $slug, $key, $value );
-				}
+				$this->do_enqueue( $asset, $should_enqueue_no_matter_what );
 			}
-
-			if ( ! empty( $asset->get_after_enqueue() ) && is_callable( $asset->get_after_enqueue() ) ) {
-				call_user_func_array( $asset->get_after_enqueue(), [ $asset ] );
-			}
-
-			$asset->set_as_enqueued();
 		}
 	}
 
@@ -726,9 +756,9 @@ class Assets {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object|array $b Second subject to compare.
-	 * @param object|array $a First Subject to compare.
-	 * @param string $method Method to use for sorting.
+	 * @param object|array $b      Second subject to compare.
+	 * @param object|array $a      First Subject to compare.
+	 * @param string       $method Method to use for sorting.
 	 *
 	 * @return int
 	 */

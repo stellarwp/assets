@@ -152,7 +152,7 @@ class Asset {
 	 *
 	 * @var string
 	 */
-	protected string $plugin_path = '';
+	protected string $root_path = '';
 
 	/**
 	 * Content or callable that should be printed after the asset.
@@ -213,16 +213,16 @@ class Asset {
 	/**
 	 * Constructor.
 	 *
-	 * @param string      $slug        The asset slug.
-	 * @param string      $file        The asset file path.
-	 * @param string|null $version     The asset version.
-	 * @param string|null $plugin_path The path to the root of the plugin.
+	 * @param string      $slug      The asset slug.
+	 * @param string      $file      The asset file path.
+	 * @param string|null $version   The asset version.
+	 * @param string|null $root_path The path to the root of the plugin.
 	 */
-	public function __construct( string $slug, string $file, string $version = null, string $plugin_path = null ) {
-		$this->slug        = sanitize_key( $slug );
-		$this->file        = $file;
-		$this->version     = $version ?? Config::get_version();
-		$this->plugin_path = $plugin_path ?? Config::get_path();
+	public function __construct( string $slug, string $file, string $version = null, string $root_path = null ) {
+		$this->slug      = sanitize_key( $slug );
+		$this->file      = $file;
+		$this->version   = $version ?? Config::get_version();
+		$this->root_path = $root_path ?? Config::get_path();
 
 		if (
 			strpos( $this->file, 'vendor/' ) !== false
@@ -237,13 +237,13 @@ class Asset {
 	/**
 	 * Registers an asset.
 	 *
-	 * @param string      $slug        The asset slug.
-	 * @param string      $file        The asset file path.
-	 * @param string|null $version     The asset version.
-	 * @param string|null $plugin_path The path to the root of the plugin.
+	 * @param string      $slug      The asset slug.
+	 * @param string      $file      The asset file path.
+	 * @param string|null $version   The asset version.
+	 * @param string|null $root_path The path to the root of the plugin.
 	 */
-	public static function add( string $slug, string $file, string $version = null, $plugin_path = null ) {
-		return Assets::init()->add( new self( $slug, $file, $version, $plugin_path ) );
+	public static function add( string $slug, string $file, string $version = null, $root_path = null ) {
+		return Assets::init()->add( new self( $slug, $file, $version, $root_path ) );
 	}
 
 	/**
@@ -306,14 +306,14 @@ class Asset {
 	 */
 	protected function build_asset_url(): string {
 		$resource                = $this->get_file();
-		$plugin_path             = $this->get_plugin_path();
+		$root_path               = $this->get_root_path();
 		$relative_path_to_assets = $this->is_vendor() ? '' : null;
 
-		if ( $plugin_path === null ) {
-			$plugin_path = Config::get_path();
+		if ( $root_path === null ) {
+			$root_path = Config::get_path();
 		}
 
-		$plugin_base_url = Config::get_url( $plugin_path );
+		$plugin_base_url = Config::get_url( $root_path );
 		$hook_prefix     = Config::get_hook_prefix();
 		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
 		$resource_path   = $relative_path_to_assets;
@@ -554,12 +554,12 @@ class Asset {
 	}
 
 	/**
-	 * Gets the plugin path for the resource.
+	 * Gets the root path for the resource.
 	 *
 	 * @return ?string
 	 */
-	public function get_plugin_path(): ?string {
-		return $this->plugin_path;
+	public function get_root_path(): ?string {
+		return $this->root_path;
 	}
 
 	/**
@@ -808,6 +808,8 @@ class Asset {
 		static $wp_content_url;
 		static $plugins_url;
 		static $base_dirs;
+		static $stylesheet_url;
+		static $stylesheet_dir;
 
 		$urls = [];
 		if ( ! isset( $wpmu_plugin_url ) ) {
@@ -826,10 +828,16 @@ class Asset {
 			$plugins_url = plugins_url();
 		}
 
+		if ( ! isset( $stylesheet_url ) ) {
+			$stylesheet_url = get_stylesheet_directory_uri();
+			$stylesheet_dir = get_stylesheet_directory();
+		}
+
 		if ( ! isset( $base_dirs ) ) {
 			$base_dirs[ WPMU_PLUGIN_DIR ] = wp_normalize_path( WPMU_PLUGIN_DIR );
 			$base_dirs[ WP_PLUGIN_DIR ]   = wp_normalize_path( WP_PLUGIN_DIR );
 			$base_dirs[ WP_CONTENT_DIR ]  = wp_normalize_path( WP_CONTENT_DIR );
+			$base_dirs[ $stylesheet_dir ] = wp_normalize_path( $stylesheet_dir );
 		}
 
 		if ( 0 === strpos( $url, $wpmu_plugin_url ) ) {
@@ -847,6 +855,9 @@ class Asset {
 		} elseif ( 0 === strpos( $url, $plugins_url ) ) {
 			$base_dir = $base_dirs[ WP_PLUGIN_DIR ];
 			$base_url = $plugins_url;
+		} elseif ( 0 === strpos( $url, $stylesheet_url ) ) {
+			$base_dir = $base_dirs[ $stylesheet_dir ];
+			$base_url = $stylesheet_url;
 		} else {
 			// Resource needs to be inside wp-content or a plugins dir.
 			return false;

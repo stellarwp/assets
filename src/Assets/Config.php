@@ -1,5 +1,4 @@
 <?php
-
 namespace StellarWP\Assets;
 
 use RuntimeException;
@@ -72,7 +71,7 @@ class Config {
 	 */
 	public static function get_url( $path ): string {
 		if ( empty( static::$path_urls[ $path ] ) ) {
-			static::$path_urls[ $path ] = trailingslashit( plugins_url( basename( $path ), $path ) );
+			static::$path_urls[ $path ] = trailingslashit( get_site_url() . $path );
 		}
 
 		return static::$path_urls[ $path ];
@@ -128,6 +127,23 @@ class Config {
 	 * @return void
 	 */
 	public static function set_path( string $path ) {
+		$content_dir = str_replace( get_site_url(), '', WP_CONTENT_URL );
+
+		$plugins_content_dir_position = strpos( $path, $content_dir . '/plugins' );
+		$themes_content_dir_position  = strpos( $path, $content_dir . '/themes' );
+
+		if (
+			$plugins_content_dir_position === false
+			&& $themes_content_dir_position === false
+		) {
+			// Default to plugins.
+			$path = $content_dir . '/plugins/' . $path;
+		} elseif ( $plugins_content_dir_position !== false ) {
+			$path = substr( $path, $plugins_content_dir_position );
+		} elseif ( $themes_content_dir_position !== false ) {
+			$path = substr( $path, $themes_content_dir_position );
+		}
+
 		static::$root_path = trailingslashit( $path );
 	}
 

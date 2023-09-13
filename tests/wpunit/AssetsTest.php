@@ -59,6 +59,8 @@ class AssetsTest extends AssetTestCase {
 
 		Assets::init()->enqueue( [ 'my-script', 'my-style' ] );
 
+		$x = Assets::init()->get( 'my-style' );
+
 		$this->assertTrue( wp_script_is( 'my-script', 'enqueued' ) );
 		$this->assertTrue( wp_style_is( 'my-style', 'enqueued' ) );
 	}
