@@ -57,6 +57,42 @@ class EnqueueCSSCest {
 		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/other-asset-root/css/fake-alt.css?ver=1.0.0' ] );
 	}
 
+	public function it_should_enqueue_from_alternate_path_with_css_in_file_ref( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'fake-css', 'css/fake-alt.css' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->set_path( 'tests/_data/other-asset-root' )
+				->register();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/other-asset-root/css/fake-alt.css?ver=1.0.0' ] );
+	}
+
+	public function it_should_enqueue_from_alternate_path_with_without_prefix_dir( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'fake-css', 'unnested.css' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->set_path( 'tests/_data', false )
+				->register();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/unnested.css?ver=1.0.0' ] );
+	}
+
 	public function it_should_enqueue_min( AcceptanceTester $I ) {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP

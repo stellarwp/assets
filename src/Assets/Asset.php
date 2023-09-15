@@ -183,6 +183,13 @@ class Asset {
 	protected bool $should_print = false;
 
 	/**
+	 * Whether to use the asset directory prefix based on asset type.
+	 *
+	 * @var bool
+	 */
+	protected bool $should_use_asset_directory_prefix = true;
+
+	/**
 	 * The asset slug.
 	 *
 	 * @var ?string
@@ -323,28 +330,44 @@ class Asset {
 			$extension = $type;
 		}
 
+		$should_prefix = $this->should_use_asset_directory_prefix;
+
 		if ( is_null( $resource_path ) ) {
 			$resources_path = $this->get_path();
-			switch ( $extension ) {
-				case 'css':
-					$resources_path = preg_replace( '#/css/$#', '/', $resources_path );
-					$resource_path  = "{$resources_path}css/";
-					break;
-				case 'js':
-					$resources_path = preg_replace( '#/js/$#', '/', $resources_path );
-					$resource_path  = "{$resources_path}js/";
-					break;
-				case 'scss':
-					$resources_path = preg_replace( '#/scss/$#', '/', $resources_path );
-					$resource_path  = "{$resources_path}scss/";
-					break;
-				case 'pcss':
-					$resources_path = preg_replace( '#/postcss/$#', '/', $resources_path );
-					$resource_path  = "{$resources_path}postcss/";
-					break;
-				default:
-					$resource_path = $resources_path;
-					break;
+			$resource_path  = $resources_path;
+
+			if ( $should_prefix ) {
+				$prefix_dir = '';
+
+				switch ( $extension ) {
+					case 'css':
+						$prefix_dir     = 'css';
+						$resources_path = preg_replace( '#/css/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}css/";
+						break;
+					case 'js':
+						$prefix_dir     = 'js';
+						$resources_path = preg_replace( '#/js/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}js/";
+						break;
+					case 'scss':
+						$prefix_dir     = 'scss';
+						$resources_path = preg_replace( '#/scss/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}scss/";
+						break;
+					case 'pcss':
+						$prefix_dir     = 'postcss';
+						$resources_path = preg_replace( '#/postcss/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}postcss/";
+						break;
+					default:
+						$resource_path = $resources_path;
+						break;
+				}
+
+				if ( $prefix_dir && strpos( $resource, $prefix_dir . '/' ) === 0 ) {
+					$resource = substr( $resource, strlen( $prefix_dir . '/' ) );
+				}
 			}
 		}
 
@@ -1027,12 +1050,14 @@ class Asset {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string|null $path The path to the minified file.
+	 * @param string|null $path                                                 The path to the minified file.
+	 * @param bool        $should_automatically_use_asset_type_directory_prefix Whether to prefix files automatically by type (e.g. js/ for JS). Defaults to true.
 	 *
 	 * @return $this
 	 */
-	public function set_path( ?string $path = null ) {
-		$this->path = trailingslashit( $path );
+	public function set_path( ?string $path = null, bool $should_automatically_use_asset_type_directory_prefix = true ) {
+		$this->path                              = trailingslashit( $path );
+		$this->should_use_asset_directory_prefix = $should_automatically_use_asset_type_directory_prefix;
 		return $this;
 	}
 
