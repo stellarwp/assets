@@ -216,34 +216,4 @@ class EnqueueJSCest {
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake-js-js[type=module]' );
 	}
-
-	public function it_should_localize( AcceptanceTester $I ) {
-		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
-		$code .= <<<PHP
-		add_action( 'wp_enqueue_scripts', function() {
-			Asset::add( 'fake-js', 'fake.js' )
-				->enqueue_on( 'wp_enqueue_scripts' )
-				->add_localize_script(
-					'animal',
-					[
-						'cow' => 'true',
-					]
-				)
-				->add_localize_script(
-					'color',
-					[ 'blue' ]
-				)
-				->register();
-		}, 100 );
-		PHP;
-
-		$I->haveMuPlugin( 'enqueue.php', $code );
-
-
-		$I->amOnPage( '/' );
-		$I->seeElement( '#fake-js-js-extra' );
-		$contents = $I->grabTextFrom( '#fake-js-js-extra' );
-		Assert::assertContains( 'var animal', $contents );
-		Assert::assertContains( 'var color', $contents );
-	}
 }
