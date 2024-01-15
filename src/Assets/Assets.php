@@ -190,7 +190,7 @@ class Assets {
 		$wp_scripts->print_extra_script( $asset->get_slug(), true );
 		$localization_html = ob_get_clean();
 
-		// After printing it remove data;|
+		// After printing it remove data;
 		$wp_scripts->add_data( $asset->get_slug(), 'data', '' );
 
 		return $localization_html . $tag;

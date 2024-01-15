@@ -403,16 +403,41 @@ class Asset {
 
 	/**
 	 * Adds a wp_localize_script object to the asset.
+	 * If the object already exists, updates it with the new data.
 	 *
 	 * @since 1.0.0
+	 * @since TBD Add a conditional and support for updating existing objects.
 	 *
-	 * @param string $object_name JS object name.
-	 * @param array  $data        Data assigned to the JS object.
+	 * @param string $object_name     JS object name.
+	 * @param array  $data            Data to be assigned to the JS object.
+	 * @param bool   $force_overwrite Whether to force the overwrite of the object.
 	 *
 	 * @return static
 	 */
-	public function add_localize_script( string $object_name, array $data ) {
-		$this->wp_localize_script_objects[ $object_name ] = $data;
+	public function add_localize_script( string $object_name, array $data, $force_overwrite = false ) {
+		if ( $force_overwrite || ! isset( $this->wp_localize_script_objects[ $object_name ] ) ) {
+			$this->wp_localize_script_objects[ $object_name ] = $data;
+			return $this;
+		}
+
+		return $this->update_localize_script( $object_name, $data );
+	}
+
+	/**
+	 * Updates a wp_localize_script object with new data.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $object_name JS object name.
+	 * @param array  $data        Data to be assigned to the JS object.
+	 *
+	 * @return static
+	 */
+	public function update_localize_script( string $object_name, array $data ) {
+		$this->wp_localize_script_objects[ $object_name ] = array_merge_recursive(
+			$this->wp_localize_script_objects[ $object_name ],
+			$data
+		);
 		return $this;
 	}
 
