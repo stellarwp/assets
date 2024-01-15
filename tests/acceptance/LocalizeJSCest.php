@@ -74,7 +74,7 @@ class LocalizeJSCest {
 		Assert::assertContains( 'black', $contents );
 	}
 
-	public function immediate_localize_should_overwrite_with_force( AcceptanceTester $I ) {
+	public function it_should_overwrite_localize_with_force( AcceptanceTester $I ) {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
@@ -110,10 +110,10 @@ class LocalizeJSCest {
 		Assert::assertContains( 'var animal', $contents );
 		Assert::assertContains( 'var color', $contents );
 		Assert::assertContains( 'brown', $contents );
-		Assert::assertContains( 'black', $contents );
+		Assert::assertNotContains( 'black', $contents );
 	}
 
-	public function it_should_append_to_localize_with_same_handle() {
+	public function it_should_append_to_localize_with_same_handle( AcceptanceTester $I ) {
 		$code_base = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code = $code_base . <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
@@ -155,9 +155,5 @@ class LocalizeJSCest {
 		Assert::assertContains( 'var color', $contents );
 		Assert::assertContains( 'cow', $contents );
 		Assert::assertContains( 'sheep', $contents );
-	}
-
-	public function it_should_not_append_to_localize_when_forced() {
-
 	}
 }
