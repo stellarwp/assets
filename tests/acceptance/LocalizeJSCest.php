@@ -136,14 +136,15 @@ class LocalizeJSCest {
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
 		$code_2 = $code_base . <<<PHP
-		Assets::get( 'fake-js' )
-			->add_localize_script(
-				'animal',
-					[
-						'sheep' => 'true',
-					]
-			);
-
+		add_action( 'wp_enqueue_scripts', function() {
+			Assets::get( 'fake-js' )
+				->add_localize_script(
+					'animal',
+						[
+							'sheep' => 'true',
+						]
+				);
+		}, 110 );
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue_2.php', $code_2 );
