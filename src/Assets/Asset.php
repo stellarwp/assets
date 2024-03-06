@@ -1333,7 +1333,7 @@ class Asset {
 	 *
 	 * @param string $src The partial path to the asset.
 	 *
-	 * @return string|null
+	 * @return array|null
 	 */
 	public function get_compiled_dependencies( string $src ): ?array {
 		$data = $this->get_compiled_data( $src );
@@ -1357,7 +1357,7 @@ class Asset {
 			return $this;
 		}
 
-		if ( ! empty( $this->dependencies ) && is_array( $this->dependencies ) ) {
+		if ( ! empty( $this->dependencies ) ) {
 			$block_dependencies = array_merge( $block_dependencies, $this->dependencies );
 		}
 
