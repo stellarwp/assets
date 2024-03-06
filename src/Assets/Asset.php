@@ -218,6 +218,16 @@ class Asset {
 	protected ?string $version = null;
 
 	/**
+	 * The compiled data for all assets already loaded.
+	 *
+	 * @since TBD
+	 *
+	 * @var array
+	 */
+	protected array $compiled_data = [];
+
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string      $slug      The asset slug.
@@ -1257,5 +1267,102 @@ class Asset {
 	 */
 	public function should_print(): bool {
 		return $this->should_print;
+	}
+
+	/**
+	 * Gets the data for a given compiled Asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return ?array
+	 */
+	public function get_compiled_data( string $src ): ?array {
+		$file = $this->get_root_path() . $this->get_path() . $src . '.asset.php';
+
+		if ( isset( $this->compiled_data[ $src ] ) ) {
+			return $this->compiled_data[ $src ];
+		}
+
+		if ( ! file_exists( $file ) ) {
+			$this->compiled_data[ $src ] = null;
+		} else {
+			$this->compiled_data[ $src ] = include $file;
+		}
+
+		return $this->compiled_data[ $src ];
+	}
+
+	/**
+	 * Gets the version for a given compiled Asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return string|null
+	 */
+	public function get_compiled_version( string $src ): ?string {
+		$data = $this->get_compiled_data( $src );
+
+		return $data['version'] ?: null;
+	}
+
+	/**
+	 * Set the version for a given compiled Asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return static
+	 */
+	public function set_compiled_version( string $src ) {
+		$version = $this->get_compiled_version( $src );
+
+		$this->version = $version ?? Config::get_version();
+
+		return $this;
+	}
+
+	/**
+	 * Gets the dependencies for a given compiled Asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return string|null
+	 */
+	public function get_compiled_dependencies( string $src ): ?array {
+		$data = $this->get_compiled_data( $src );
+
+		return $data['dependencies'] ?: [];
+	}
+
+	/**
+	 * Set block dependencies.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return static
+	 */
+	public function set_block_dependencies( string $src ) {
+		$block_dependencies = $this->get_compiled_dependencies( $src );
+
+		if ( empty( $block_dependencies ) ) {
+			return $this;
+		}
+
+		if ( ! empty( $this->dependencies ) && is_array( $this->dependencies ) ) {
+			$block_dependencies = array_merge( $block_dependencies, $this->dependencies );
+		}
+
+		$this->set_dependencies( ...$block_dependencies );
+
+		return $this;
 	}
 }
