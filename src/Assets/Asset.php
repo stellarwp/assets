@@ -218,6 +218,16 @@ class Asset {
 	protected ?string $version = null;
 
 	/**
+	 * The compiled data for all assets already loaded.
+	 *
+	 * @since TBD
+	 *
+	 * @var array
+	 */
+	protected array $compiled = [];
+
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string      $slug      The asset slug.
@@ -481,6 +491,13 @@ class Asset {
 	 * @return array
 	 */
 	public function get_dependencies(): array {
+		if (
+			$this->is_compiled()
+			&& ! empty( $this->compiled['dependencies'] )
+		) {
+			return $this->compiled['dependencies'];
+		}
+
 		return $this->dependencies;
 	}
 
@@ -671,9 +688,18 @@ class Asset {
 	/**
 	 * Get the asset version.
 	 *
+	 * @since TBD - Add support for compiled assets.
+	 *
 	 * @return string
 	 */
 	public function get_version(): string {
+		if (
+			$this->is_compiled()
+			&& ! empty( $this->compiled['version'] )
+		) {
+			return (string) $this->compiled['version'];
+		}
+
 		return $this->version;
 	}
 
@@ -1257,5 +1283,37 @@ class Asset {
 	 */
 	public function should_print(): bool {
 		return $this->should_print;
+	}
+
+	/**
+	 * Determines if the asset is compiled.
+	 *
+	 * @since TBD
+	 *
+	 * @return bool
+	 */
+	public function is_compiled(): bool {
+		return ! empty( $this->compiled );
+	}
+
+	/**
+	 * Set the compiled data for the asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $src The partial path to the asset.
+	 *
+	 * @return static
+	 */
+	public function set_compiled_data( string $src ) {
+		$file = $this->get_root_path() . $this->get_path() . $src . '.asset.php';
+
+		if ( ! file_exists( $file ) ) {
+			return $this;
+		}
+
+		$this->compiled = require $file;
+
+		return $this;
 	}
 }
