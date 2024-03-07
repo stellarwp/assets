@@ -224,7 +224,7 @@ class Asset {
 	 *
 	 * @var array
 	 */
-	protected array $compiled_data = [];
+	protected array $compiled = [];
 
 
 	/**
@@ -491,6 +491,13 @@ class Asset {
 	 * @return array
 	 */
 	public function get_dependencies(): array {
+		if (
+			$this->is_compiled()
+			&& ! empty( $this->compiled['dependencies'] )
+		) {
+			return $this->compiled['dependencies'];
+		}
+
 		return $this->dependencies;
 	}
 
@@ -681,9 +688,18 @@ class Asset {
 	/**
 	 * Get the asset version.
 	 *
+	 * @since TBD - Add support for compiled assets.
+	 *
 	 * @return string
 	 */
 	public function get_version(): string {
+		if (
+			$this->is_compiled()
+			&& ! empty( $this->compiled['version'] )
+		) {
+			return (string) $this->compiled['version'];
+		}
+
 		return $this->version;
 	}
 
@@ -1270,98 +1286,33 @@ class Asset {
 	}
 
 	/**
-	 * Gets the data for a given compiled Asset.
+	 * Determines if the asset is compiled.
+	 *
+	 * @since TBD
+	 *
+	 * @return bool
+	 */
+	public function is_compiled(): bool {
+		return ! empty( $this->compiled );
+	}
+
+	/**
+	 * Set the compiled data for the asset.
 	 *
 	 * @since TBD
 	 *
 	 * @param string $src The partial path to the asset.
 	 *
-	 * @return ?array
+	 * @return static
 	 */
-	public function get_compiled_data( string $src ): ?array {
+	public function set_compiled_data( string $src ) {
 		$file = $this->get_root_path() . $this->get_path() . $src . '.asset.php';
 
-		if ( isset( $this->compiled_data[ $src ] ) ) {
-			return $this->compiled_data[ $src ];
-		}
-
 		if ( ! file_exists( $file ) ) {
-			$this->compiled_data[ $src ] = null;
-		} else {
-			$this->compiled_data[ $src ] = include $file;
-		}
-
-		return $this->compiled_data[ $src ];
-	}
-
-	/**
-	 * Gets the version for a given compiled Asset.
-	 *
-	 * @since TBD
-	 *
-	 * @param string $src The partial path to the asset.
-	 *
-	 * @return string|null
-	 */
-	public function get_compiled_version( string $src ): ?string {
-		$data = $this->get_compiled_data( $src );
-
-		return $data['version'] ?: null;
-	}
-
-	/**
-	 * Set the version for a given compiled Asset.
-	 *
-	 * @since TBD
-	 *
-	 * @param string $src The partial path to the asset.
-	 *
-	 * @return static
-	 */
-	public function set_compiled_version( string $src ) {
-		$version = $this->get_compiled_version( $src );
-
-		$this->version = $version ?? Config::get_version();
-
-		return $this;
-	}
-
-	/**
-	 * Gets the dependencies for a given compiled Asset.
-	 *
-	 * @since TBD
-	 *
-	 * @param string $src The partial path to the asset.
-	 *
-	 * @return array|null
-	 */
-	public function get_compiled_dependencies( string $src ): ?array {
-		$data = $this->get_compiled_data( $src );
-
-		return $data['dependencies'] ?: [];
-	}
-
-	/**
-	 * Set block dependencies.
-	 *
-	 * @since TBD
-	 *
-	 * @param string $src The partial path to the asset.
-	 *
-	 * @return static
-	 */
-	public function set_block_dependencies( string $src ) {
-		$block_dependencies = $this->get_compiled_dependencies( $src );
-
-		if ( empty( $block_dependencies ) ) {
 			return $this;
 		}
 
-		if ( ! empty( $this->dependencies ) ) {
-			$block_dependencies = array_merge( $block_dependencies, $this->dependencies );
-		}
-
-		$this->set_dependencies( ...$block_dependencies );
+		$this->compiled = require $file;
 
 		return $this;
 	}
