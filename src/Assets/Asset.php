@@ -491,14 +491,19 @@ class Asset {
 	 * @return array
 	 */
 	public function get_dependencies(): array {
-		if (
-			$this->is_compiled()
-			&& ! empty( $this->compiled['dependencies'] )
-		) {
-			return $this->compiled['dependencies'];
-		}
+	    if (
+	       $this->is_compiled()
+	       && ! empty( $this->compiled['dependencies'] )
+	    ) {
+		    return array_unique(
+		        array_merge(
+		            $this->compiled['dependencies'],
+		            $this->dependencies
+	            )
+            );
+	    }
 
-		return $this->dependencies;
+	    return $this->dependencies;
 	}
 
 	/**
@@ -1297,6 +1302,25 @@ class Asset {
 	}
 
 	/**
+	 * Set the asset as compiled.
+	 *
+	 * @since TBD
+	 *
+	 * @return static
+	 */
+	public function set_as_compiled() {
+		$file = $this->get_root_path() . $this->get_path() . $this->get_file() . '.asset.php';
+
+		if ( ! file_exists( $file ) ) {
+			return $this;
+		}
+
+		$this->compiled = require $file;
+
+		return $this;
+	}
+
+	/**
 	 * Set the compiled data for the asset.
 	 *
 	 * @since TBD
@@ -1305,7 +1329,7 @@ class Asset {
 	 *
 	 * @return static
 	 */
-	public function set_compiled_data( string $src ) {
+	public function set_compiled_path( string $src ) {
 		$file = $this->get_root_path() . $this->get_path() . $src . '.asset.php';
 
 		if ( ! file_exists( $file ) ) {
