@@ -1309,9 +1309,12 @@ class Asset {
 	 * @return static
 	 */
 	public function set_as_compiled() {
-		$file = $this->get_root_path() . $this->get_path() . $this->get_file() . '.asset.php';
+		$file = $this->get_root_path() . $this->get_path() . str_replace( '.js', '', $this->get_file() ) . '.asset.php';
 
 		if ( ! file_exists( $file ) ) {
+			// Set file type to empty string to prevent fatal error.
+			$this->set_type( '' );
+
 			return $this;
 		}
 
