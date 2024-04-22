@@ -427,6 +427,79 @@ Asset::add( 'my-asset', 'css/some-asset.css' )
 	->register();
 ```
 
+If you specify an object name using dot notation, then the object will be printed on the page "merging" it with other, pre-existing objects.
+In the following example, the `boomshakalaka.project` object will be created and then the `firstScriptData` and `secondScriptData` objects will be added to it:
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+
+Asset::add( 'my-first-script', 'js/first-script.js' )
+	->add_localize_script(
+		'boomshakalaka.project.firstScriptData',
+		[
+			'animal' => 'cat',
+			'color'  => 'orange',
+		]
+	)
+	->register();
+
+Asset::add( 'my-second-script', 'js/second-script.js' )
+	->add_localize_script(
+		'boomshakalaka.project.secondScriptData',
+		[
+			'animal' => 'dog',
+			'color'  => 'green',
+		]
+	)
+	->register();
+
+Asset::add( 'my-second-script-mod', 'js/second-script-mod.js' )
+	->add_localize_script(
+		'boomshakalaka.project.secondScriptData',
+		[
+			'animal' => 'horse'
+		]
+	)
+	->register();
+```
+
+The resulting output will be:
+
+```html
+<script id="my-first-script-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.firstScriptData = Object.assign(
+		window.boomshakalaka.project.firstScriptData || {},
+		{ "animal": "cat", "color": "orange" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/first-script.js" id="my-first-script-js"></script>
+<script id="my-second-script-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.secondScriptData = Object.assign(
+		window.boomshakalaka.project.secondScriptData || {},
+		{ "animal": "dog", "color": "green" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/second-script.js" id="my-second-script-js"></script>
+<script id="my-second-script-mod-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.secondScriptData = Object.assign(
+		window.boomshakalaka.project.secondScriptData || {},
+		{ "animal": "horse" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/second-script-mod.js"
+		id="my-second-script-mod-js"></script>
+```
+
+Note the `my-second-script-mod` handle is overriding a specific nested
+key, `boomshakalaka.project.secondScriptData.animal`, in the `boomshakalaka.project.secondScriptData` object while
+preserving the other keys.
+
 ### Output content before/after a JS asset is output
 
 There may be times when you wish to output markup or text immediately before or immediately after outputting the JS
