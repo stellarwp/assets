@@ -115,7 +115,7 @@ class Asset {
 	/**
 	 * The asset wp_localize_script objects for this asset.
 	 *
-	 * @var array
+	 * @var array<string,mixed>
 	 */
 	protected array $wp_localize_script_objects = [];
 
@@ -216,6 +216,13 @@ class Asset {
 	 * @var ?string
 	 */
 	protected ?string $version = null;
+
+	/**
+	 * An array of objects to localized using dot-notation and namespaces.
+	 *
+	 * @var array<array{0: string, 1:mixed}>
+	 */
+	protected array $custom_localize_script_objects = [];
 
 	/**
 	 * Constructor.
@@ -412,7 +419,12 @@ class Asset {
 	 * @return static
 	 */
 	public function add_localize_script( string $object_name, array $data ) {
-		$this->wp_localize_script_objects[ $object_name ] = $data;
+		if ( str_contains( $object_name, '.' ) ) {
+			$this->custom_localize_script_objects[] = [ $object_name, $data ];
+		} else {
+			$this->wp_localize_script_objects[ $object_name ] = $data;
+		}
+
 		return $this;
 	}
 
@@ -518,6 +530,15 @@ class Asset {
 	 */
 	public function get_localize_scripts(): array {
 		return $this->wp_localize_script_objects;
+	}
+
+	/**
+	 * Get the asset wp_localize_script_objects.
+	 *
+	 * @return array<array{0: string, 1: mixed}> A set of data to localized using dot-notation.
+	 */
+	public function get_custom_localize_scripts(): array {
+		return $this->custom_localize_script_objects;
 	}
 
 	/**
