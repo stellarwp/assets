@@ -414,11 +414,13 @@ class Asset {
 	 * @since 1.0.0
 	 *
 	 * @param string $object_name JS object name.
-	 * @param array  $data        Data assigned to the JS object.
+	 * @param array|callable  $data Data assigned to the JS object. If a callable is passed, it will be called
+	 *                              when the asset is enqueued and the return value will be used. The callable
+	 *                              will be passed the asset as the first argument and should return an array.
 	 *
 	 * @return static
 	 */
-	public function add_localize_script( string $object_name, array $data ) {
+	public function add_localize_script( string $object_name, $data ) {
 		if ( str_contains( $object_name, '.' ) ) {
 			$this->custom_localize_script_objects[] = [ $object_name, $data ];
 		} else {

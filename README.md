@@ -31,6 +31,7 @@ A library for managing asset registration and enqueuing in WordPress.
   * [Conditional enqueuing](#conditional-enqueuing)
   * [Firing a callback after enqueuing occurs](#firing-a-callback-after-enqueuing-occurs)
   * [Output JS data](#output-js-data)
+	  * [Using a callable to provide localization data](#using-a-callable-to-provide-localization-data)
   * [Output content before/after a JS asset is output](#output-content-beforeafter-a-js-asset-is-output)
   * [Style meta data](#style-meta-data)
 
@@ -499,6 +500,28 @@ The resulting output will be:
 Note the `my-second-script-mod` handle is overriding a specific nested
 key, `boomshakalaka.project.secondScriptData.animal`, in the `boomshakalaka.project.secondScriptData` object while
 preserving the other keys.
+
+#### Using a callable to provide localization data
+
+If you need to provide localization data dynamically, you can use a callable to do so. The callable will be called
+when the asset is enqueued and the return value will be used. The callable will be passed the asset as the first
+argument and should return an array.
+
+```php
+Asset::add( 'my-script', 'js/some-asset.js' )
+	->add_localize_script(
+		'boomshakalaka.project.myScriptData',
+		function( Asset $asset ) {
+			return [
+				'animal' => 'cat',
+				'color'  => 'orange',
+			];
+		}
+	)
+	->register();
+```
+
+Any valid callable can be used, including Closures, like in the example above.
 
 ### Output content before/after a JS asset is output
 
