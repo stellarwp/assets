@@ -215,4 +215,55 @@ SCRIPT,
 			$apply_filters
 		);
 	}
+
+	/**
+	 * It should allow localizing data using a Closure
+	 *
+	 * @test
+	 */
+	public function should_allow_localizing_data_using_a_closure(): void {
+		$resolved_one      = false;
+		$resolved_two      = false;
+		$data_callback_one = function () use ( &$resolved_one ) {
+			$resolved_one = true;
+
+			return [
+				'animal' => 'cat',
+				'color'  => 'orange',
+			];
+		};
+		$data_callback_two = function () use ( &$resolved_two ) {
+			$resolved_two = true;
+
+			return [
+				'animal' => 'dog',
+				'color'  => 'green',
+			];
+		};
+
+		Asset::add( 'my-script-with-closure-data', 'test-script.js' )
+		     ->add_localize_script( 'scriptWithClosureData', $data_callback_one )
+		     ->add_localize_script( 'acme.project.closureData', $data_callback_two )
+		     ->register();
+
+		$this->assertFalse( $resolved_one, 'The first callback should not have been resolved yet.' );
+		$this->assertFalse( $resolved_two, 'The second callback should not have been resolved yet.' );
+
+		$apply_filters = apply_filters( 'script_loader_tag', '', 'my-script-with-closure-data' );
+		$this->assertEquals( <<< SCRIPT
+<script id="my-script-with-closure-data-js-extra">
+var scriptWithClosureData = {"animal":"cat","color":"orange"};
+</script>
+<script id="my-script-with-closure-data-ns-extra">
+window.acme = window.acme || {};
+window.acme.project = window.acme.project || {};
+window.acme.project.closureData = Object.assign(window.acme.project.closureData || {}, {"animal":"dog","color":"green"});
+</script>
+SCRIPT,
+			$apply_filters
+		);
+
+		$this->assertTrue( $resolved_one );
+		$this->assertTrue( $resolved_two );
+	}
 }

@@ -357,7 +357,7 @@ class Assets {
 
 				// If we have a Callable as the Localize data we execute it.
 				if ( is_callable( $localize ) ) {
-					$localize = call_user_func( $localize, $asset );
+					$localize = $localize( $asset );
 				}
 
 				wp_localize_script( $asset->get_slug(), $key, $localize );
@@ -378,6 +378,11 @@ class Assets {
 		 * Print the dot.notation namespaced objects for the asset.
 		 */
 		foreach ( $custom_localize_scripts as [$object_name, $data] ) {
+			// If we have a Callable as the Localize data we execute it.
+			if ( is_callable( $data ) ) {
+				$data = $data( $asset );
+			}
+
 			$localized_key = "{$asset->get_slug()}::{$object_name}";
 
 			if ( in_array( $localized_key, $this->localized, true ) ) {
