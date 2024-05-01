@@ -150,6 +150,18 @@ Asset::add( 'script-with-dependencies', 'js/something.js' )
 	->register();
 ```
 
+You can also specify dependencies as a callable that returns an array of dependencies, like so:
+
+```php
+Asset::add( 'script-with-dependencies', 'js/something.js' )
+	->set_dependencies( function() {
+		return [ 'jquery', 'jquery-ui', 'some-other-thing' ];
+	} )
+	->register();
+```
+
+Note that the callable will be called when the asset is enqueued, not later, when the asset is printed.
+
 #### Auto-enqueuing on an action
 To specify when to enqueue the asset, you can indicate it like so:
 

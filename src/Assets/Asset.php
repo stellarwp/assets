@@ -36,9 +36,9 @@ class Asset {
 	/**
 	 * The asset dependencies.
 	 *
-	 * @var array
+	 * @var array<string>|callable
 	 */
-	protected array $dependencies = [];
+	protected $dependencies = [];
 
 	/**
 	 * The asset file path.
@@ -492,9 +492,9 @@ class Asset {
 	/**
 	 * Get the asset dependencies.
 	 *
-	 * @return array
+	 * @return array<string>|callable
 	 */
-	public function get_dependencies(): array {
+	public function get_dependencies() {
 		return $this->dependencies;
 	}
 
@@ -1215,15 +1215,15 @@ class Asset {
 	/**
 	 * @since 1.0.0
 	 *
-	 * @param string ...$dependencies
+	 * @param string|callable ...$dependencies
 	 *
 	 * @return static
 	 */
-	public function set_dependencies( string ...$dependencies ) {
-		$this->dependencies = [];
-
-		foreach ( $dependencies as $dependency ) {
-			$this->add_dependency( $dependency );
+	public function set_dependencies( ...$dependencies ) {
+		if ( $dependencies[0] && is_callable( $dependencies[0] ) ) {
+			$this->dependencies = $dependencies[0];
+		} else {
+			$this->dependencies = $dependencies;
 		}
 
 		return $this;
