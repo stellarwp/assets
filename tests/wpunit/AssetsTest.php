@@ -266,4 +266,70 @@ SCRIPT,
 		$this->assertTrue( $resolved_one );
 		$this->assertTrue( $resolved_two );
 	}
+
+	/**
+	 * It should allow setting dependencies with an array
+	 *
+	 * @test
+	 */
+	public function should_allow_setting_dependencies_with_an_array(): void {
+		Asset::add( 'my-deps-base-script', 'base-script.js' )
+		     ->register();
+		Asset::add( 'my-deps-vendor-script', 'vendor-script.js' )
+		     ->register();
+		Asset::add( 'my-deps-dependent-script', 'dependent-script.js' )
+		     ->set_dependencies( 'my-deps-base-script', 'my-deps-vendor-script' )
+		     ->enqueue_on( 'test_action' )
+		     ->print()
+		     ->register();
+
+		ob_start();
+		do_action( 'test_action' );
+		$this->assertEquals( <<< SCRIPT
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script.js?ver=1.0.0" id="my-deps-base-script-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script.js?ver=1.0.0" id="my-deps-vendor-script-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script.js?ver=1.0.0" id="my-deps-dependent-script-js"></script>
+
+SCRIPT,
+			ob_get_clean()
+		);
+	}
+
+	/**
+	 * It should allow setting dependencies with a callable
+	 *
+	 * @test
+	 */
+	public function should_allow_setting_dependencies_with_a_callable(): void {
+		Asset::add( 'my-base-script-2', 'base-script-2.js' )
+		     ->register();
+		Asset::add( 'my-vendor-script-2', 'vendor-script-2.js' )
+		     ->register();
+		$resolved = false;
+		$asset = Asset::add( 'my-dependent-script-2', 'dependent-script-2.js' )
+		              ->set_dependencies( function () use ( &$resolved ) {
+			              $resolved = true;
+
+			              return [ 'my-base-script-2', 'my-vendor-script-2' ];
+		              } )
+		              ->enqueue_on( 'test_action_2' )
+		              ->print();
+
+		$this->assertFalse( $resolved, 'The dependencies should not have been resolved yet.' );
+
+		$asset->register();
+
+		$this->assertTrue( $resolved );
+
+		ob_start();
+		do_action( 'test_action_2' );
+		$this->assertEquals( <<< SCRIPT
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script-2.js?ver=1.0.0" id="my-base-script-2-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script-2.js?ver=1.0.0" id="my-vendor-script-2-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script-2.js?ver=1.0.0" id="my-dependent-script-2-js"></script>
+
+SCRIPT,
+			ob_get_clean()
+		);
+	}
 }
