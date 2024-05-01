@@ -160,7 +160,7 @@ Asset::add( 'script-with-dependencies', 'js/something.js' )
 	->register();
 ```
 
-Note that the callable will be called when the asset is enqueued, not later, when the asset is printed.
+Note that the callable will be executed when the asset is **_enqueued_**.
 
 #### Auto-enqueuing on an action
 To specify when to enqueue the asset, you can indicate it like so:
