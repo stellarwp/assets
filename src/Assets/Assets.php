@@ -681,6 +681,23 @@ class Assets {
 	 *
 	 */
 	public function register_in_wp( $assets = null ) {
+		if ( ! (
+			did_action( 'init' ) || did_action( 'wp_enqueue_scripts' )
+			|| did_action( 'admin_enqueue_scripts' ) || did_action( 'login_enqueue_scripts' )
+		)
+		) {
+			// Registering the asset now would trigger a doing_it_wrong notice: queue the assets to be registered later.
+
+			if ( ! is_array( $assets ) ) {
+				$assets = [ $assets ];
+			}
+
+			// Register later, avoid the doing_it_wrong notice.
+			$this->assets = array_merge( $this->assets, $assets );
+
+			return;
+		}
+
 		if ( is_null( $assets ) ) {
 			$assets = $this->get();
 		}
