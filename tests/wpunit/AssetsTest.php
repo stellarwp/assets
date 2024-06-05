@@ -7,7 +7,7 @@ use PHPUnit\Framework\Assert;
 
 class AssetsTest extends AssetTestCase {
 	/**
-	 * Store the value of SCRIPT_DEBUG before modifying it.
+	 * Store const modifications.
 	 *
 	 * @var mixed
 	 */
