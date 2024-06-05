@@ -927,7 +927,11 @@ class Asset {
 			substr( $relative_location, -3, 3 ) === '.js'
 			|| substr( $relative_location, -4, 4 ) === '.css'
 		) {
-			$urls[] = preg_replace( '#(.*)(' . preg_quote( $relative_asset_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).(js|css)#', '$1' . $min_asset_path . '$3.min.$4', $relative_location );
+			if ( $min_asset_path !== $relative_asset_path ) {
+				$urls[] = preg_replace( '#(.*)(' . preg_quote( $relative_asset_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).(js|css)#', '$1' . $min_asset_path . '$3.min.$4', $relative_location );
+			} else {
+				$urls[] = preg_replace( '#(.*).(js|css)#', '$1.min.$2', $relative_location );
+			}
 		}
 
 		if ( ! $script_debug ) {
