@@ -3,8 +3,16 @@
 namespace StellarWP\Assets;
 
 use StellarWP\Assets\Tests\AssetTestCase;
+use PHPUnit\Framework\Assert;
 
 class AssetsTest extends AssetTestCase {
+	/**
+	 * Store the value of SCRIPT_DEBUG before modifying it.
+	 *
+	 * @var mixed
+	 */
+	protected static $uopz_redefines = [];
+
 	public function setUp() {
 		// before
 		parent::setUp();
@@ -17,6 +25,19 @@ class AssetsTest extends AssetTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		Config::reset();
+	}
+
+	/**
+	 * @after
+	 */
+	public function unset_uopz_redefines() {
+		if ( function_exists( 'uopz_redefine' ) ) {
+			foreach ( self::$uopz_redefines as $restore_callback ) {
+				$restore_callback();
+			}
+		}
+
+		self::$uopz_redefines = [];
 	}
 
 	/**
@@ -33,11 +54,6 @@ class AssetsTest extends AssetTestCase {
 	 * @test
 	 */
 	public function it_should_locate_minified_versions_of_external_assets() {
-		if ( defined( SCRIPT_DEBUG ) ) {
-			$old_script_debug = SCRIPT_DEBUG;
-			uopz_undefine( 'SCRIPT_DEBUG' );
-		}
-
 		Asset::add( 'fake-script', 'fake.js' )->register();
 		Asset::add( 'fake-style', 'fake.css' )->register();
 		Asset::add( 'fake2-script', 'fake2.js' )->register();
@@ -58,10 +74,6 @@ class AssetsTest extends AssetTestCase {
 		foreach ( $slugs as $slug => $data ) {
 			$this->assert_minified_found( $slug, true, ...$data );
 			$this->assert_minified_found( $slug, false, ...$data );
-		}
-
-		if ( isset( $old_script_debug ) ) {
-			uopz_redefine( 'SCRIPT_DEBUG', $old_script_debug );
 		}
 	}
 
@@ -391,7 +403,7 @@ SCRIPT,
 
 		$urls = [];
 
-		uopz_redefine( 'SCRIPT_DEBUG', false );
+		$this->set_const_value( 'SCRIPT_DEBUG', false );
 
 		$this->assertFalse( SCRIPT_DEBUG );
 
@@ -411,7 +423,7 @@ SCRIPT,
 			$asset->get_url()
 		);
 
-		uopz_redefine( 'SCRIPT_DEBUG', true );
+		$this->set_const_value( 'SCRIPT_DEBUG', true );
 
 		$this->assertTrue( SCRIPT_DEBUG );
 
@@ -425,7 +437,33 @@ SCRIPT,
 			$urls['1'],
 			$asset->get_url()
 		);
+	}
 
-		uopz_undefine( 'SCRIPT_DEBUG' );
+	/**
+	 * Set a constant value using uopz.
+	 *
+	 * @param string $const
+	 * @param mixed  $value
+	 */
+	private function set_const_value( $const, $value ) {
+		if ( ! function_exists( 'uopz_redefine' ) ) {
+			$this->markTestSkipped( 'uopz extension is not installed' );
+		}
+
+		// Normal const redefinition.
+		$previous_value = defined( $const ) ? constant( $const ) : null;
+		if ( null === $previous_value ) {
+			$restore_callback = static function () use ( $const ) {
+				uopz_undefine( $const );
+				Assert::assertFalse( defined( $const ) );
+			};
+		} else {
+			$restore_callback = static function () use ( $previous_value, $const ) {
+				uopz_redefine( $const, $previous_value );
+				Assert::assertEquals( $previous_value, constant( $const ) );
+			};
+		}
+		uopz_redefine( $const, $value );
+		self::$uopz_redefines[] = $restore_callback;
 	}
 }
