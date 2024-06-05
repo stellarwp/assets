@@ -54,15 +54,15 @@ class AssetsTest extends AssetTestCase {
 	 * @test
 	 */
 	public function it_should_locate_minified_versions_of_external_assets() {
-		Asset::add( 'fake-script', 'fake.js' )->register();
-		Asset::add( 'fake-style', 'fake.css' )->register();
+		Asset::add( 'fake1-script', 'fake1.js' )->register();
+		Asset::add( 'fake1-style', 'fake1.css' )->register();
 		Asset::add( 'fake2-script', 'fake2.js' )->register();
 		Asset::add( 'fake2-style', 'fake2.css' )->register();
 		Asset::add( 'fake3-script', 'fake3.js' )->register();
 		Asset::add( 'fake3-style', 'fake3.css' )->register();
 
 		$slugs = [
-			'fake' => [ true, false ],
+			'fake1' => [ true, false ],
 			'fake2' => [ false, false ],
 			'fake3' => [ true, true ]
 		];
