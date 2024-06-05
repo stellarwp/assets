@@ -22,22 +22,53 @@ class AssetsTest extends AssetTestCase {
 	/**
 	 * @test
 	 */
-	public function it_should_should_register_multiple_assets() {
+	public function it_should_register_multiple_assets() {
 		Asset::add( 'my-script', 'fake.js' )->register();
 		Asset::add( 'my-style', 'fake.css' )->register();
 
-		$this->assertTrue( Assets::init()->exists( 'my-script' ) );
-		$this->assertTrue( Assets::init()->exists( 'my-style' ) );
-		$this->assertTrue( wp_script_is( 'my-script', 'registered' ) );
-		$this->assertTrue( wp_style_is( 'my-style', 'registered' ) );
-		$this->assertEquals( 'my-script', Assets::init()->get( 'my-script' )->get_slug() );
-		$this->assertEquals( 'my-style', Assets::init()->get( 'my-style' )->get_slug() );
+		$this->existence_assertions( 'my' );
 	}
 
 	/**
 	 * @test
 	 */
-	public function it_should_should_remove_assets() {
+	public function it_should_locate_minified_versions_of_external_assets() {
+		if ( defined( SCRIPT_DEBUG ) ) {
+			$old_script_debug = SCRIPT_DEBUG;
+			uopz_undefine( 'SCRIPT_DEBUG' );
+		}
+
+		Asset::add( 'fake-script', 'fake.js' )->register();
+		Asset::add( 'fake-style', 'fake.css' )->register();
+		Asset::add( 'fake2-script', 'fake2.js' )->register();
+		Asset::add( 'fake2-style', 'fake2.css' )->register();
+		Asset::add( 'fake3-script', 'fake3.js' )->register();
+		Asset::add( 'fake3-style', 'fake3.css' )->register();
+
+		$slugs = [
+			'fake' => [ true, false ],
+			'fake2' => [ false, false ],
+			'fake3' => [ true, true ]
+		];
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			$this->existence_assertions( $slug );
+		}
+
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, ...$data );
+			$this->assert_minified_found( $slug, false, ...$data );
+		}
+
+		if ( isset( $old_script_debug ) ) {
+			uopz_redefine( 'SCRIPT_DEBUG', $old_script_debug );
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_remove_assets() {
 		Asset::add( 'my-script', 'fake.js' )->register();
 		Asset::add( 'my-style', 'fake.css' )->register();
 
@@ -331,5 +362,70 @@ SCRIPT,
 SCRIPT,
 			ob_get_clean()
 		);
+	}
+
+	/**
+	 * Evaluates if a script and style have been registered.
+	 */
+	protected function existence_assertions( $test_slug_prefix ) {
+		$this->assertTrue( Assets::init()->exists( $test_slug_prefix . '-script' ) );
+		$this->assertTrue( Assets::init()->exists( $test_slug_prefix . '-style' ) );
+		$this->assertTrue( wp_script_is( $test_slug_prefix . '-script', 'registered' ) );
+		$this->assertTrue( wp_style_is( $test_slug_prefix . '-style', 'registered' ) );
+		$this->assertEquals( $test_slug_prefix . '-script', Assets::init()->get( $test_slug_prefix . '-script' )->get_slug() );
+		$this->assertEquals( $test_slug_prefix . '-style', Assets::init()->get( $test_slug_prefix. '-style' )->get_slug() );
+	}
+
+	/**
+	 * Asserts that the minified version of a script or style is found.
+	 *
+	 * @param string $slug_prefix
+	 * @param bool   $is_js
+	 * @param bool   $has_min
+	 * @param bool   $has_only_min
+	 */
+	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false ) {
+		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
+
+		$url = get_site_url() . '/wp-content/plugins/assets/tests/_data/' . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix;
+
+		$urls = [];
+
+		uopz_redefine( 'SCRIPT_DEBUG', false );
+
+		$this->assertFalse( SCRIPT_DEBUG );
+
+		if ( $has_only_min ) {
+			$urls[] = $url . '.min' . ( $is_js ? '.js' : '.css' );
+			$urls[] = $url . '.min' . ( $is_js ? '.js' : '.css' );
+		} elseif ( $has_min ) {
+			$urls[] = $url . ( $is_js ? '.min.js' : '.min.css' );
+			$urls[] = $url . ( $is_js ? '.js' : '.css' );
+		} else {
+			$urls[] = $url . ( $is_js ? '.js' : '.css' );
+			$urls[] = $url . ( $is_js ? '.js' : '.css' );
+		}
+
+		$this->assertEquals(
+			$urls['0'],
+			$asset->get_url()
+		);
+
+		uopz_redefine( 'SCRIPT_DEBUG', true );
+
+		$this->assertTrue( SCRIPT_DEBUG );
+
+		// Remove and re add to clear cache.
+		Assets::init()->remove( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
+		Asset::add( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ), $slug_prefix . '.' . ( $is_js ? 'js' : 'css' ) )->register();
+
+		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
+
+		$this->assertEquals(
+			$urls['1'],
+			$asset->get_url()
+		);
+
+		uopz_undefine( 'SCRIPT_DEBUG' );
 	}
 }
