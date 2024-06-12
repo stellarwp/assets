@@ -88,10 +88,11 @@ class AssetsTest extends AssetTestCase {
 		$this->assertTrue( wp_script_is( 'fake3-script', 'registered' ) );
 		$this->assertEquals( 'fake3-script', Assets::init()->get( 'fake3-script' )->get_slug() );
 
-		$asset = Assets::init()->get( 'fake3-script' );
-
 		// The URL will always be the minified version, since we ignore the script debug.
 		$expected_url = get_site_url() . '/wp-content/plugins/assets/tests/_data/js/fake3.min.js';
+
+		Assets::init()->remove( 'fake3-script' );
+		Asset::add( 'fake3-script', 'fake3.js' )->register();
 
 		Config::set_ignore_script_debug( true );
 
@@ -100,15 +101,18 @@ class AssetsTest extends AssetTestCase {
 
 		$this->assertEquals(
 			$expected_url,
-			$asset->get_url()
+			Assets::init()->get( 'fake3-script' )->get_url()
 		);
+
+		Assets::init()->remove( 'fake3-script' );
+		Asset::add( 'fake3-script', 'fake3.js' )->register();
 
 		$this->set_const_value( 'SCRIPT_DEBUG', true );
 		$this->assertTrue( SCRIPT_DEBUG );
 
 		$this->assertEquals(
 			$expected_url,
-			$asset->get_url()
+			Assets::init()->get( 'fake3-script' )->get_url()
 		);
 	}
 
