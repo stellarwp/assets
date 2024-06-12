@@ -80,7 +80,7 @@ class AssetsTest extends AssetTestCase {
 	/**
 	 * @test
 	 */
-	public function it_should_locate_minified_versions_of_external_assets() {
+	public function it_should_properly_locate_minified_files_when_SCRIPT_DEBUG_is_on_but_ignored() {
 
 		Asset::add( 'fake3-script', 'fake3.js' )->register();
 
@@ -88,7 +88,28 @@ class AssetsTest extends AssetTestCase {
 		$this->assertTrue( wp_script_is( 'fake3-script', 'registered' ) );
 		$this->assertEquals( 'fake3-script', Assets::init()->get( 'fake3-script' )->get_slug() );
 
-		$this->assert_minified_found( 'fake3', true, true, true );
+		$asset = Assets::init()->get( 'fake3-script' );
+
+		// The URL will always be the minified version, since we ignore the script debug.
+		$expected_url = get_site_url() . '/wp-content/plugins/assets/tests/_data/js/fake3.min.js';
+
+		Config::set_ignore_script_debug( true );
+
+		$this->set_const_value( 'SCRIPT_DEBUG', false );
+		$this->assertFalse( SCRIPT_DEBUG );
+
+		$this->assertEquals(
+			$expected_url,
+			$asset->get_url()
+		);
+
+		$this->set_const_value( 'SCRIPT_DEBUG', true );
+		$this->assertTrue( SCRIPT_DEBUG );
+
+		$this->assertEquals(
+			$expected_url,
+			$asset->get_url()
+		);
 	}
 
 	/**
