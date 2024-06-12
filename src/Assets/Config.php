@@ -71,7 +71,7 @@ class Config {
 	 */
 	public static function get_url( $path ): string {
 		if ( empty( static::$path_urls[ $path ] ) ) {
-			static::$path_urls[ $path ] = trailingslashit( get_site_url() . $path );
+			static::$path_urls[ $path ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
 		}
 
 		return static::$path_urls[ $path ];
@@ -127,17 +127,15 @@ class Config {
 	 * @return void
 	 */
 	public static function set_path( string $path ) {
-		$content_dir = str_replace( get_site_url(), '', WP_CONTENT_URL );
-
-		$plugins_content_dir_position = strpos( $path, $content_dir . '/plugins' );
-		$themes_content_dir_position  = strpos( $path, $content_dir . '/themes' );
+		$plugins_content_dir_position = strpos( $path, WP_PLUGIN_DIR );
+		$themes_content_dir_position  = strpos( $path, get_theme_root() );
 
 		if (
 			$plugins_content_dir_position === false
 			&& $themes_content_dir_position === false
 		) {
 			// Default to plugins.
-			$path = $content_dir . '/plugins/' . $path;
+			$path = WP_PLUGIN_DIR . $path;
 		} elseif ( $plugins_content_dir_position !== false ) {
 			$path = substr( $path, $plugins_content_dir_position );
 		} elseif ( $themes_content_dir_position !== false ) {
