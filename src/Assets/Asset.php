@@ -939,6 +939,8 @@ class Asset {
 			$urls[] = $relative_location;
 		}
 
+		$urls = array_unique( $urls );
+
 		// Check for all Urls added to the array.
 		foreach ( $urls as $partial_path ) {
 			$file_path = wp_normalize_path( "{$base_dir}/{$partial_path}" );
