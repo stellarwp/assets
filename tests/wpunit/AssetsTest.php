@@ -80,6 +80,20 @@ class AssetsTest extends AssetTestCase {
 	/**
 	 * @test
 	 */
+	public function it_should_locate_minified_versions_of_external_assets() {
+
+		Asset::add( 'fake3-script', 'fake3.js' )->register();
+
+		$this->assertTrue( Assets::init()->exists( 'fake3-script' ) );
+		$this->assertTrue( wp_script_is( 'fake3-script', 'registered' ) );
+		$this->assertEquals( 'fake3-script', Assets::init()->get( 'fake3-script' )->get_slug() );
+
+		$this->assert_minified_found( 'fake3', true, true, true );
+	}
+
+	/**
+	 * @test
+	 */
 	public function it_should_remove_assets() {
 		Asset::add( 'my-script', 'fake.js' )->register();
 		Asset::add( 'my-style', 'fake.css' )->register();

@@ -53,15 +53,26 @@ class ConfigTest extends AssetTestCase {
 	/**
 	 * @test
 	 */
+	public function should_set_ignore_script_debug() {
+		Config::set_ignore_script_debug( true );
+
+		$this->assertTrue( Config::should_ignore_script_debug() );
+	}
+
+	/**
+	 * @test
+	 */
 	public function should_reset() {
 		Config::set_hook_prefix( 'bork' );
 		Config::set_version( '1.1.0' );
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
 		Config::set_relative_asset_path( 'src/resources/' );
+		Config::set_ignore_script_debug( true );
 		Config::reset();
 
 		$this->assertEquals( 'src/assets/', Config::get_relative_asset_path() );
 		$this->assertEquals( '', Config::get_version() );
+		$this->assertFalse( Config::should_ignore_script_debug() );
 
 		try {
 			Config::get_hook_prefix();

@@ -30,6 +30,13 @@ class Config {
 	protected static array $path_urls = [];
 
 	/**
+	 * Determine if we should ignore SCRIPT_DEBUG when including `.min` files in the asset loading.
+	 *
+	 * @var bool
+	 */
+	protected static bool $ignore_script_debug = false;
+
+	/**
 	 * Gets the hook prefix.
 	 *
 	 * @return string
@@ -65,6 +72,15 @@ class Config {
 	}
 
 	/**
+	 * Gets wether this project shiuld ignore SCRIPT_DEBUG.
+	 *
+	 * @return bool
+	 */
+	public static function should_ignore_script_debug(): bool {
+		return static::$ignore_script_debug;
+	}
+
+	/**
 	 * Gets the root path of the project.
 	 *
 	 * @return string
@@ -95,6 +111,8 @@ class Config {
 		static::$root_path           = '';
 		static::$path_urls           = [];
 		static::$version             = '';
+
+		static::set_ignore_script_debug( false );
 	}
 
 	/**
@@ -145,6 +163,17 @@ class Config {
 		}
 
 		static::$root_path = trailingslashit( $path );
+	}
+
+	/**
+	 * Sets the ignore script debug of the project.
+	 *
+	 * @param bool $value The value to set for ignoring SCRIPT_DEBUG.
+	 *
+	 * @return void
+	 */
+	public static function set_ignore_script_debug( bool $value ) {
+		static::$ignore_script_debug = $value;
 	}
 
 	/**

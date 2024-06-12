@@ -914,7 +914,7 @@ class Asset {
 		// Strip the plugin URL and make this relative.
 		$relative_location = str_replace( $base_url . '/', '', $url );
 
-		if ( $script_debug ) {
+		if ( Config::should_ignore_script_debug() || $script_debug ) {
 			// Add the actual url after having the min file added.
 			$urls[] = $relative_location;
 		}
@@ -934,7 +934,7 @@ class Asset {
 			}
 		}
 
-		if ( ! $script_debug ) {
+		if ( Config::should_ignore_script_debug() || ! $script_debug ) {
 			// Add the actual url after having the min file added.
 			$urls[] = $relative_location;
 		}
