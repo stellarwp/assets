@@ -378,6 +378,10 @@ class Asset {
 			}
 		}
 
+		if ( ! file_exists( $root_path . $resource_path . $resource ) ) {
+			return false;
+		}
+
 		$url = $plugin_base_url . $resource_path . $resource;
 
 		/**
@@ -388,6 +392,104 @@ class Asset {
 		 * @param Asset  $asset The Asset object.
 		 */
 		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_url", $url, $this->get_slug(), $this );
+	}
+
+	protected function build_min_asset_url( $original_url ): string {
+		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
+
+		if ( $original_url && $script_debug ) {
+			return $original_url;
+		}
+
+		$resource                = $this->get_file();
+		$root_path               = $this->get_root_path();
+		$relative_path_to_assets = $this->is_vendor() ? '' : null;
+
+		if ( $root_path === null ) {
+			$root_path = Config::get_path();
+		}
+
+		$plugin_base_url = Config::get_url( $root_path );
+		$hook_prefix     = Config::get_hook_prefix();
+		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
+		$resource_path   = $relative_path_to_assets;
+		$type            = $this->get_type();
+
+		if ( ! $extension && $type ) {
+			$extension = $type;
+		}
+
+		$should_prefix = $this->should_use_asset_directory_prefix;
+
+		if ( is_null( $resource_path ) ) {
+			$resources_path = $this->get_path();
+			$resource_path  = $resources_path;
+
+			if ( $should_prefix ) {
+				$prefix_dir = '';
+
+				switch ( $extension ) {
+					case 'css':
+						$prefix_dir     = 'css';
+						$resources_path = preg_replace( '#/css/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}css/";
+						break;
+					case 'js':
+						$prefix_dir     = 'js';
+						$resources_path = preg_replace( '#/js/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}js/";
+						break;
+					case 'scss':
+						$prefix_dir     = 'scss';
+						$resources_path = preg_replace( '#/scss/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}scss/";
+						break;
+					case 'pcss':
+						$prefix_dir     = 'postcss';
+						$resources_path = preg_replace( '#/postcss/$#', '/', $resources_path );
+						$resource_path  = "{$resources_path}postcss/";
+						break;
+					default:
+						$resource_path = $resources_path;
+						break;
+				}
+
+				if ( $prefix_dir && strpos( $resource, $prefix_dir . '/' ) === 0 ) {
+					$resource = substr( $resource, strlen( $prefix_dir . '/' ) );
+				}
+			}
+		}
+
+		$relative_asset_path = $this->get_path();
+		$min_asset_path      = $this->get_min_path();
+
+		if ( $min_asset_path !== $relative_asset_path ) {
+			$minified_file_path = preg_replace( '#(.*)(' . preg_quote( $relative_asset_path, '#' ) . ')(.*[a-zA-Z0-0\-\_\.]+).(js|css)#', '$1' . $min_asset_path . '$3.min.$4', $resource_path . $resource );
+		} else {
+			$minified_file_path = preg_replace( '#(.*).(js|css)#', '$1.min.$2', $resource_path . $resource );
+		}
+
+		$minified_abs_file_path = $root_path . $minified_file_path;
+
+		codecept_debug( $minified_abs_file_path );
+		codecept_debug( $minified_file_path );
+		codecept_debug( $plugin_base_url );
+		codecept_debug( file_exists( $minified_abs_file_path ));
+
+		if ( ! file_exists( $minified_abs_file_path ) ) {
+			return $original_url;
+		}
+
+		$url = $plugin_base_url . $minified_file_path;
+
+		/**
+		 * Filters the min asset URL
+		 *
+		 * @param string $url   Asset URL.
+		 * @param string $slug  Asset slug.
+		 * @param Asset  $asset The Asset object.
+		 */
+		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/min_resource_url", $url, $this->get_slug(), $this );
 	}
 
 	/**
@@ -681,14 +783,15 @@ class Asset {
 		}
 
 		if ( $this->min_url === null ) {
-			$this->min_url = $this->maybe_get_min_file( $this->url );
+			$this->min_url = $this->build_min_asset_url( $this->url );
 		}
 
 		if ( $use_min_if_available && $this->min_url ) {
 			return $this->min_url;
 		}
 
-		return $this->url;
+		// If unminified is not available return the minified.
+		return $this->url ? $this->url : $this->min_url;
 	}
 
 	/**
