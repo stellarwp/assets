@@ -855,7 +855,7 @@ class Asset {
 	 * @return array
 	 */
 	protected function get_bases(): array {
-		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
+		$key = Utils::get_runtime_cache_key();
 
 		if ( empty( static::$bases[ $key ] ) ) {
 			static::$bases[ $key ] = [

@@ -53,4 +53,29 @@ class Utils {
 		// For other types (ints, floats etc) cast to bool
 		return (bool) $var;
 	}
+
+	/**
+	 * Get the runtime cache key.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @return string
+	 */
+	public static function get_runtime_cache_key(): string {
+		return md5(
+			serialize(
+				[
+					WPMU_PLUGIN_DIR,
+					WPMU_PLUGIN_URL,
+					WP_PLUGIN_DIR,
+					WP_PLUGIN_URL,
+					WP_CONTENT_DIR,
+					WP_CONTENT_URL,
+					plugins_url(),
+					get_stylesheet_directory(),
+					get_stylesheet_directory_uri(),
+				]
+			)
+		);
+	}
 }

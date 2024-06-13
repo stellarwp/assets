@@ -70,12 +70,10 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
+		$key = Utils::get_runtime_cache_key();
 		if ( empty( static::$path_urls[ $key ] ) ) {
 			static::$path_urls[ $key ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
 		}
-
-		codecept_debug( static::$path_urls[ $key ] );
 
 		return static::$path_urls[ $key ];
 	}
