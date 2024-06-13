@@ -500,13 +500,12 @@ SCRIPT,
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
 
 		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path  ) {
-			// If we are testing outside of the actual plugin directory, we should expect a path rather than a URL.
-			// In installations where this set up is the actual, the URL will be adjusted.
-
+			// If we are testing outside of the actual plugin directory, the file_exists will always fail.
+			// In installations where this set up is the actual, the file should exist.
 			// In this case it will always fail to locate mins.
 			$urls = array_map(
 				static function ( $url ) {
-					return str_replace( [ plugins_url( '/assets/' ), '.min' ], [ WP_PLUGIN_DIR . '/assets/' , '' ], $url );
+					return str_replace( '.min', '', $url );
 				},
 				$urls
 			);
