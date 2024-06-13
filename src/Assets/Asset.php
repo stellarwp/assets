@@ -390,7 +390,17 @@ class Asset {
 		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_url", $url, $this->get_slug(), $this );
 	}
 
+	/**
+	 * Builds the minified asset URL.
+	 *
+	 * @since 1.2.4
+	 *
+	 * @param string $original_url The original URL.
+	 *
+	 * @return string
+	 */
 	protected function build_min_asset_url( $original_url ): string {
+		// debt: This is too much of a copy paste from build_asset_url. We should refactor this.
 		$resource                = $this->get_file();
 		$root_path               = $this->get_root_path();
 		$relative_path_to_assets = $this->is_vendor() ? '' : null;
@@ -938,11 +948,14 @@ class Asset {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @deprecated 1.2.4 Use build_min_asset_url() instead.
+	 *
 	 * @param string $url The absolute URL to the un-minified file.
 	 *
 	 * @return string|false The url to the minified version or false, if file not found.
 	 */
 	public function maybe_get_min_file( $url ) {
+		_deprecated_function( __METHOD__, '1.2.4', __CLASS__ . '::build_min_asset_url()' );
 		$bases = Utils::get_bases();
 
 		$urls = [];

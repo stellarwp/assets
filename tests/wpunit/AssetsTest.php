@@ -149,6 +149,36 @@ class AssetsTest extends AssetTestCase {
 					'WP_PLUGIN_URL'  => 'http://wordpress.test/plugins',
 				],
 			],
+			[
+				// More Complex.
+				'**more-complex**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/wp-content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/wp-content',
+					'WP_PLUGIN_DIR'  => '/var/www/html/addons',
+					'WP_PLUGIN_URL'  => null,
+				],
+			],
+			[
+				// More Complex.
+				'**more-complex-2**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/content',
+					'WP_CONTENT_URL' => null,
+					'WP_PLUGIN_DIR'  => null,
+					'WP_PLUGIN_URL'  => null,
+				],
+			],
+			[
+				// More More Complex.
+				'**more-more-complex**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/content',
+					'WP_CONTENT_URL' => null,
+					'WP_PLUGIN_DIR'  => '/var/www/html/addons',
+					'WP_PLUGIN_URL'  => null,
+				],
+			],
 		];
 
 		foreach ( $data as $d ) {
