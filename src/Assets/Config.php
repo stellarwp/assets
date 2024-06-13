@@ -71,6 +71,11 @@ class Config {
 	 */
 	public static function get_url( $path ): string {
 		$key = Utils::get_runtime_cache_key();
+
+		if ( empty( static::$path_urls[ $path ] ) ) {
+			static::$path_urls[ $path ] = [];
+		}
+
 		if ( empty( static::$path_urls[ $path ][ $key ] ) ) {
 			$bases = Utils::get_bases();
 			static::$path_urls[ $path ][ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
