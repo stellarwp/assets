@@ -679,7 +679,6 @@ class Asset {
 				$this->url = $this->build_asset_url();
 			}
 		}
-
 		if ( $this->min_url === null ) {
 			$this->min_url = $this->maybe_get_min_file( $this->url );
 		}
