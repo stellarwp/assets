@@ -378,10 +378,6 @@ class Asset {
 			}
 		}
 
-		if ( ! file_exists( $root_path . $resource_path . $resource ) ) {
-			return false;
-		}
-
 		$url = $plugin_base_url . $resource_path . $resource;
 
 		/**
@@ -395,12 +391,6 @@ class Asset {
 	}
 
 	protected function build_min_asset_url( $original_url ): string {
-		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
-
-		if ( $original_url && $script_debug ) {
-			return $original_url;
-		}
-
 		$resource                = $this->get_file();
 		$root_path               = $this->get_root_path();
 		$relative_path_to_assets = $this->is_vendor() ? '' : null;
@@ -469,12 +459,13 @@ class Asset {
 			$minified_file_path = preg_replace( '#(.*).(js|css)#', '$1.min.$2', $resource_path . $resource );
 		}
 
-		$minified_abs_file_path = $root_path . $minified_file_path;
+		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
-		codecept_debug( $minified_abs_file_path );
-		codecept_debug( $minified_file_path );
-		codecept_debug( $plugin_base_url );
-		codecept_debug( file_exists( $minified_abs_file_path ));
+		if ( $script_debug && file_exists( $root_path . $resource_path . $resource ) ) {
+			return $original_url;
+		}
+
+		$minified_abs_file_path = $root_path . $minified_file_path;
 
 		if ( ! file_exists( $minified_abs_file_path ) ) {
 			return $original_url;
@@ -791,7 +782,7 @@ class Asset {
 		}
 
 		// If unminified is not available return the minified.
-		return $this->url ? $this->url : $this->min_url;
+		return $this->url;
 	}
 
 	/**
