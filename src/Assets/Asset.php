@@ -791,7 +791,6 @@ class Asset {
 			return $this->min_url;
 		}
 
-		// If unminified is not available return the minified.
 		return $this->url;
 	}
 
