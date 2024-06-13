@@ -70,18 +70,14 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		$key = Utils::get_runtime_cache_key();
+		$key = Utils::get_runtime_cache_key( [ $path ] );
 
-		if ( empty( static::$path_urls[ $path ] ) ) {
-			static::$path_urls[ $path ] = [];
-		}
-
-		if ( empty( static::$path_urls[ $path ][ $key ] ) ) {
+		if ( empty( static::$path_urls[ $key ] ) ) {
 			$bases = Utils::get_bases();
-			static::$path_urls[ $path ][ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
+			static::$path_urls[ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
 		}
 
-		return static::$path_urls[ $path ][ $key ];
+		return static::$path_urls[ $key ];
 	}
 
 	/**
