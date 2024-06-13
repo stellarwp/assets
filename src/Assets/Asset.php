@@ -6,6 +6,15 @@ use InvalidArgumentException;
 
 class Asset {
 	/**
+	 * Stores all the Bases for the request.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @var array
+	 */
+	protected static array $bases = [];
+
+	/**
 	 * @var array The asset action.
 	 */
 	protected array $action = [];
@@ -679,6 +688,7 @@ class Asset {
 				$this->url = $this->build_asset_url();
 			}
 		}
+
 		if ( $this->min_url === null ) {
 			$this->min_url = $this->maybe_get_min_file( $this->url );
 		}
@@ -838,6 +848,44 @@ class Asset {
 	}
 
 	/**
+	 * Gets the asset bases for the request, both directory and URL.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @return array
+	 */
+	protected function get_bases(): array {
+		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
+
+		if ( empty( static::$bases[ $key ] ) ) {
+			static::$bases[ $key ] = [
+				'wpmu_plugin' => [
+					'base_dir' => wp_normalize_path( WPMU_PLUGIN_DIR ),
+					'base_url' => set_url_scheme( WPMU_PLUGIN_URL ),
+				],
+				'wp_plugin'   => [
+					'base_dir' => wp_normalize_path( WP_PLUGIN_DIR ),
+					'base_url' => set_url_scheme( WP_PLUGIN_URL ),
+				],
+				'wp_content'  => [
+					'base_dir' => wp_normalize_path( WP_CONTENT_DIR ),
+					'base_url' => set_url_scheme( WP_CONTENT_URL ),
+				],
+				'plugins'     => [
+					'base_dir' => wp_normalize_path( WP_PLUGIN_DIR ),
+					'base_url' => plugins_url(),
+				],
+				'stylesheet'  => [
+					'base_dir' => wp_normalize_path( get_stylesheet_directory() ),
+					'base_url' => get_stylesheet_directory_uri(),
+				],
+			];
+		}
+
+		return static::$bases[ $key ];
+	}
+
+	/**
 	 * Returns the path to a minified version of a js or css file, if it exists.
 	 * If the file does not exist, returns false.
 	 *
@@ -848,61 +896,34 @@ class Asset {
 	 * @return string|false The url to the minified version or false, if file not found.
 	 */
 	public function maybe_get_min_file( $url ) {
-		static $wpmu_plugin_url;
-		static $wp_plugin_url;
-		static $wp_content_url;
-		static $plugins_url;
-		static $base_dirs;
-		static $stylesheet_url;
-		static $stylesheet_dir;
+		$bases = $this->get_bases();
 
 		$urls = [];
-		if ( ! isset( $wpmu_plugin_url ) ) {
-			$wpmu_plugin_url = set_url_scheme( WPMU_PLUGIN_URL );
-		}
 
-		if ( ! isset( $wp_plugin_url ) ) {
-			$wp_plugin_url = set_url_scheme( WP_PLUGIN_URL );
-		}
-
-		if ( ! isset( $wp_content_url ) ) {
-			$wp_content_url = set_url_scheme( WP_CONTENT_URL );
-		}
-
-		if ( ! isset( $plugins_url ) ) {
-			$plugins_url = plugins_url();
-		}
-
-		if ( ! isset( $stylesheet_url ) ) {
-			$stylesheet_url = get_stylesheet_directory_uri();
-			$stylesheet_dir = get_stylesheet_directory();
-		}
-
-		if ( ! isset( $base_dirs ) ) {
-			$base_dirs[ WPMU_PLUGIN_DIR ] = wp_normalize_path( WPMU_PLUGIN_DIR );
-			$base_dirs[ WP_PLUGIN_DIR ]   = wp_normalize_path( WP_PLUGIN_DIR );
-			$base_dirs[ WP_CONTENT_DIR ]  = wp_normalize_path( WP_CONTENT_DIR );
-			$base_dirs[ $stylesheet_dir ] = wp_normalize_path( $stylesheet_dir );
-		}
+		$wpmu_plugin_url = $bases['wpmu_plugin']['base_url'];
+		$wp_plugin_url   = $bases['wp_plugin']['base_url'];
+		$wp_content_url  = $bases['wp_content']['base_url'];
+		$plugins_url     = $bases['plugins']['base_url'];
+		$stylesheet_url  = $bases['stylesheet']['base_url'];
 
 		if ( 0 === strpos( $url, $wpmu_plugin_url ) ) {
 			// URL inside WPMU plugin dir.
-			$base_dir = $base_dirs[ WPMU_PLUGIN_DIR ];
-			$base_url = $wpmu_plugin_url;
+			$base_dir = $bases['wpmu_plugin']['base_dir'];
+			$base_url = $bases['wpmu_plugin']['base_url'];
 		} elseif ( 0 === strpos( $url, $wp_plugin_url ) ) {
 			// URL inside WP plugin dir.
-			$base_dir = $base_dirs[ WP_PLUGIN_DIR ];
-			$base_url = $wp_plugin_url;
+			$base_dir = $bases['wp_plugin']['base_dir'];
+			$base_url = $bases['wp_plugin']['base_url'];
 		} elseif ( 0 === strpos( $url, $wp_content_url ) ) {
 			// URL inside WP content dir.
-			$base_dir = $base_dirs[ WP_CONTENT_DIR ];
-			$base_url = $wp_content_url;
+			$base_dir = $bases['wp_content']['base_dir'];
+			$base_url = $bases['wp_content']['base_url'];
 		} elseif ( 0 === strpos( $url, $plugins_url ) ) {
-			$base_dir = $base_dirs[ WP_PLUGIN_DIR ];
-			$base_url = $plugins_url;
+			$base_dir = $bases['plugins']['base_dir'];
+			$base_url = $bases['plugins']['base_url'];
 		} elseif ( 0 === strpos( $url, $stylesheet_url ) ) {
-			$base_dir = $base_dirs[ $stylesheet_dir ];
-			$base_url = $stylesheet_url;
+			$base_dir = $bases['stylesheet']['base_dir'];
+			$base_url = $bases['stylesheet']['base_url'];
 		} else {
 			// Resource needs to be inside wp-content or a plugins dir.
 			return false;

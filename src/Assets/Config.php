@@ -70,11 +70,14 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		if ( empty( static::$path_urls[ $path ] ) ) {
-			static::$path_urls[ $path ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
+		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
+		if ( empty( static::$path_urls[ $key ] ) ) {
+			static::$path_urls[ $key ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
 		}
 
-		return static::$path_urls[ $path ];
+		codecept_debug( static::$path_urls[ $key ] );
+
+		return static::$path_urls[ $key ];
 	}
 
 	/**

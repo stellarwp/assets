@@ -81,6 +81,9 @@ class AssetsTest extends AssetTestCase {
 	 * @test
 	 */
 	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff() {
+		Assets::init()->remove( 'fake1-script' );
+		Assets::init()->remove( 'fake2-script' );
+		Assets::init()->remove( 'fake3-script' );
 
 		$this->set_const_value( 'WP_CONTENT_DIR', '/var/www/html/wp-content' );
 		$this->set_const_value( 'WP_CONTENT_URL', 'http://wordpress.test/foo' );
@@ -89,6 +92,7 @@ class AssetsTest extends AssetTestCase {
 		$this->set_const_value( 'SCRIPT_DEBUG', false );
 
 		Config::reset();
+
 		Config::set_hook_prefix( 'bork' );
 		Config::set_version( '1.1.0' );
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
@@ -99,16 +103,16 @@ class AssetsTest extends AssetTestCase {
 		Asset::add( 'fake3-script', 'fake3.js' )->register();
 
 		$this->assertEquals(
-			Assets::init()->get( 'fake1-script' )->get_url(),
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake1.min.js'
+			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake1.min.js',
+			Assets::init()->get( 'fake1-script' )->get_url()
 		);
 		$this->assertEquals(
-			Assets::init()->get( 'fake2-script' )->get_url(),
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake2.js'
+			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake2.js',
+			Assets::init()->get( 'fake2-script' )->get_url()
 		);
 		$this->assertEquals(
-			Assets::init()->get( 'fake3-script' )->get_url(),
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake3.min.js'
+			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake3.min.js',
+			Assets::init()->get( 'fake3-script' )->get_url()
 		);
 	}
 
