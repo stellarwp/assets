@@ -674,11 +674,11 @@ class Assets {
 	/**
 	 * Register the Assets on the correct hooks.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param array|Asset|null $assets Array of asset objects, single asset object, or null.
 	 *
 	 * @return void
-	 * @since 1.0.0
-	 *
 	 */
 	public function register_in_wp( $assets = null ) {
 		if ( ! (
@@ -775,11 +775,11 @@ class Assets {
 	/**
 	 * Removes an Asset from been registered and enqueue.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $slug Slug of the Asset.
 	 *
 	 * @return bool
-	 * @since 1.0.0
-	 *
 	 */
 	public function remove( $slug ) {
 		if ( ! $this->exists( $slug ) ) {
@@ -806,13 +806,13 @@ class Assets {
 	 *
 	 * The method will force the scripts and styles to print overriding their registration and conditional.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string|array $group Which group(s) should be enqueued.
 	 * @param bool $echo Whether to print the group(s) tag(s) to the page or not; default to `true` to
 	 *                            print the HTML `script` (JS) and `link` (CSS) tags to the page.
 	 *
 	 * @return string The `script` and `link` HTML tags produced for the group(s).
-	 * @since 1.0.0
-	 *
 	 */
 	public function print_group( $group, $echo = true ) {
 		$all_assets = $this->get();
