@@ -79,41 +79,81 @@ class AssetsTest extends AssetTestCase {
 
 	/**
 	 * @test
+	 *
+	 * @dataProvider constantProvider
 	 */
-	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff() {
-		Assets::init()->remove( 'fake1-script' );
-		Assets::init()->remove( 'fake2-script' );
-		Assets::init()->remove( 'fake3-script' );
+	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff( $id, $constants ) {
+		$slugs = [
+			'fake1' => [ true, false ],
+			'fake2' => [ false, false ],
+			'fake3' => [ true, true ]
+		];
 
-		$this->set_const_value( 'WP_CONTENT_DIR', '/var/www/html/wp-content' );
-		$this->set_const_value( 'WP_CONTENT_URL', 'http://wordpress.test/foo' );
-		$this->set_const_value( 'WP_PLUGIN_DIR', '/var/www/html/wp-content/plugins' );
-		$this->set_const_value( 'WP_PLUGIN_URL', 'http://wordpress.test/foo/plugins' );
-		$this->set_const_value( 'SCRIPT_DEBUG', false );
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Assets::init()->remove( $slug . '-script' );
+			Assets::init()->remove( $slug . '-style' );
+		}
+
+		foreach ( $constants as $constant => $value ) {
+			$this->set_const_value( $constant, $value );
+			$this->assertEquals( $value, constant( $constant ) );
+		}
 
 		Config::reset();
 
 		Config::set_hook_prefix( 'bork' );
 		Config::set_version( '1.1.0' );
-		Config::set_path( dirname( dirname( __DIR__ ) ) );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
 		Config::set_relative_asset_path( 'tests/_data/' );
 
-		Asset::add( 'fake1-script', 'fake1.js' )->register();
-		Asset::add( 'fake2-script', 'fake2.js' )->register();
-		Asset::add( 'fake3-script', 'fake3.js' )->register();
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Asset::add( $slug . '-script', $slug . '.js' );
+			Asset::add( $slug . '-style', $slug . '.css' );
+		}
 
-		$this->assertEquals(
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake1.min.js',
-			Assets::init()->get( 'fake1-script' )->get_url()
-		);
-		$this->assertEquals(
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake2.js',
-			Assets::init()->get( 'fake2-script' )->get_url()
-		);
-		$this->assertEquals(
-			'http://wordpress.test/foo/plugins/assets/tests/_data/js/fake3.min.js',
-			Assets::init()->get( 'fake3-script' )->get_url()
-		);
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id );
+			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id );
+		}
+	}
+
+	public function constantProvider() {
+		$data = [
+			[
+				// Normal.
+				'**normal**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/wp-content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/wp-content',
+					'WP_PLUGIN_DIR'  => '/var/www/html/wp-content/plugins',
+					'WP_PLUGIN_URL'  => 'http://wordpress.test/wp-content/plugins',
+				],
+			],
+			[
+				// Small complexity.
+				'**small-complex**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/wp-content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/foo',
+					'WP_PLUGIN_DIR'  => '/var/www/html/wp-content/plugins',
+					'WP_PLUGIN_URL'  => 'http://wordpress.test/foo/plugins',
+				],
+			],
+			[
+				// Complex.
+				'**complex**',
+				[
+					'WP_CONTENT_DIR' => '/var/www/html/content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/content',
+					'WP_PLUGIN_DIR'  => '/var/www/html/plugins',
+					'WP_PLUGIN_URL'  => 'http://wordpress.test/plugins',
+				],
+			],
+		];
+
+		foreach ( $data as $d ) {
+			yield $d;
+		}
 	}
 
 	/**
@@ -435,10 +475,10 @@ SCRIPT,
 	 * @param bool   $has_min
 	 * @param bool   $has_only_min
 	 */
-	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false ) {
+	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '' ) {
 		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
 
-		$url = get_site_url() . '/wp-content/plugins/assets/tests/_data/' . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix;
+		$url = plugins_url( '/assets/tests/_data/' . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
 
 		$urls = [];
 
@@ -457,9 +497,24 @@ SCRIPT,
 			$urls[] = $url . ( $is_js ? '.js' : '.css' );
 		}
 
+		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
+
+		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path  ) {
+			// If we are testing outside of the actual plugin directory, the file_exists will always fail.
+			// In installations where this set up is the actual, the file should exist.
+			// In this case it will always fail to locate mins.
+			$urls = array_map(
+				static function ( $url ) {
+					return str_replace( '.min', '', $url );
+				},
+				$urls
+			);
+		}
+
 		$this->assertEquals(
 			$urls['0'],
-			$asset->get_url()
+			$asset->get_url(),
+			$id
 		);
 
 		$this->set_const_value( 'SCRIPT_DEBUG', true );
@@ -474,7 +529,8 @@ SCRIPT,
 
 		$this->assertEquals(
 			$urls['1'],
-			$asset->get_url()
+			$asset->get_url(),
+			$id
 		);
 	}
 

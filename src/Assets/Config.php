@@ -70,12 +70,12 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
-		if ( empty( static::$path_urls[ $key ] ) ) {
-			static::$path_urls[ $key ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
-		}
+		$key = Utils::get_runtime_cache_key( [ $path ] );
 
-		codecept_debug( static::$path_urls[ $key ] );
+		if ( empty( static::$path_urls[ $key ] ) ) {
+			$bases = Utils::get_bases();
+			static::$path_urls[ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
+		}
 
 		return static::$path_urls[ $key ];
 	}

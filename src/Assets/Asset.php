@@ -6,15 +6,6 @@ use InvalidArgumentException;
 
 class Asset {
 	/**
-	 * Stores all the Bases for the request.
-	 *
-	 * @since 1.2.3
-	 *
-	 * @var array
-	 */
-	protected static array $bases = [];
-
-	/**
 	 * @var array The asset action.
 	 */
 	protected array $action = [];
@@ -848,44 +839,6 @@ class Asset {
 	}
 
 	/**
-	 * Gets the asset bases for the request, both directory and URL.
-	 *
-	 * @since 1.2.3
-	 *
-	 * @return array
-	 */
-	protected function get_bases(): array {
-		$key = md5( serialize( [ WP_CONTENT_DIR, WP_CONTENT_URL ] ) );
-
-		if ( empty( static::$bases[ $key ] ) ) {
-			static::$bases[ $key ] = [
-				'wpmu_plugin' => [
-					'base_dir' => wp_normalize_path( WPMU_PLUGIN_DIR ),
-					'base_url' => set_url_scheme( WPMU_PLUGIN_URL ),
-				],
-				'wp_plugin'   => [
-					'base_dir' => wp_normalize_path( WP_PLUGIN_DIR ),
-					'base_url' => set_url_scheme( WP_PLUGIN_URL ),
-				],
-				'wp_content'  => [
-					'base_dir' => wp_normalize_path( WP_CONTENT_DIR ),
-					'base_url' => set_url_scheme( WP_CONTENT_URL ),
-				],
-				'plugins'     => [
-					'base_dir' => wp_normalize_path( WP_PLUGIN_DIR ),
-					'base_url' => plugins_url(),
-				],
-				'stylesheet'  => [
-					'base_dir' => wp_normalize_path( get_stylesheet_directory() ),
-					'base_url' => get_stylesheet_directory_uri(),
-				],
-			];
-		}
-
-		return static::$bases[ $key ];
-	}
-
-	/**
 	 * Returns the path to a minified version of a js or css file, if it exists.
 	 * If the file does not exist, returns false.
 	 *
@@ -896,7 +849,7 @@ class Asset {
 	 * @return string|false The url to the minified version or false, if file not found.
 	 */
 	public function maybe_get_min_file( $url ) {
-		$bases = $this->get_bases();
+		$bases = Utils::get_bases();
 
 		$urls = [];
 
