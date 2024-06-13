@@ -71,11 +71,12 @@ class Config {
 	 */
 	public static function get_url( $path ): string {
 		$key = Utils::get_runtime_cache_key();
-		if ( empty( static::$path_urls[ $key ] ) ) {
-			static::$path_urls[ $key ] = trailingslashit( str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path ) );
+		if ( empty( static::$path_urls[ $path ][ $key ] ) ) {
+			$bases = Utils::get_bases();
+			static::$path_urls[ $path ][ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
 		}
 
-		return static::$path_urls[ $key ];
+		return static::$path_urls[ $path ][ $key ];
 	}
 
 	/**
