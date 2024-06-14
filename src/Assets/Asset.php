@@ -471,11 +471,11 @@ class Asset {
 
 		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
-		if ( $script_debug && file_exists( $root_path . $resource_path . $resource ) ) {
+		if ( $script_debug && file_exists( wp_normalize_path( $root_path . $resource_path . $resource ) ) ) {
 			return $original_url;
 		}
 
-		$minified_abs_file_path = $root_path . $minified_file_path;
+		$minified_abs_file_path = wp_normalize_path( $root_path . $minified_file_path );
 
 		if ( ! file_exists( $minified_abs_file_path ) ) {
 			return $original_url;
