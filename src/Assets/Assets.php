@@ -459,16 +459,18 @@ class Assets {
 	/**
 	 * Filters the Script tags to attach type=module based on the rules we set in our Asset class.
 	 *
-	 * @param string $tag Tag we are filtering.
+	 * @since 1.0.0
+	 * @since 1.2.6
+	 *
+	 * @param string $tag    Tag we are filtering.
 	 * @param string $handle Which is the ID/Handle of the tag we are about to print.
 	 *
 	 * @return string Script tag with the type=module
-	 * @since 1.0.0
-	 *
 	 */
 	public function filter_modify_to_module( $tag, $handle ) {
-		// Only filter for own own filters.
-		if ( ! $asset = $this->get( $handle ) ) {
+		$asset = $this->get( $handle );
+		// Only filter for our own filters.
+		if ( ! $asset ) {
 			return $tag;
 		}
 
@@ -482,16 +484,15 @@ class Assets {
 			return $tag;
 		}
 
-		// These themes already have the `type='text/javascript'` added by WordPress core.
-		if ( ! current_theme_supports( 'html5', 'script' ) ) {
-			$replacement = 'type="module"';
-
-			return str_replace( "type='text/javascript'", $replacement, $tag );
+		// Remove the type attribute if it exists.
+		preg_match( "/ *type=['\"]{0,1}[^'\"]+['\"]{0,1}/i", $tag, $matches );
+		if ( ! empty( $matches ) ) {
+			$tag = str_replace( $matches[0], '', $tag );
 		}
 
 		$replacement = '<script type="module" ';
 
-		return str_replace( '<script ', $replacement, $tag );
+		return str_replace( '<script', $replacement, $tag );
 	}
 
 	/**
