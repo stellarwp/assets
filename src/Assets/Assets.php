@@ -460,7 +460,7 @@ class Assets {
 	 * Filters the Script tags to attach type=module based on the rules we set in our Asset class.
 	 *
 	 * @since 1.0.0
-	 * @since TBD
+	 * @since 1.2.6
 	 *
 	 * @param string $tag    Tag we are filtering.
 	 * @param string $handle Which is the ID/Handle of the tag we are about to print.
