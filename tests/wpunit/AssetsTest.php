@@ -179,6 +179,28 @@ class AssetsTest extends AssetTestCase {
 					'WP_PLUGIN_URL'  => null,
 				],
 			],
+			[
+				// Windows
+				'**windows-simple**',
+				[
+					'ABSPATH'        => 'C:\\xampp\\htdocs\\wordpress',
+					'WP_CONTENT_DIR' => 'C:\\xampp\\htdocs\\wordpress\\wp-content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/wp-content',
+					'WP_PLUGIN_DIR'  => 'C:\\xampp\\htdocs\\wordpress\\wp-content\\plugins',
+					'WP_PLUGIN_URL'  => 'http://wordpress.test/wp-content/plugins',
+				],
+			],
+			[
+				// Windows
+				'**windows-complex**',
+				[
+					'ABSPATH'        => 'C:\\xampp\\htdocs\\wordpress',
+					'WP_CONTENT_DIR' => 'C:\\xampp\\htdocs\\content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/content',
+					'WP_PLUGIN_DIR'  => 'C:\\xampp\\htdocs\\addons',
+					'WP_PLUGIN_URL'  => 'http://wordpress.test/wp-content/addons',
+				],
+			],
 		];
 
 		foreach ( $data as $d ) {
@@ -529,7 +551,7 @@ SCRIPT,
 
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
 
-		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path  ) {
+		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 ) {
 			// If we are testing outside of the actual plugin directory, the file_exists will always fail.
 			// In installations where this set up is the actual, the file should exist.
 			// In this case it will always fail to locate mins.
