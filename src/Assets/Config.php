@@ -70,7 +70,8 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		$key = Utils::get_runtime_cache_key( [ $path ] );
+		$path = wp_normalize_path( $path );
+		$key  = Utils::get_runtime_cache_key( [ $path ] );
 
 		if ( empty( static::$path_urls[ $key ] ) ) {
 			$bases = Utils::get_bases();
