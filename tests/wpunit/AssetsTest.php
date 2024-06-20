@@ -32,6 +32,9 @@ class AssetsTest extends AssetTestCase {
 	 */
 	public function unset_uopz_redefines() {
 		if ( function_exists( 'uopz_redefine' ) ) {
+			// Restore in reverse order.
+			self::$uopz_redefines = array_reverse( self::$uopz_redefines );
+
 			foreach ( self::$uopz_redefines as $restore_callback ) {
 				$restore_callback();
 			}
