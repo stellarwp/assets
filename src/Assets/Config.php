@@ -134,7 +134,7 @@ class Config {
 		$plugin_dir = WP_PLUGIN_DIR;
 
 		if ( DIRECTORY_SEPARATOR !== '/' ) {
-			$plugin_dir = str_replace( '/', DIRECTORY_SEPARATOR, $plugin_dir );
+			$plugin_dir = str_replace( DIRECTORY_SEPARATOR, '/', $plugin_dir );
 		}
 
 		$plugins_content_dir_position = strpos( $path, $plugin_dir );
