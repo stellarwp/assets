@@ -267,4 +267,21 @@ class EnqueueJSCest {
 		Assert::assertContains( 'var animal', $contents );
 		Assert::assertContains( 'var color', $contents );
 	}
+
+	public function it_should_enqueue_and_use_asset_file( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'fake4-js', 'fake4.js' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->register();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake4.js?ver=12345' ] );
+	}
 }

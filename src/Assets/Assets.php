@@ -719,15 +719,7 @@ class Assets {
 					continue;
 				}
 
-				$dependencies = $asset->get_dependencies();
-
-				// If the asset is a callable, we call the function,
-				// passing it the asset and expecting back an array of dependencies.
-				if ( is_callable( $dependencies ) ) {
-					$dependencies = $dependencies( $asset );
-				}
-
-				wp_register_script( $asset->get_slug(), $asset->get_url(), $dependencies, $asset->get_version(), $asset->is_in_footer() );
+				wp_register_script( $asset->get_slug(), $asset->get_url(), $asset->get_dependencies(), $asset->get_version(), $asset->is_in_footer() );
 
 				// Register that this asset is actually registered on the WP methods.
 				// @phpstan-ignore-next-line
