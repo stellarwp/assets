@@ -66,6 +66,7 @@ jobs:
           ${SLIC_BIN} debug on
           ${SLIC_BIN} info
           ${SLIC_BIN} config
+          ${SLIC_BIN} wp core update --version=6.4 --force
       - name: Set up StellarWP Assets
         run: |
           ${SLIC_BIN} use assets

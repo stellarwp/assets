@@ -31,6 +31,7 @@ A library for managing asset registration and enqueuing in WordPress.
   * [Conditional enqueuing](#conditional-enqueuing)
   * [Firing a callback after enqueuing occurs](#firing-a-callback-after-enqueuing-occurs)
   * [Output JS data](#output-js-data)
+	  * [Using a callable to provide localization data](#using-a-callable-to-provide-localization-data)
   * [Output content before/after a JS asset is output](#output-content-beforeafter-a-js-asset-is-output)
   * [Style meta data](#style-meta-data)
 
@@ -148,6 +149,18 @@ Asset::add( 'script-with-dependencies', 'js/something.js' )
 	->set_dependencies( 'jquery', 'jquery-ui', 'some-other-thing' )
 	->register();
 ```
+
+You can also specify dependencies as a callable that returns an array of dependencies, like so:
+
+```php
+Asset::add( 'script-with-dependencies', 'js/something.js' )
+	->set_dependencies( function() {
+		return [ 'jquery', 'jquery-ui', 'some-other-thing' ];
+	} )
+	->register();
+```
+
+Note that the callable will be executed when the asset is **_enqueued_**.
 
 #### Auto-enqueuing on an action
 To specify when to enqueue the asset, you can indicate it like so:
@@ -426,6 +439,101 @@ Asset::add( 'my-asset', 'css/some-asset.css' )
 	)
 	->register();
 ```
+
+If you specify an object name using dot notation, then the object will be printed on the page "merging" it with other, pre-existing objects.
+In the following example, the `boomshakalaka.project` object will be created and then the `firstScriptData` and `secondScriptData` objects will be added to it:
+
+```php
+use Boomshakalaka\StellarWP\Assets\Asset;
+
+Asset::add( 'my-first-script', 'js/first-script.js' )
+	->add_localize_script(
+		'boomshakalaka.project.firstScriptData',
+		[
+			'animal' => 'cat',
+			'color'  => 'orange',
+		]
+	)
+	->register();
+
+Asset::add( 'my-second-script', 'js/second-script.js' )
+	->add_localize_script(
+		'boomshakalaka.project.secondScriptData',
+		[
+			'animal' => 'dog',
+			'color'  => 'green',
+		]
+	)
+	->register();
+
+Asset::add( 'my-second-script-mod', 'js/second-script-mod.js' )
+	->add_localize_script(
+		'boomshakalaka.project.secondScriptData',
+		[
+			'animal' => 'horse'
+		]
+	)
+	->register();
+```
+
+The resulting output will be:
+
+```html
+<script id="my-first-script-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.firstScriptData = Object.assign(
+		window.boomshakalaka.project.firstScriptData || {},
+		{ "animal": "cat", "color": "orange" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/first-script.js" id="my-first-script-js"></script>
+<script id="my-second-script-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.secondScriptData = Object.assign(
+		window.boomshakalaka.project.secondScriptData || {},
+		{ "animal": "dog", "color": "green" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/second-script.js" id="my-second-script-js"></script>
+<script id="my-second-script-mod-ns-extra">
+	window.boomshakalaka = window.boomshakalaka || {};
+	window.boomshakalaka.project = window.boomshakalaka.project || {};
+	window.boomshakalaka.project.secondScriptData = Object.assign(
+		window.boomshakalaka.project.secondScriptData || {},
+		{ "animal": "horse" }
+	);
+</script>
+<script src="https://someplace.com/wp-content/plugins/my-plugins/js/second-script-mod.js"
+		id="my-second-script-mod-js"></script>
+```
+
+Note the `my-second-script-mod` handle is overriding a specific nested
+key, `boomshakalaka.project.secondScriptData.animal`, in the `boomshakalaka.project.secondScriptData` object while
+preserving the other keys.
+
+#### Using a callable to provide localization data
+
+If you need to provide localization data dynamically, you can use a callable to do so. The callable will be called
+when the asset is enqueued and the return value will be used. The callable will be passed the asset as the first
+argument and should return an array.
+
+```php
+Asset::add( 'my-script', 'js/some-asset.js' )
+	->add_localize_script(
+		'boomshakalaka.project.myScriptData',
+		function( Asset $asset ) {
+			return [
+				'animal' => 'cat',
+				'color'  => 'orange',
+			];
+		}
+	)
+	->register();
+```
+
+Any valid callable can be used, including Closures, like in the example above.
 
 ### Output content before/after a JS asset is output
 

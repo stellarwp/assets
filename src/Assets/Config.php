@@ -70,11 +70,15 @@ class Config {
 	 * @return string
 	 */
 	public static function get_url( $path ): string {
-		if ( empty( static::$path_urls[ $path ] ) ) {
-			static::$path_urls[ $path ] = trailingslashit( get_site_url() . $path );
+		$path = wp_normalize_path( $path );
+		$key  = Utils::get_runtime_cache_key( [ $path ] );
+
+		if ( empty( static::$path_urls[ $key ] ) ) {
+			$bases = Utils::get_bases();
+			static::$path_urls[ $key ] = trailingslashit( str_replace( wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ), $path ) );
 		}
 
-		return static::$path_urls[ $path ];
+		return static::$path_urls[ $key ];
 	}
 
 	/**
@@ -127,17 +131,21 @@ class Config {
 	 * @return void
 	 */
 	public static function set_path( string $path ) {
-		$content_dir = str_replace( get_site_url(), '', WP_CONTENT_URL );
+		$plugin_dir = WP_PLUGIN_DIR;
 
-		$plugins_content_dir_position = strpos( $path, $content_dir . '/plugins' );
-		$themes_content_dir_position  = strpos( $path, $content_dir . '/themes' );
+		if ( DIRECTORY_SEPARATOR !== '/' ) {
+			$plugin_dir = str_replace( DIRECTORY_SEPARATOR, '/', $plugin_dir );
+		}
+
+		$plugins_content_dir_position = strpos( $path, $plugin_dir );
+		$themes_content_dir_position  = strpos( $path, get_theme_root() );
 
 		if (
 			$plugins_content_dir_position === false
 			&& $themes_content_dir_position === false
 		) {
 			// Default to plugins.
-			$path = $content_dir . '/plugins/' . $path;
+			$path = $plugin_dir . $path;
 		} elseif ( $plugins_content_dir_position !== false ) {
 			$path = substr( $path, $plugins_content_dir_position );
 		} elseif ( $themes_content_dir_position !== false ) {
