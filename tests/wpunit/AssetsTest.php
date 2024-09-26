@@ -515,7 +515,6 @@ SCRIPT,
 	 */
 	public function it_should_use_include_css_asset_file_dependencies_when_no_dependencies_are_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
-		$asset->register();
 
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
 	}
@@ -526,7 +525,6 @@ SCRIPT,
 	public function it_should_use_include_css_asset_file_dependencies_when_dependencies_are_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
 		$asset->set_dependencies( 'fake1' );
-		$asset->register();
 
 		$this->assertContains( 'fake1', $asset->get_dependencies() );
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
@@ -540,7 +538,6 @@ SCRIPT,
 		$asset->set_dependencies( static function() {
 			return [ 'fake1' ];
 		} );
-		$asset->register();
 
 		$this->assertContains( 'fake1', $asset->get_dependencies() );
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
@@ -551,7 +548,6 @@ SCRIPT,
 	 */
 	public function it_should_use_css_asset_file_version_when_no_version_is_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
-		$asset->register();
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
@@ -561,7 +557,6 @@ SCRIPT,
 	 */
 	public function it_should_use_css_asset_file_version_when_version_is_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css', '1.0' );
-		$asset->register();
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
@@ -571,7 +566,6 @@ SCRIPT,
 	 */
 	public function it_should_use_include_js_asset_file_dependencies_when_no_dependencies_are_set(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js' );
-		$asset->register();
 
 		$this->assertContains( 'jquery', $asset->get_dependencies() );
 	}
@@ -582,7 +576,6 @@ SCRIPT,
 	public function it_should_use_include_js_asset_file_dependencies_when_dependencies_are_set(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js' );
 		$asset->set_dependencies( 'fake1' );
-		$asset->register();
 
 		$this->assertContains( 'fake1', $asset->get_dependencies() );
 		$this->assertContains( 'jquery', $asset->get_dependencies() );
@@ -596,7 +589,6 @@ SCRIPT,
 		$asset->set_dependencies( static function() {
 			return [ 'fake1' ];
 		} );
-		$asset->register();
 
 		$this->assertContains( 'fake1', $asset->get_dependencies() );
 		$this->assertContains( 'jquery', $asset->get_dependencies() );
@@ -607,7 +599,6 @@ SCRIPT,
 	 */
 	public function it_should_use_js_asset_file_version_when_no_version_is_set(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js' );
-		$asset->register();
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
@@ -617,7 +608,6 @@ SCRIPT,
 	 */
 	public function it_should_use_js_asset_file_version_when_version_is_set(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js', '1.0' );
-		$asset->register();
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
@@ -628,7 +618,6 @@ SCRIPT,
 	public function it_should_allow_for_asset_file_path_overrides(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js', '1.0.0' );
 		$asset->set_asset_file( 'other-asset-root/fake4' );
-		$asset->register();
 
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
 		$this->assertNotContains( 'jquery', $asset->get_dependencies() );
@@ -641,7 +630,6 @@ SCRIPT,
 	public function it_should_allow_for_asset_file_path_overrides_when_providing_full_asset_file(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js', '1.0.0' );
 		$asset->set_asset_file( 'other-asset-root/fake4.asset.php' );
-		$asset->register();
 
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
 		$this->assertNotContains( 'jquery', $asset->get_dependencies() );
@@ -654,7 +642,23 @@ SCRIPT,
 	public function it_should_allow_for_asset_file_path_overrides_when_providing_full_js_file(): void {
 		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js', '1.0.0' );
 		$asset->set_asset_file( 'other-asset-root/fake4.js' );
-		$asset->register();
+
+		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
+		$this->assertNotContains( 'jquery', $asset->get_dependencies() );
+		$this->assertEquals( '67890', $asset->get_version() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_reset_asset_file_contents_when_setting_asset_file_later(): void {
+		$asset = Asset::add( 'my-script' . uniqid(), 'fake4.js' );
+
+		$this->assertNotContains( 'some-dependency', $asset->get_dependencies() );
+		$this->assertContains( 'jquery', $asset->get_dependencies() );
+		$this->assertEquals( '12345', $asset->get_version() );
+
+		$asset->set_asset_file( 'other-asset-root/fake4' );
 
 		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
 		$this->assertNotContains( 'jquery', $asset->get_dependencies() );
