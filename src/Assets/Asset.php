@@ -27,11 +27,32 @@ class Asset {
 	protected $after_enqueue;
 
 	/**
+	 * The asset asset file contents.
+	 *
+	 * @var array
+	 */
+	protected array $asset_file_contents = [];
+
+	/**
+	 * The asset file path.
+	 *
+	 * @var string
+	 */
+	protected string $asset_file_path = '';
+
+	/**
 	 * The asset conditional callable.
 	 *
 	 * @var mixed
 	 */
 	protected $condition;
+
+	/**
+	 * An array of objects to localized using dot-notation and namespaces.
+	 *
+	 * @var array<array{0: string, 1:mixed}>
+	 */
+	protected array $custom_localize_script_objects = [];
 
 	/**
 	 * The asset dependencies.
@@ -218,13 +239,6 @@ class Asset {
 	protected ?string $version = null;
 
 	/**
-	 * An array of objects to localized using dot-notation and namespaces.
-	 *
-	 * @var array<array{0: string, 1:mixed}>
-	 */
-	protected array $custom_localize_script_objects = [];
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string      $slug      The asset slug.
@@ -312,13 +326,11 @@ class Asset {
 	}
 
 	/**
-	 * Builds the base asset URL.
+	 * Builds the path information for the asset.
 	 *
-	 * @since 1.0.0
-	 *
-	 * @return string
+	 * @return array<string,string>
 	 */
-	protected function build_asset_url(): string {
+	protected function build_resource_path_data(): array {
 		$resource                = $this->get_file();
 		$root_path               = $this->get_root_path();
 		$relative_path_to_assets = $this->is_vendor() ? '' : null;
@@ -327,11 +339,11 @@ class Asset {
 			$root_path = Config::get_path();
 		}
 
-		$plugin_base_url = Config::get_url( $root_path );
-		$hook_prefix     = Config::get_hook_prefix();
-		$extension       = pathinfo( $resource, PATHINFO_EXTENSION );
-		$resource_path   = $relative_path_to_assets;
-		$type            = $this->get_type();
+		$hook_prefix   = Config::get_hook_prefix();
+		$extension     = pathinfo( $resource, PATHINFO_EXTENSION );
+		$resource_path = $relative_path_to_assets;
+		$type          = $this->get_type();
+		$prefix_dir    = '';
 
 		if ( ! $extension && $type ) {
 			$extension = $type;
@@ -344,8 +356,6 @@ class Asset {
 			$resource_path  = $resources_path;
 
 			if ( $should_prefix ) {
-				$prefix_dir = '';
-
 				switch ( $extension ) {
 					case 'css':
 						$prefix_dir     = 'css';
@@ -377,6 +387,38 @@ class Asset {
 				}
 			}
 		}
+
+		$data = [
+			'resource_path' => $resource_path,
+			'resource'      => $resource,
+			'prefix_dir'    => $prefix_dir,
+		];
+
+		/**
+		 * Filters the asset URL
+		 *
+		 * @param array<string,string> $data  Resource path data.
+		 * @param string               $slug  Asset slug.
+		 * @param Asset                $asset The Asset object.
+		 */
+		return (array) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_path_data", $data, $this->get_slug(), $this );
+	}
+
+	/**
+	 * Builds the base asset URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	protected function build_asset_url(): string {
+		$resource_path_data = $this->build_resource_path_data();
+		$resource           = $resource_path_data['resource'];
+		$resource_path      = $resource_path_data['resource_path'];
+
+		$root_path       = $this->get_root_path();
+		$plugin_base_url = Config::get_url( $root_path );
+		$hook_prefix     = Config::get_hook_prefix();
 
 		$url = $plugin_base_url . $resource_path . $resource;
 
@@ -584,6 +626,57 @@ class Asset {
 	}
 
 	/**
+	 * Get the asset asset file contents.
+	 *
+	 * @return array
+	 */
+	public function get_asset_file_contents(): array {
+		if ( ! empty( $this->asset_file_contents ) ) {
+			return $this->asset_file_contents;
+		}
+
+		$default = [
+			'dependencies' => [],
+			'version'      => null,
+		];
+
+		if ( ! $this->has_asset_file() ) {
+			$this->asset_file_contents = $default;
+
+			return $this->asset_file_contents;
+		}
+
+		$asset_file_contents = include $this->get_asset_file_path();
+
+		if ( ! is_array( $asset_file_contents ) ) {
+			$this->asset_file_contents = $default;
+
+			return $this->asset_file_contents;
+		}
+
+		$asset_file_contents                 = wp_parse_args( $asset_file_contents, $default );
+		$asset_file_contents['dependencies'] = array_unique( $asset_file_contents['dependencies'] );
+
+		$this->asset_file_contents = $asset_file_contents;
+
+		return $this->asset_file_contents;
+	}
+
+	/**
+	 * Get the asset asset file path.
+	 *
+	 * @return string
+	 */
+	public function get_asset_file_path(): string {
+		if ( $this->asset_file_path === '' ) {
+			$resource_path_data    = $this->build_resource_path_data();
+			$this->asset_file_path = $this->get_root_path() . $resource_path_data['resource_path'] . str_replace( [ '.css', '.js' ], '', $this->get_file() ) . '.asset.php';
+		}
+
+		return $this->asset_file_path;
+	}
+
+	/**
 	 * Get the asset condition callable.
 	 *
 	 * @return mixed
@@ -595,10 +688,27 @@ class Asset {
 	/**
 	 * Get the asset dependencies.
 	 *
-	 * @return array<string>|callable
+	 * @return array<string>
 	 */
-	public function get_dependencies() {
-		return $this->dependencies;
+	public function get_dependencies(): array {
+		$dependencies = $this->dependencies;
+
+		if ( is_callable( $dependencies ) ) {
+			$dependencies = $dependencies( $this );
+		}
+
+		$asset_file_contents = $this->get_asset_file_contents();
+
+		if ( ! empty( $asset_file_contents['dependencies'] ) ) {
+			$dependencies = array_unique(
+				array_merge(
+					$asset_file_contents['dependencies'],
+					$dependencies
+				)
+			);
+		}
+
+		return $dependencies;
 	}
 
 	/**
@@ -800,7 +910,28 @@ class Asset {
 	 * @return string
 	 */
 	public function get_version(): string {
+		$asset_file_contents = $this->get_asset_file_contents();
+
+		if ( ! empty( $asset_file_contents['version'] ) ) {
+			return (string) $asset_file_contents['version'];
+		}
+
 		return $this->version;
+	}
+
+	/**
+	 * Determines if the asset has an asset.php file.
+	 *
+	 * @return boolean
+	 */
+	public function has_asset_file(): bool {
+		$asset_file_path = $this->get_asset_file_path();
+
+		if ( empty( $asset_file_path ) ) {
+			return false;
+		}
+
+		return file_exists( $asset_file_path );
 	}
 
 	/**
@@ -1111,6 +1242,29 @@ class Asset {
 	 */
 	public function set_action( string $action ) {
 		$this->action[ $action ] = $action;
+
+		return $this;
+	}
+
+	/**
+	 * Set the asset file path for the asset.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $path The partial path to the asset.
+	 *
+	 * @return static
+	 */
+	public function set_asset_file( string $path ) {
+		if ( strpos( $path, '.asset.php' ) === false ) {
+			$path = preg_replace( '/\.(js|css)$/', '', $path );
+			$path .= '.asset.php';
+		}
+
+		$this->asset_file_path = $this->get_root_path() . $this->get_path() . $path;
+
+		// Since we are setting a new asset file path, reset the asset file contents.
+		$this->asset_file_contents = [];
 
 		return $this;
 	}
