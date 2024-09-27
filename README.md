@@ -205,6 +205,8 @@ The following items get cloned over from the original asset:
 * Asset slug ( `-style`, `-script`, `-css`, and `-js` are stripped from the end of the original asset slug and replaced with either `-css` or `-js`)
 * Version
 
+**Note:** When auto-registering CSS or JS in this way, if there is a `.asset.php` file, the auto-registered asset will _not_ use the `.asset.php` file. If there is an asset file for both, it is best to register each on their own, or to use `::clone_to()`, make some changes, and then call `::use_asset_file( true )` on the cloned asset.
+
 ### Comprehensive CSS example
 
 The following example shows all of the options available during the registration of an asset.
