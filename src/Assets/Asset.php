@@ -1269,7 +1269,7 @@ class Asset {
 	 * @param boolean $prefix_asset_directory Whether to use the asset directory prefix.
 	 * @return static
 	 */
-	public function prefix_asset_directory( bool $prefix_asset_directory = true ): static {
+	public function prefix_asset_directory( bool $prefix_asset_directory = true ): self {
 		$this->should_use_asset_directory_prefix = $prefix_asset_directory;
 		return $this;
 	}
