@@ -232,6 +232,15 @@ class Asset {
 	protected ?string $url = null;
 
 	/**
+	 * Whether or not to attempt to load an .asset.php file.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @var bool
+	 */
+	protected bool $use_asset_file = true;
+
+	/**
 	 * The asset version.
 	 *
 	 * @var ?string
@@ -617,6 +626,7 @@ class Asset {
 		$path       = $this->get_path();
 		$min_path   = $this->get_min_path();
 
+		$clone->use_asset_file( false );
 		$clone->prefix_asset_directory( $this->should_use_asset_directory_prefix );
 
 		if ( $dependencies ) {
@@ -1005,6 +1015,10 @@ class Asset {
 	 * @return boolean
 	 */
 	public function has_asset_file(): bool {
+		if ( ! $this->use_asset_file ) {
+			return false;
+		}
+
 		$asset_file_path = $this->get_asset_file_path();
 
 		if ( empty( $asset_file_path ) ) {
@@ -1664,5 +1678,18 @@ class Asset {
 	 */
 	public function should_print(): bool {
 		return $this->should_print;
+	}
+
+	/**
+	 * Set whether or not to use an .asset.php file.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param boolean $use_asset_file Whether to use an .asset.php file.
+	 * @return self
+	 */
+	public function use_asset_file( bool $use_asset_file = true ): self {
+		$this->use_asset_file = $use_asset_file;
+		return $this;
 	}
 }

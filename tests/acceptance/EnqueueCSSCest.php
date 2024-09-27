@@ -273,6 +273,6 @@ class EnqueueCSSCest {
 
 		$I->amOnPage( '/' );
 		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.css?ver=12345' ] );
-		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.js?ver=12345' ] );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.js?ver=1.0.0' ] );
 	}
 }
