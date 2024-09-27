@@ -18,6 +18,7 @@ A library for managing asset registration and enqueuing in WordPress.
     * [Assets with no file extension](#assets-with-no-file-extension)
     * [Dependencies](#dependencies)
     * [Auto-enqueuing on an action](#auto-enqueuing-on-an-action)
+    * [Adding JS and CSS at the same time](#adding-js-and-css-at-the-same-time)
   * [Comprehensive CSS example](#comprehensive-css-example)
   * [Comprehensive JS example](#comprehensive-js-example)
   * [Enqueuing manually](#enqueuing-manually)
@@ -173,6 +174,36 @@ Asset::add( 'yet-another-style', 'css/yet-another.css' )
 	->enqueue_on( 'wp_enqueue_scripts' )
 	->register();
 ```
+
+#### Adding JS and CSS at the same time
+
+If you have a JS file and a CSS file that share the same directory and you wish to register them at the same time (typically helpful for [assets built with `wp-scripts`](#support-for-wp-scripts)), you can do this like so:
+
+```php
+// Add the JS file and then register_with_css() to get a CSS file at the same time.
+Asset::add( 'something-js', 'build/something.js' )
+	->enqueue_on( 'wp_enqueue_scripts' )
+	->set_dependencies( 'another-js' )
+	->register_with_css( 'some-css-dependency', 'another-css-dependency');
+
+// OR
+
+// Add the CSS file and then register_with_js() to get a JS file at the same time.
+Asset::add( 'something-css', 'build/something.css' )
+	->enqueue_on( 'wp_enqueue_scripts' )
+	->set_dependencies( 'another-css' )
+	->register_with_js( 'some-js-dependency', 'another-js-dependency' );
+```
+
+The following items get cloned over from the original asset:
+
+* `add_to_group()`
+* `enqueue_on()`
+* `set_condition()`
+* `set_min_path()`
+* `set_path()`
+* Asset slug ( `-style`, `-script`, `-css`, and `-js` are stripped from the end of the original asset slug and replaced with either `-css` or `-js`)
+* Version
 
 ### Comprehensive CSS example
 

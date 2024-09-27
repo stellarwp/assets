@@ -292,6 +292,28 @@ class Asset {
 	}
 
 	/**
+	 * Adds a wp_localize_script object to the asset.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $object_name JS object name.
+	 * @param array|callable  $data Data assigned to the JS object. If a callable is passed, it will be called
+	 *                              when the asset is enqueued and the return value will be used. The callable
+	 *                              will be passed the asset as the first argument and should return an array.
+	 *
+	 * @return static
+	 */
+	public function add_localize_script( string $object_name, $data ) {
+		if ( strpos( $object_name, '.' ) !== false ) {
+			$this->custom_localize_script_objects[] = [ $object_name, $data ];
+		} else {
+			$this->wp_localize_script_objects[ $object_name ] = $data;
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Adds data to be attached to the stylesheet.
 	 *
 	 * @see   : wp_style_add_data()
@@ -554,25 +576,83 @@ class Asset {
 	}
 
 	/**
-	 * Adds a wp_localize_script object to the asset.
+	 * Clone the asset to another type (JS to CSS or vice versa).
 	 *
-	 * @since 1.0.0
+	 * This assumes that both the CSS and JS assets are in the same directory. If
+	 * more differentiation is needed, modify the clone or create the asset separately.
 	 *
-	 * @param string $object_name JS object name.
-	 * @param array|callable  $data Data assigned to the JS object. If a callable is passed, it will be called
-	 *                              when the asset is enqueued and the return value will be used. The callable
-	 *                              will be passed the asset as the first argument and should return an array.
+	 * @since 1.3.1
 	 *
-	 * @return static
+	 * @param string          $clone_type      The type of asset to register- 'css' or 'js'.
+	 * @param string|callable ...$dependencies The dependencies to add to the cloned asset.
+	 *
+	 * @return self
 	 */
-	public function add_localize_script( string $object_name, $data ) {
-		if ( strpos( $object_name, '.' ) !== false ) {
-			$this->custom_localize_script_objects[] = [ $object_name, $data ];
-		} else {
-			$this->wp_localize_script_objects[ $object_name ] = $data;
+	public function clone_to( string $clone_type, ...$dependencies ) {
+		$source_type = $this->get_type();
+
+		if ( $clone_type === $source_type ) {
+			throw new \InvalidArgumentException( 'The clone type must be different from the source type.' );
 		}
 
-		return $this;
+		if ( ! in_array( $clone_type, [ 'css', 'js' ], true ) ) {
+			throw new \InvalidArgumentException( 'The clone type must be either "css" or "js".' );
+		}
+
+		$slug  = $this->slug;
+		$slug  = preg_replace( "/-(css|js|script|style)$/", '', $slug );
+		$slug .= "-{$clone_type}";
+
+		$clone = static::add(
+			$slug,
+			str_replace( ".{$source_type}", ".{$clone_type}", $this->file ),
+			$this->version,
+			$this->root_path
+		);
+
+		$condition  = $this->get_condition();
+		$enqueue_on = $this->get_enqueue_on();
+		$groups     = $this->get_groups();
+		$priority   = $this->get_priority();
+		$path       = $this->get_path();
+		$min_path   = $this->get_min_path();
+
+		$clone->prefix_asset_directory( $this->should_use_asset_directory_prefix );
+
+		if ( $dependencies ) {
+			foreach ( $dependencies as $dependency ) {
+				$clone->add_dependency( $dependency );
+			}
+		}
+
+		if ( $condition ) {
+			$clone->set_condition( $condition );
+		}
+
+		if ( $enqueue_on ) {
+			foreach ( $enqueue_on as $on ) {
+				$clone->enqueue_on(
+					$on,
+					$priority
+				);
+			}
+		}
+
+		if ( $groups ) {
+			foreach ( $groups as $group ) {
+				$clone->add_to_group( $group );
+			}
+		}
+
+		if ( $path ) {
+			$clone->set_path( $path );
+		}
+
+		if ( $min_path ) {
+			$clone->set_min_path( $min_path );
+		}
+
+		return $clone;
 	}
 
 	/**
@@ -985,6 +1065,15 @@ class Asset {
 	}
 
 	/**
+	 * Returns whether or not the asset is a CSS asset.
+	 *
+	 * @return boolean
+	 */
+	public function is_css(): bool {
+		return $this->get_type() === 'css';
+	}
+
+	/**
 	 * Returns whether or not the asset is deferred.
 	 *
 	 * @since 1.0.0
@@ -1026,6 +1115,15 @@ class Asset {
 	 */
 	public function is_in_header(): bool {
 		return ! $this->in_footer;
+	}
+
+	/**
+	 * Returns whether or not the asset is a JS asset.
+	 *
+	 * @return boolean
+	 */
+	public function is_js(): bool {
+		return $this->get_type() === 'js';
 	}
 
 	/**
@@ -1164,6 +1262,19 @@ class Asset {
 	}
 
 	/**
+	 * Sets whether or not to use the asset directory prefix (css/ or js/).
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param boolean $prefix_asset_directory Whether to use the asset directory prefix.
+	 * @return static
+	 */
+	public function prefix_asset_directory( bool $prefix_asset_directory = true ): static {
+		$this->should_use_asset_directory_prefix = $prefix_asset_directory;
+		return $this;
+	}
+
+	/**
 	 * Print the asset.
 	 *
 	 * @since 1.0.0
@@ -1212,6 +1323,38 @@ class Asset {
 	 */
 	public function register() {
 		Assets::init()->register_in_wp( $this );
+	}
+
+	/**
+	 * Register the asset along with registering a CSS asset from the same directory.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param string|callable ...$dependencies The dependencies to add to the cloned asset.
+	 *
+	 * @return void
+	 */
+	public function register_with_css( ...$dependencies ) {
+		$this->prefix_asset_directory( false );
+		$this->register();
+		$asset = $this->clone_to( 'css', ...$dependencies );
+		$asset->register();
+	}
+
+	/**
+	 * Register the asset along with registering a JS asset from the same directory.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param string|callable ...$dependencies The dependencies to add to the cloned asset.
+	 *
+	 * @return void
+	 */
+	public function register_with_js( ...$dependencies ) {
+		$this->prefix_asset_directory( false );
+		$this->register();
+		$asset = $this->clone_to( 'js', ...$dependencies );
+		$asset->register();
 	}
 
 	/**
@@ -1311,13 +1454,17 @@ class Asset {
 	 * @since 1.0.0
 	 *
 	 * @param string|null $path                                                 The path to the minified file.
-	 * @param bool        $should_automatically_use_asset_type_directory_prefix Whether to prefix files automatically by type (e.g. js/ for JS). Defaults to true.
+	 * @param bool|null   $should_automatically_use_asset_type_directory_prefix Whether to prefix files automatically by type (e.g. js/ for JS). Defaults to true.
 	 *
 	 * @return $this
 	 */
-	public function set_path( ?string $path = null, bool $should_automatically_use_asset_type_directory_prefix = true ) {
-		$this->path                              = trailingslashit( $path );
-		$this->should_use_asset_directory_prefix = $should_automatically_use_asset_type_directory_prefix;
+	public function set_path( ?string $path = null, $should_automatically_use_asset_type_directory_prefix = null ) {
+		$this->path = trailingslashit( $path );
+
+		if ( $should_automatically_use_asset_type_directory_prefix !== null ) {
+			$this->prefix_asset_directory( $should_automatically_use_asset_type_directory_prefix );
+		}
+
 		return $this;
 	}
 
