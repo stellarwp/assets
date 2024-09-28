@@ -443,6 +443,12 @@ Note: You can provide the JS file extension (`other-asset-directory/something.js
 You can specify translations for a JS asset like so:
 
 ```php
+// Using the default path of 'languages/'.
+Asset::add( 'my-thing', 'js/something.js' )
+	->with_translations( $textdomain )
+	->register();
+
+// Specifying a different path.
 Asset::add( 'my-thing', 'js/something.js' )
 	->with_translations( $textdomain, 'relative/path/to/json/lang/files' )
 	->register();
