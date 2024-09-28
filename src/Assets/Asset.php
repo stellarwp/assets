@@ -1334,6 +1334,7 @@ class Asset {
 	 * Enqueue the asset.
 	 *
 	 * @since 1.0.0
+	 * @since 1.3.1 Returns itself to enable chaining.
 	 *
 	 * @return static
 	 */
