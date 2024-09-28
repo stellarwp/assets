@@ -1760,7 +1760,7 @@ class Asset {
 	 *
 	 * @return self
 	 */
-	public function with_translations( string $textdomain, string $path ): self {
+	public function with_translations( string $textdomain, string $path = 'languages' ): self {
 		if ( ! $this->is_js() ) {
 			throw new InvalidArgumentException( 'Translations may only be set for JS assets.' );
 		}
