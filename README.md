@@ -438,6 +438,16 @@ Asset::add( 'my-thing', 'js/something.js' )
 
 Note: You can provide the JS file extension (`other-asset-directory/something.js`), the asset file extension (`other-asset-directory/something.asset.php`), or leave it off entirely (`other-asset-directory/something`).
 
+#### Specifying translations for a JS asset
+
+You can specify translations for a JS asset like so:
+
+```php
+Asset::add( 'my-thing', 'js/something.js' )
+	->with_translations( $textdomain, 'relative/path/to/json/lang/files' )
+	->register();
+```
+
 ### Conditional enqueuing
 
 It is rare that you will want to enqueue an asset on every page load. Luckily, you can specify a condition for when an

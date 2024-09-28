@@ -303,4 +303,23 @@ class EnqueueJSCest {
 		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.css?ver=1.0.0' ] );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.js?ver=12345' ] );
 	}
+
+	public function it_should_register_translations( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'fake1', 'fake1.js' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->with_translations( 'fake1', 'tests/_data/lang' )
+				->register();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( '#fake1-js-translations' );
+	}
+
 }
