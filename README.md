@@ -32,6 +32,7 @@ A library for managing asset registration and enqueuing in WordPress.
 	* [Support for wp-scripts](#support-for-wp-scripts)
 	  * [Default example](#default-example)
 	  * [Overriding the default asset file location](#overriding-the-default-asset-file-location)
+	  * [Specifying translations for a JS asset](#specifying-translations-for-a-js-asset)
   * [Conditional enqueuing](#conditional-enqueuing)
   * [Firing a callback after enqueuing occurs](#firing-a-callback-after-enqueuing-occurs)
   * [Output JS data](#output-js-data)
