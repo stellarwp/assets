@@ -452,6 +452,11 @@ Asset::add( 'my-thing', 'js/something.js' )
 Asset::add( 'my-thing', 'js/something.js' )
 	->with_translations( $textdomain, 'relative/path/to/json/lang/files' )
 	->register();
+
+// Using the 'default' textdomain and the default path of 'languages/'.
+Asset::add( 'my-thing', 'js/something.js' )
+	->with_translations()
+	->register();
 ```
 
 ### Conditional enqueuing
