@@ -284,4 +284,23 @@ class EnqueueJSCest {
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake4.js?ver=12345' ] );
 	}
+
+	public function it_should_enqueue_css_when_using_register_with_css( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'something-js', 'something.js' )
+				->set_path( 'tests/_data/build' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->register_with_css();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.css?ver=1.0.0' ] );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.js?ver=12345' ] );
+	}
 }

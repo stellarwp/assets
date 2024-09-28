@@ -666,6 +666,112 @@ SCRIPT,
 	}
 
 	/**
+	 * @test
+	 */
+	public function it_should_set_properties_when_using_register_with_css() {
+		$slug = 'something-' . uniqid() . '-css';
+
+		Asset::add( $slug, 'something.css' )
+			->set_path( 'tests/_data/build' )
+			->set_min_path( 'tests/_data/build' )
+			->add_to_group( 'bork' )
+			->enqueue_on( 'wp_enqueue_scripts', 100 )
+			->set_condition( 'is_admin' )
+			->register_with_js();
+
+		$css = Assets::init()->get( $slug );
+		$js  = Assets::init()->get( str_replace( '-css', '-js', $slug ) );
+
+		$this->assertEquals( $css->get_path(), $js->get_path() );
+		$this->assertEquals( $css->get_min_path(), $js->get_min_path() );
+		$this->assertEquals( $css->get_enqueue_on(), $js->get_enqueue_on() );
+		$this->assertEquals( $css->get_condition(), $js->get_condition() );
+		$this->assertEquals( $css->get_groups(), $js->get_groups() );
+		$this->assertEquals( $css->get_priority(), $js->get_priority() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_set_properties_when_using_register_with_js() {
+		$slug = 'something-' . uniqid() . '-js';
+
+		Asset::add( $slug, 'something.js' )
+			->set_path( 'tests/_data/build' )
+			->set_min_path( 'tests/_data/build' )
+			->add_to_group( 'bork' )
+			->enqueue_on( 'wp_enqueue_scripts', 100 )
+			->set_condition( 'is_admin' )
+			->register_with_css();
+
+		$js  = Assets::init()->get( $slug );
+		$css = Assets::init()->get( str_replace( '-js', '-css', $slug ) );
+
+		$this->assertEquals( $css->get_path(), $js->get_path() );
+		$this->assertEquals( $css->get_min_path(), $js->get_min_path() );
+		$this->assertEquals( $css->get_enqueue_on(), $js->get_enqueue_on() );
+		$this->assertEquals( $css->get_condition(), $js->get_condition() );
+		$this->assertEquals( $css->get_groups(), $js->get_groups() );
+		$this->assertEquals( $css->get_priority(), $js->get_priority() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_set_properties_with_clone_to() {
+		$slug = 'something-' . uniqid() . '-js';
+
+		$css = Asset::add( $slug, 'something.js' )
+			->set_path( 'tests/_data/build' )
+			->set_min_path( 'tests/_data/build' )
+			->add_to_group( 'bork' )
+			->enqueue_on( 'wp_enqueue_scripts', 100 )
+			->set_condition( 'is_admin' )
+			->clone_to( 'css' );
+
+		$js = Assets::init()->get( $slug );
+
+		$this->assertEquals( $css->get_path(), $js->get_path() );
+		$this->assertEquals( $css->get_min_path(), $js->get_min_path() );
+		$this->assertEquals( $css->get_enqueue_on(), $js->get_enqueue_on() );
+		$this->assertEquals( $css->get_condition(), $js->get_condition() );
+		$this->assertEquals( $css->get_groups(), $js->get_groups() );
+		$this->assertEquals( $css->get_priority(), $js->get_priority() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_throw_errors_when_cloning_js_to_js() {
+		$this->expectException( \InvalidArgumentException::class );
+		$slug = 'something-' . uniqid() . '-js';
+
+		Asset::add( $slug, 'something.js' )
+			->set_path( 'tests/_data/build' )
+			->set_min_path( 'tests/_data/build' )
+			->add_to_group( 'bork' )
+			->enqueue_on( 'wp_enqueue_scripts', 100 )
+			->set_condition( 'is_admin' )
+			->clone_to( 'js' );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_throw_errors_when_cloning_css_to_css() {
+		$this->expectException( \InvalidArgumentException::class );
+		$slug = 'something-' . uniqid() . '-css';
+
+		Asset::add( $slug, 'something.css' )
+			->set_path( 'tests/_data/build' )
+			->set_min_path( 'tests/_data/build' )
+			->add_to_group( 'bork' )
+			->enqueue_on( 'wp_enqueue_scripts', 100 )
+			->set_condition( 'is_admin' )
+			->clone_to( 'css' );
+	}
+
+	/**
 	 * Evaluates if a script and style have been registered.
 	 */
 	protected function existence_assertions( $test_slug_prefix ) {
