@@ -218,6 +218,20 @@ class Asset {
 	protected ?string $slug = null;
 
 	/**
+	 * The asset textdomain.
+	 *
+	 * @var string
+	 */
+	protected string $textdomain = '';
+
+	/**
+	 * Translation path.
+	 *
+	 * @var string
+	 */
+	protected string $translations_path = '';
+
+	/**
 	 * The asset type.
 	 *
 	 * @var ?string
@@ -948,6 +962,26 @@ class Asset {
 	}
 
 	/**
+	 * Get the asset textdomain.
+	 *
+	 * @return string
+	 */
+	public function get_textdomain(): string {
+		return $this->textdomain;
+	}
+
+	/**
+	 * Get the asset translation path.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @return string
+	 */
+	public function get_translation_path(): string {
+		return Config::get_path() . $this->translations_path;
+	}
+
+	/**
 	 * Get the asset style data.
 	 *
 	 * @return array
@@ -1665,6 +1699,19 @@ class Asset {
 	}
 
 	/**
+	 * Set the translation path. Alias of with_translations().
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param string $textdomain The textdomain of the asset.
+	 * @param string $path Relative path to the translations directory.
+	 * @return self
+	 */
+	public function set_translations( string $textdomain, string $path ): self {
+		return $this->with_translations( $textdomain, $path );
+	}
+
+	/**
 	 * Set the asset type.
 	 *
 	 * @since 1.0.0
@@ -1699,6 +1746,28 @@ class Asset {
 	 */
 	public function use_asset_file( bool $use_asset_file = true ): self {
 		$this->use_asset_file = $use_asset_file;
+		return $this;
+	}
+
+	/**
+	 * Set the translation path.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param string $textdomain The textdomain of the asset.
+	 * @param string $path Relative path to the translations directory.
+	 *
+	 * @throws InvalidArgumentException If the asset is not a JS asset.
+	 *
+	 * @return self
+	 */
+	public function with_translations( string $textdomain = 'default', string $path = 'languages' ): self {
+		if ( ! $this->is_js() ) {
+			throw new InvalidArgumentException( 'Translations may only be set for JS assets.' );
+		}
+
+		$this->translations_path = $path;
+		$this->textdomain        = $textdomain;
 		return $this;
 	}
 }

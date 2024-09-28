@@ -1,0 +1,8 @@
+{
+	"fake1.php": {
+		"Fake plugin": ""
+	},
+	"src/fake1.php:82": {
+		"Page title": "Fake title"
+	}
+}

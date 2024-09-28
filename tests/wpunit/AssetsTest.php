@@ -772,6 +772,32 @@ SCRIPT,
 	}
 
 	/**
+	 * @test
+	 */
+	public function it_should_register_translations() {
+		$slug = 'something-' . uniqid() . '-js';
+
+		$asset = Asset::add( $slug, 'something.js' )
+			->set_translations( 'fake1', 'tests/_data/lang' )
+			->register();
+
+		$this->assertEquals( 'fake1', $asset->get_textdomain() );
+		$this->assertEquals( dirname( dirname( __DIR__ ) ) . '/tests/_data/lang', $asset->get_translation_path() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_throw_exception_when_registering_translations_for_css() {
+		$this->expectException( \InvalidArgumentException::class );
+		$slug = 'something-' . uniqid() . '-css';
+
+		Asset::add( $slug, 'something.css' )
+			->set_translations( 'fake1', 'tests/_data/lang' )
+			->register();
+	}
+
+	/**
 	 * Evaluates if a script and style have been registered.
 	 */
 	protected function existence_assertions( $test_slug_prefix ) {
