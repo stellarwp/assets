@@ -1334,9 +1334,13 @@ class Asset {
 	 * Enqueue the asset.
 	 *
 	 * @since 1.0.0
+	 *
+	 * @return static
 	 */
-	public function register() {
+	public function register(): self {
 		Assets::init()->register_in_wp( $this );
+
+		return $this;
 	}
 
 	/**
@@ -1346,13 +1350,15 @@ class Asset {
 	 *
 	 * @param string|callable ...$dependencies The dependencies to add to the cloned asset.
 	 *
-	 * @return void
+	 * @return static
 	 */
-	public function register_with_css( ...$dependencies ) {
+	public function register_with_css( ...$dependencies ): self {
 		$this->prefix_asset_directory( false );
 		$this->register();
 		$asset = $this->clone_to( 'css', ...$dependencies );
 		$asset->register();
+
+		return $this;
 	}
 
 	/**
@@ -1362,13 +1368,15 @@ class Asset {
 	 *
 	 * @param string|callable ...$dependencies The dependencies to add to the cloned asset.
 	 *
-	 * @return void
+	 * @return static
 	 */
-	public function register_with_js( ...$dependencies ) {
+	public function register_with_js( ...$dependencies ): self {
 		$this->prefix_asset_directory( false );
 		$this->register();
 		$asset = $this->clone_to( 'js', ...$dependencies );
 		$asset->register();
+
+		return $this;
 	}
 
 	/**
