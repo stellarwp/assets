@@ -17,7 +17,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
 	}
@@ -35,7 +34,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/other-asset-root/js/fake-alt.js?ver=1.0.0' ] );
 	}
@@ -52,7 +50,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/other-asset-root/js/fake-alt.js?ver=1.0.0' ] );
@@ -91,7 +88,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake-with-min.min.js?ver=1.0.0' ] );
 	}
@@ -108,7 +104,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/minified/js/fake.min.js?ver=1.0.0' ] );
@@ -127,7 +122,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->dontSeeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
 	}
@@ -143,7 +137,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=2.0.0' ] );
@@ -162,7 +155,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake-js-with-no-extension?ver=1.0.0' ] );
 	}
@@ -178,7 +170,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->dontSeeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake.js?ver=1.0.0' ] );
@@ -197,7 +188,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake-js-js[defer]' );
 	}
@@ -215,7 +205,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake-js-js[async]' );
 	}
@@ -232,7 +221,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake-js-js[type=module]' );
@@ -260,7 +248,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake-js-js-extra' );
 		$contents = $I->grabTextFrom( '#fake-js-js-extra' );
@@ -280,7 +267,6 @@ class EnqueueJSCest {
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
 
-
 		$I->amOnPage( '/' );
 		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/js/fake4.js?ver=12345' ] );
 	}
@@ -297,7 +283,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.css?ver=1.0.0' ] );
@@ -316,7 +301,6 @@ class EnqueueJSCest {
 		PHP;
 
 		$I->haveMuPlugin( 'enqueue.php', $code );
-
 
 		$I->amOnPage( '/' );
 		$I->seeElement( '#fake1-js-translations' );
