@@ -135,6 +135,8 @@ class Config {
 
 		if ( DIRECTORY_SEPARATOR !== '/' ) {
 			$plugin_dir = str_replace( DIRECTORY_SEPARATOR, '/', $plugin_dir );
+			// Because the $path passed can be a constant like plugin_dir_path( __FILE__ ), we should check and replace the slash in the $path too.
+			$path       = str_replace( DIRECTORY_SEPARATOR, '/', $path );
 		}
 
 		$plugins_content_dir_position = strpos( $path, $plugin_dir );
