@@ -120,6 +120,47 @@ class AssetsTest extends AssetTestCase {
 		}
 	}
 
+	/**
+	 * @test
+	 *
+	 * @dataProvider constantProvider
+	 */
+	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff_and_assets_are_in_asset_group( $id, $constants ) {
+		$slugs = [
+			'fake1' => [ true, false ],
+			'fake2' => [ false, false ],
+			'fake3' => [ true, true ]
+		];
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Assets::init()->remove( $slug . '-script' );
+			Assets::init()->remove( $slug . '-style' );
+		}
+
+		foreach ( $constants as $constant => $value ) {
+			$this->set_const_value( $constant, $value );
+			$this->assertEquals( $value, constant( $constant ) );
+		}
+
+		Config::reset();
+
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+		Config::add_group_path( 'fake-group-path', [ 'root' => constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', 'relative' => '_data/fake-feature'] );
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
+			Asset::add( $slug . '-style', $slug . '.css' )->add_to_group_path( 'fake-group-path' );
+		}
+
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
+			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
+		}
+	}
+
 	public function constantProvider() {
 		$data = [
 			[
@@ -816,11 +857,14 @@ SCRIPT,
 	 * @param bool   $is_js
 	 * @param bool   $has_min
 	 * @param bool   $has_only_min
+	 * @param string $id
+	 * @param string $add_to_path_group
+	 * @param string $group_path_path
 	 */
-	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '' ) {
+	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '', $add_to_path_group = '', $group_path_path = '' ) {
 		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
 
-		$url = plugins_url( '/assets/tests/_data/' . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
+		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
 
 		$urls = [];
 
@@ -865,9 +909,11 @@ SCRIPT,
 
 		// Remove and re add to clear cache.
 		Assets::init()->remove( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
-		Asset::add( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ), $slug_prefix . '.' . ( $is_js ? 'js' : 'css' ) )->register();
+		$asset = Asset::add( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ), $slug_prefix . '.' . ( $is_js ? 'js' : 'css' ) );
 
-		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
+		if ( $add_to_path_group ) {
+			$asset->add_to_group_path( $add_to_path_group );
+		}
 
 		$this->assertEquals(
 			$urls['1'],

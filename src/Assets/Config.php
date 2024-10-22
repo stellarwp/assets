@@ -83,11 +83,11 @@ class Config {
 	 */
 	public static function add_group_path( string $group_path_slug, array $paths ): void {
 		if ( empty( $paths['root'] ) || ! is_string( $paths['root'] ) ) {
-			throw new RuntimeException( 'You must specify a root path for the group path' );
+			throw new RuntimeException( 'You must specify a root path for the group path.' );
 		}
 
 		if ( empty( $paths['relative'] ) || ! is_string( $paths['relative'] ) ) {
-			throw new RuntimeException( 'You must specify a relative path for the group path' );
+			throw new RuntimeException( 'You must specify a relative path for the group path.' );
 		}
 
 		$paths['root']     = self::normalize_path( $paths['root'] );
