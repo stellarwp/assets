@@ -75,4 +75,25 @@ class ConfigTest extends AssetTestCase {
 			$this->assertInstanceOf( \RuntimeException::class, $e );
 		}
 	}
+
+	/**
+	 * @test
+	 */
+	public function should_add_group_paths() {
+		Config::add_group_path( 'my-group-path-1', dirname( __DIR__, 2) . '/src/feature-1', 'app-1');
+		Config::add_group_path( 'my-group-path-2', dirname( __DIR__, 2) . '/src/feature-2', 'app-2');
+
+		$this->assertEquals( WP_PLUGIN_DIR . '/assets/src/feature-1/', Config::get_path_of_group_path( 'my-group-path-1' ) );
+		$this->assertEquals( 'app-1/', Config::get_relative_path_of_group_path( 'my-group-path-1' ) );
+		$this->assertEquals( WP_PLUGIN_DIR . '/assets/src/feature-2/', Config::get_path_of_group_path( 'my-group-path-2' ) );
+		$this->assertEquals( 'app-2/', Config::get_relative_path_of_group_path( 'my-group-path-2' ) );
+	}
+
+	/**
+	 * @test
+	 */
+	public function should_return_empty_string_if_no_group() {
+		$this->assertEquals( '', Config::get_path_of_group_path( 'test1-' . wp_rand( 1, 9999 ) ) );
+		$this->assertEquals( '', Config::get_relative_path_of_group_path( 'test2-' . wp_rand( 1, 9999 ) ) );
+	}
 }

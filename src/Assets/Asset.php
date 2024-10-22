@@ -176,6 +176,21 @@ class Asset {
 	protected string $root_path = '';
 
 	/**
+	 * The path group name for this asset.
+	 *
+	 * A path group is a group of assets that share the same path which could be different that the root path or the asset's path.
+	 *
+	 * The order of priority goes like this:
+	 *
+	 * 1. If a specific root path is set, that will be used.
+	 * 2. If a path group is set, that will be used.
+	 * 3. Otherwise, the root path will be used.
+	 *
+	 * @var string
+	 */
+	protected string $group_path_name = '';
+
+	/**
 	 * Content or callable that should be printed after the asset.
 	 *
 	 * @var mixed
@@ -283,6 +298,19 @@ class Asset {
 		}
 
 		$this->infer_type();
+	}
+
+	/**
+	 * Adds the asset to a group path.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @return static
+	 */
+	public function add_to_group_path( string $group_path_name ) {
+		$this->group_path_name = $group_path_name;
+
+		return $this;
 	}
 
 	/**
@@ -630,7 +658,7 @@ class Asset {
 			$slug,
 			str_replace( ".{$source_type}", ".{$clone_type}", $this->file ),
 			$this->version,
-			$this->root_path
+			$this->get_root_path()
 		);
 
 		$condition  = $this->get_condition();
@@ -910,7 +938,8 @@ class Asset {
 	 */
 	public function get_path(): string {
 		if ( $this->path === null ) {
-			return Config::get_relative_asset_path();
+			$group_relative = $this->group_path_name ? Config::get_relative_path_of_group_path( $this->group_path_name ) : '';
+			return $group_relative ? $group_relative : Config::get_relative_asset_path();
 		}
 
 		return $this->path;
@@ -922,7 +951,17 @@ class Asset {
 	 * @return ?string
 	 */
 	public function get_root_path(): ?string {
-		return $this->root_path;
+		if ( ! $this->group_path_name ) {
+			return $this->root_path;
+		}
+
+		if ( $this->root_path !== Config::get_path() ) {
+			return $this->root_path;
+		}
+
+		$group_path = Config::get_path_of_group_path( $this->group_path_name );
+
+		return $group_path ? $group_path : $this->root_path;
 	}
 
 	/**

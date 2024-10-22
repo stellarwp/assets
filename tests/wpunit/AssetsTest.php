@@ -87,9 +87,9 @@ class AssetsTest extends AssetTestCase {
 	 */
 	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff( $id, $constants ) {
 		$slugs = [
-			'fake1' => [ true, false ],
-			'fake2' => [ false, false ],
-			'fake3' => [ true, true ]
+			'fake1' => [ 'has_min' => true, 'has_only_min' => false ],
+			'fake2' => [ 'has_min' => false, 'has_only_min' => false ],
+			'fake3' => [ 'has_min' => true, 'has_only_min' => true ]
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -115,8 +115,91 @@ class AssetsTest extends AssetTestCase {
 		}
 
 		foreach ( $slugs as $slug => $data ) {
-			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id );
-			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id );
+			$this->assert_minified_found( $slug, true, $data['has_min'], $data['has_only_min'], $id );
+			$this->assert_minified_found( $slug, false, $data['has_min'], $data['has_only_min'], $id );
+		}
+	}
+
+	/**
+	 * @test
+	 *
+	 * @dataProvider constantProvider
+	 */
+	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff_and_assets_are_in_asset_group( $id, $constants ) {
+		$slugs = [
+			'fake1' => [ true, false ],
+			'fake2' => [ false, false ],
+			'fake3' => [ true, true ]
+		];
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Assets::init()->remove( $slug . '-script' );
+			Assets::init()->remove( $slug . '-style' );
+		}
+
+		foreach ( $constants as $constant => $value ) {
+			$this->set_const_value( $constant, $value );
+			$this->assertEquals( $value, constant( $constant ) );
+		}
+
+		Config::reset();
+
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', '_data/fake-feature' );
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
+			Asset::add( $slug . '-style', $slug . '.css' )->add_to_group_path( 'fake-group-path' );
+		}
+
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
+			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
+		}
+	}
+
+	/**
+	 * @test
+	 *
+	 * @dataProvider constantProvider
+	 */
+	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff_and_assets_are_in_asset_group_while_outside_of_root_path( $id, $constants ) {
+		$slugs = [
+			'fake1' => [ 'has_min' => true, 'has_only_min' => false ],
+			'fake2' => [ 'has_min' => false, 'has_only_min' => false ],
+			'fake3' => [ 'has_min' => true, 'has_only_min' => true ]
+		];
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Assets::init()->remove( $slug . '-script' );
+			Assets::init()->remove( $slug . '-style' );
+		}
+
+		foreach ( $constants as $constant => $value ) {
+			$this->set_const_value( $constant, $value );
+			$this->assertEquals( $value, constant( $constant ) );
+		}
+
+		Config::reset();
+
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+		// Now our scripts are using a path that does not actually exist in the filesystem. So we can't expect it to figure out minified vs un-minified. So we are adding a new param.
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/another-plugin/ecp', 'random/feature' );
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
+			Asset::add( $slug . '-style', $slug . '.css' )->add_to_group_path( 'fake-group-path' );
+		}
+
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, $data['has_min'], $data['has_only_min'], $id, 'fake-group-path', '/another-plugin/ecp/random/feature/', true );
+			$this->assert_minified_found( $slug, false, $data['has_min'], $data['has_only_min'], $id, 'fake-group-path', '/another-plugin/ecp/random/feature/', true );
 		}
 	}
 
@@ -816,11 +899,14 @@ SCRIPT,
 	 * @param bool   $is_js
 	 * @param bool   $has_min
 	 * @param bool   $has_only_min
+	 * @param string $id
+	 * @param string $add_to_path_group
+	 * @param string $group_path_path
 	 */
-	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '' ) {
+	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '', $add_to_path_group = '', $group_path_path = '', $wont_figure_out_min_vs_unmin = false ) {
 		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
 
-		$url = plugins_url( '/assets/tests/_data/' . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
+		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
 
 		$urls = [];
 
@@ -841,7 +927,7 @@ SCRIPT,
 
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
 
-		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 ) {
+		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 || $wont_figure_out_min_vs_unmin ) {
 			// If we are testing outside of the actual plugin directory, the file_exists will always fail.
 			// In installations where this set up is the actual, the file should exist.
 			// In this case it will always fail to locate mins.
@@ -865,9 +951,11 @@ SCRIPT,
 
 		// Remove and re add to clear cache.
 		Assets::init()->remove( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
-		Asset::add( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ), $slug_prefix . '.' . ( $is_js ? 'js' : 'css' ) )->register();
+		$asset = Asset::add( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ), $slug_prefix . '.' . ( $is_js ? 'js' : 'css' ) );
 
-		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
+		if ( $add_to_path_group ) {
+			$asset->add_to_group_path( $add_to_path_group );
+		}
 
 		$this->assertEquals(
 			$urls['1'],
