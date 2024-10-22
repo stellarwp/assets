@@ -148,7 +148,7 @@ class AssetsTest extends AssetTestCase {
 		Config::set_version( '1.1.0' );
 		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
 		Config::set_relative_asset_path( 'tests/_data/' );
-		Config::add_group_path( 'fake-group-path', [ 'root' => constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', 'relative' => '_data/fake-feature'] );
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', '_data/fake-feature' );
 
 		foreach ( array_keys( $slugs ) as $slug ) {
 			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );

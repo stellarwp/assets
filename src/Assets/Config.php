@@ -77,23 +77,16 @@ class Config {
 	 * @throws RuntimeException If the root or relative path is not specified.
 	 *
 	 * @param string $group_path_slug The slug of the group path.
-	 * @param array<string, string> $paths The paths of the group path.
+	 * @param string $root            The root path of the group.
+	 * @param string $relative        The relative path of the group.
 	 *
 	 * @return void
 	 */
-	public static function add_group_path( string $group_path_slug, array $paths ): void {
-		if ( empty( $paths['root'] ) || ! is_string( $paths['root'] ) ) {
-			throw new RuntimeException( 'You must specify a root path for the group path.' );
-		}
-
-		if ( empty( $paths['relative'] ) || ! is_string( $paths['relative'] ) ) {
-			throw new RuntimeException( 'You must specify a relative path for the group path.' );
-		}
-
-		$paths['root']     = self::normalize_path( $paths['root'] );
-		$paths['relative'] = trailingslashit( $paths['relative'] );
-
-		static::$group_paths[ $group_path_slug ] = $paths;
+	public static function add_group_path( string $group_path_slug, string $root, string $relative ): void {
+		static::$group_paths[ $group_path_slug ] = [
+			'root'     => self::normalize_path( $root ),
+			'relative' => trailingslashit( $relative ),
+		];
 	}
 
 	/**

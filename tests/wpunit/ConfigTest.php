@@ -80,31 +80,13 @@ class ConfigTest extends AssetTestCase {
 	 * @test
 	 */
 	public function should_add_group_paths() {
-		Config::add_group_path( 'my-group-path-1', [ 'root' => dirname( dirname( __DIR__ ) ) . '/src/feature-1', 'relative' => 'app-1' ] );
-		Config::add_group_path( 'my-group-path-2', [ 'root' => dirname( dirname( __DIR__ ) ) . '/src/feature-2', 'relative' => 'app-2' ] );
+		Config::add_group_path( 'my-group-path-1', dirname( dirname( __DIR__ ) ) . '/src/feature-1', 'app-1');
+		Config::add_group_path( 'my-group-path-2', dirname( dirname( __DIR__ ) ) . '/src/feature-2', 'app-2');
 
 		$this->assertEquals( WP_PLUGIN_DIR . '/assets/src/feature-1/', Config::get_path_of_group_path( 'my-group-path-1' ) );
 		$this->assertEquals( 'app-1/', Config::get_relative_path_of_group_path( 'my-group-path-1' ) );
 		$this->assertEquals( WP_PLUGIN_DIR . '/assets/src/feature-2/', Config::get_path_of_group_path( 'my-group-path-2' ) );
 		$this->assertEquals( 'app-2/', Config::get_relative_path_of_group_path( 'my-group-path-2' ) );
-	}
-
-	/**
-	 * @test
-	 */
-	public function should_throw_exception_when_root_is_not_provided() {
-		$this->expectException( \RuntimeException::class );
-		$this->expectExceptionMessage( 'You must specify a root path for the group path.' );
-		Config::add_group_path( 'my-group-path-1', [ 'relative' => 'app-1' ] );
-	}
-
-	/**
-	 * @test
-	 */
-	public function should_throw_exception_when_relative_is_not_provided() {
-		$this->expectException( \RuntimeException::class );
-		$this->expectExceptionMessage( 'You must specify a relative path for the group path.' );
-		Config::add_group_path( 'my-group-path-1', [ 'root' => 'app-1' ] );
 	}
 
 	/**
