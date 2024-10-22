@@ -212,7 +212,7 @@ class Config {
 		$plugin_dir = wp_normalize_path( WP_PLUGIN_DIR );
 		$path       = wp_normalize_path( $path );
 
-		$plugins_content_dir_position = strpos( $path, $plugin_dir );
+		$plugins_content_dir_position = $plugin_dir ? strpos( $path, $plugin_dir ) : false;
 		$themes_content_dir_position  = strpos( $path, wp_normalize_path( get_theme_root() ) );
 
 		if (
