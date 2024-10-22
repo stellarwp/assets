@@ -50,7 +50,7 @@ class Config {
 	/**
 	 * Gets the root path of a group.
 	 *
-	 * @since TBD
+	 * @since 1.4.0
 	 *
 	 * @return string
 	 */
@@ -61,7 +61,7 @@ class Config {
 	/**
 	 * Gets the relative path of a group.
 	 *
-	 * @since TBD
+	 * @since 1.4.0
 	 *
 	 * @return string
 	 */
@@ -72,7 +72,7 @@ class Config {
 	/**
 	 * Adds a group path.
 	 *
-	 * @since TBD
+	 * @since 1.4.0
 	 *
 	 * @throws RuntimeException If the root or relative path is not specified.
 	 *
@@ -195,7 +195,7 @@ class Config {
 	/**
 	 * Normalizes a path.
 	 *
-	 * @since TBD
+	 * @since 1.4.0
 	 *
 	 * @param string $path The path to normalize.
 	 *

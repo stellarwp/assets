@@ -303,7 +303,7 @@ class Asset {
 	/**
 	 * Adds the asset to a group path.
 	 *
-	 * @since TBD
+	 * @since 1.4.0
 	 *
 	 * @return static
 	 */
