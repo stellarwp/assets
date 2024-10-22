@@ -9,12 +9,15 @@ A library for managing asset registration and enqueuing in WordPress.
 * [Installation](#installation)
 * [Notes on examples](#notes-on-examples)
 * [Configuration](#configuration)
+  *[Adding Group Paths](#adding-group-paths)
 * [Register and enqueue assets](#register-and-enqueue-assets)
   * [Simple examples](#simple-examples)
     * [A simple registration](#a-simple-registration)
     * [A URL-based asset registration](#a-url-based-asset-registration)
     * [Specifying the version](#specifying-the-version)
+	* [Specifying a group path](#specifying-a-group-path)
     * [Specifying the root path](#specifying-the-root-path)
+	* [Priority of the Paths](#priority-of-the-paths)
     * [Assets with no file extension](#assets-with-no-file-extension)
     * [Dependencies](#dependencies)
     * [Auto-enqueuing on an action](#auto-enqueuing-on-an-action)
@@ -74,6 +77,14 @@ add_action( 'plugins_loaded', function() {
 } );
 ```
 
+### Adding Group Paths
+
+Now you can specify "group paths" in your application. This enables you to load assets which are stored in locations outside of your path set through `Config::set_path( PATH_TO_YOUR_PROJECT_ROOT );`
+
+```php
+Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path' );
+```
+
 ## Register and enqueue assets
 
 There are a lot of options that are available for handling assets
@@ -109,14 +120,36 @@ Asset::add( 'another-style', 'css/another.css', '1.2.3' )
 	->register();
 ```
 
+#### Specifying a group path
+To specify a group path first you need to have it registered. So in a hook prior your asset is being added to the `group-path-slug` you should run:
+
+```php
+Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path' );
+```
+
+Then you can specify the above group path in your assets while being added or later.
+
+```php
+Asset::add( 'another-style', 'css/another.css' )
+	->add_to_group_path( 'group-path-slug' );
+```
+
+Now the asset `another-style` would be search inside `GROUP_PATH_ROOT . '/group/path/relevant/path'`
+
 #### Specifying the root path
-By default, assets are searched for/found from the root path of your project based on
+By default, assets are searched for/found from the root path (unless they belong to a group path) of your project based on
 the value set in Config::get_path(), but you can specify a root path manually:
 
 ```php
 Asset::add( 'another-style', 'css/another.css', null, $my_path )
 	->register();
 ```
+
+#### Priority of the Paths
+
+  1. If a specific root path is set for the asset, that will be used.
+  2. If a path group is set for the asset, that will be used.
+  3. Otherwise, the root path of the project will be used.
 
 #### Assets with no file extension
 
