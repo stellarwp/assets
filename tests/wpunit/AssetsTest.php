@@ -189,7 +189,7 @@ class AssetsTest extends AssetTestCase {
 		Config::set_version( '1.1.0' );
 		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
 		Config::set_relative_asset_path( 'tests/_data/' );
-		// Now are scripts are using a path that does not actually exist in the filesystem. So we can't expect it to figure out minified vs un-minified. So we are adding a new param.
+		// Now our scripts are using a path that does not actually exist in the filesystem. So we can't expect it to figure out minified vs un-minified. So we are adding a new param.
 		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/another-plugin/ecp', 'random/feature' );
 
 		foreach ( array_keys( $slugs ) as $slug ) {
