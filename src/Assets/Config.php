@@ -20,6 +20,11 @@ class Config {
 	protected static string $root_path = '';
 
 	/**
+	 * @var array<string, array<string, string>>
+	 */
+	protected static array $group_paths = [];
+
+	/**
 	 * @var string
 	 */
 	protected static string $version = '';
@@ -40,6 +45,55 @@ class Config {
 			throw new RuntimeException( "You must specify a hook prefix for your project with {$class}::set_hook_prefix()" );
 		}
 		return static::$hook_prefix;
+	}
+
+	/**
+	 * Gets the root path of a group.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
+	public static function get_path_of_group_path( string $group ): string {
+		return ( static::$group_paths[ $group ] ?? [] )['root'] ?? '';
+	}
+
+	/**
+	 * Gets the relative path of a group.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
+	public static function get_relative_path_of_group_path( string $group ): string {
+		return ( static::$group_paths[ $group ] ?? [] )['relative'] ?? '';
+	}
+
+	/**
+	 * Adds a group path.
+	 *
+	 * @since TBD
+	 *
+	 * @throws RuntimeException If the root or relative path is not specified.
+	 *
+	 * @param string $group_path_slug The slug of the group path.
+	 * @param array<string, string> $paths The paths of the group path.
+	 *
+	 * @return void
+	 */
+	public static function add_group_path( string $group_path_slug, array $paths ): void {
+		if ( empty( $paths['root'] ) || ! is_string( $paths['root'] ) ) {
+			throw new RuntimeException( 'You must specify a root path for the group path' );
+		}
+
+		if ( empty( $paths['relative'] ) || ! is_string( $paths['relative'] ) ) {
+			throw new RuntimeException( 'You must specify a relative path for the group path' );
+		}
+
+		$paths['root']     = self::normalize_path( $paths['root'] );
+		$paths['relative'] = trailingslashit( $paths['relative'] );
+
+		static::$group_paths[ $group_path_slug ] = $paths;
 	}
 
 	/**
@@ -131,16 +185,35 @@ class Config {
 	 * @return void
 	 */
 	public static function set_path( string $path ) {
-		$plugin_dir = WP_PLUGIN_DIR;
+		static::$root_path = self::normalize_path( $path );
+	}
 
-		if ( DIRECTORY_SEPARATOR !== '/' ) {
-			$plugin_dir = str_replace( DIRECTORY_SEPARATOR, '/', $plugin_dir );
-			// Because the $path passed can be a constant like plugin_dir_path( __FILE__ ), we should check and replace the slash in the $path too.
-			$path       = str_replace( DIRECTORY_SEPARATOR, '/', $path );
-		}
+	/**
+	 * Sets the version of the project.
+	 *
+	 * @param string $version The version of the project.
+	 *
+	 * @return void
+	 */
+	public static function set_version( string $version ) {
+		static::$version = $version;
+	}
+
+	/**
+	 * Normalizes a path.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $path The path to normalize.
+	 *
+	 * @return string
+	 */
+	protected static function normalize_path( string $path ): string {
+		$plugin_dir = wp_normalize_path( WP_PLUGIN_DIR );
+		$path       = wp_normalize_path( $path );
 
 		$plugins_content_dir_position = strpos( $path, $plugin_dir );
-		$themes_content_dir_position  = strpos( $path, get_theme_root() );
+		$themes_content_dir_position  = strpos( $path, wp_normalize_path( get_theme_root() ) );
 
 		if (
 			$plugins_content_dir_position === false
@@ -154,17 +227,6 @@ class Config {
 			$path = substr( $path, $themes_content_dir_position );
 		}
 
-		static::$root_path = trailingslashit( $path );
-	}
-
-	/**
-	 * Sets the version of the project.
-	 *
-	 * @param string $version The version of the project.
-	 *
-	 * @return void
-	 */
-	public static function set_version( string $version ) {
-		static::$version = $version;
+		return trailingslashit( $path );
 	}
 }
