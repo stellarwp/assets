@@ -81,7 +81,7 @@ class ConfigTest extends AssetTestCase {
 	 */
 	public function should_add_group_paths() {
 		Config::add_group_path( 'my-group-path-1', dirname( __DIR__, 2) . '/src/feature-1', 'app-1');
-		Config::add_group_path( 'my-group-path-2', dirname( dirname( __DIR__ ) ) . '/src/feature-2', 'app-2');
+		Config::add_group_path( 'my-group-path-2', dirname( __DIR__, 2) . '/src/feature-2', 'app-2');
 
 		$this->assertEquals( WP_PLUGIN_DIR . '/assets/src/feature-1/', Config::get_path_of_group_path( 'my-group-path-1' ) );
 		$this->assertEquals( 'app-1/', Config::get_relative_path_of_group_path( 'my-group-path-1' ) );
