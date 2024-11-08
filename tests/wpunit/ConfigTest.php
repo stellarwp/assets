@@ -38,7 +38,7 @@ class ConfigTest extends AssetTestCase {
 	 */
 	public function should_set_root_path_correctly( $path, $expected ) {
 		Config::set_path( $path );
-		$this->assertEquals( $expected, Config::get_path( $path ) );
+		$this->assertEquals( $expected, Config::get_path( $path ), Config::get_path( $path ) );
 	}
 
 	/**
