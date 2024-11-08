@@ -196,7 +196,8 @@ class Config {
 	/**
 	 * Normalizes a path.
 	 *
-	 * @since 1.4.1
+	 * @since 1.4.0
+	 * @since 1.4.1 Allow for paths that are not in the plugin or theme directory.
 	 *
 	 * @param string $path The path to normalize.
 	 *
