@@ -24,12 +24,12 @@ class ConfigTest extends AssetTestCase {
 	}
 
 	public function paths_provider() {
-		yield 'plugin' => [ WP_PLUGIN_DIR . '/assets/', '/var/www/html/wp-content/plugins/assets/' ];
-		yield 'theme' => [ get_theme_file_path() . '/assets/', get_theme_file_path() . '/assets/' ];
-		yield 'mu-plugin' => [ WPMU_PLUGIN_DIR . '/assets/', '/var/www/html/wp-content/mu-plugins/assets/' ];
-		yield 'content' => [ WP_CONTENT_DIR . '/assets/', '/var/www/html/wp-content/assets/' ];
-		yield 'root' => [ ABSPATH . 'assets/', '/var/www/html/assets/' ];
-		yield 'relative' => [ 'src/resources/', 'src/resources/' ];
+		yield 'plugin' => [ WP_PLUGIN_DIR . '/my-plugin/', '/var/www/html/wp-content/plugins/my-plugin/' ];
+		yield 'theme' => [ get_theme_file_path() . '/', get_theme_file_path() . '/' ];
+		yield 'mu-plugin' => [ WPMU_PLUGIN_DIR . '/my-plugin/', '/var/www/html/wp-content/mu-plugins/my-plugin/' ];
+		yield 'content' => [ WP_CONTENT_DIR . '/stuff/', '/var/www/html/wp-content/stuff/' ];
+		yield 'root' => [ ABSPATH . 'stuff/', '/var/www/html/stuff/' ];
+		yield 'relative' => [ 'my-plugin/', '/var/www/html/wp-content/plugins/my-plugin/' ];
 	}
 
 	/**
