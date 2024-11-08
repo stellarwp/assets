@@ -23,6 +23,24 @@ class ConfigTest extends AssetTestCase {
 		$this->assertEquals( 'bork', Config::get_hook_prefix() );
 	}
 
+	public function paths_provider() {
+		yield 'plugin' => [ WP_PLUGIN_DIR . 'assets/', '/var/www/html/wp-content/plugins/assets/' ];
+		yield 'theme' => [ get_theme_file_path() . 'assets/', get_theme_file_path() . '/var/www/html/wp-content/themes/assets/' ];
+		yield 'mu-plugin' => [ WPMU_PLUGIN_DIR . 'assets/', '/var/www/html/wp-content/mu-plugins/assets/' ];
+		yield 'content' => [ WP_CONTENT_DIR . 'assets/', '/var/www/html/wp-content/assets/' ];
+		yield 'root' => [ ABSPATH . 'assets/', '/var/www/html/assets/' ];
+		yield 'relative' => [ 'src/resources/', 'src/resources/' ];
+	}
+
+	/**
+	 * @test
+	 * @dataProvider paths_provider
+	 */
+	public function should_normalize_path( $path, $expected ) {
+		Config::set_path( $path );
+		$this->assertEquals( $expected, Config::get_path( $path ) );
+	}
+
 	/**
 	 * @test
 	 */
