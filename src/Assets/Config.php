@@ -213,9 +213,10 @@ class Config {
 		if (
 			$plugins_content_dir_position === false
 			&& $themes_content_dir_position === false
+			&& strpos( $path, '/' ) !== 0
 		) {
-			// Default to path.
-			$path = $path;
+			// Default to plugins if a relative path is provided.
+			$path = trailingslashit( $plugin_dir ) . $path;
 		} elseif ( $plugins_content_dir_position !== false ) {
 			$path = substr( $path, $plugins_content_dir_position );
 		} elseif ( $themes_content_dir_position !== false ) {
