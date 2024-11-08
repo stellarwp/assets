@@ -25,7 +25,7 @@ class ConfigTest extends AssetTestCase {
 
 	public function paths_provider() {
 		yield 'plugin' => [ WP_PLUGIN_DIR . '/assets/', '/var/www/html/wp-content/plugins/assets/' ];
-		yield 'theme' => [ get_theme_file_path() . '/assets/', get_theme_file_path() . '/var/www/html/wp-content/themes/assets/' ];
+		yield 'theme' => [ get_theme_file_path() . '/assets/', get_theme_file_path() . '/assets/' ];
 		yield 'mu-plugin' => [ WPMU_PLUGIN_DIR . '/assets/', '/var/www/html/wp-content/mu-plugins/assets/' ];
 		yield 'content' => [ WP_CONTENT_DIR . '/assets/', '/var/www/html/wp-content/assets/' ];
 		yield 'root' => [ ABSPATH . 'assets/', '/var/www/html/assets/' ];
