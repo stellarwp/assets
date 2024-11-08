@@ -23,6 +23,24 @@ class ConfigTest extends AssetTestCase {
 		$this->assertEquals( 'bork', Config::get_hook_prefix() );
 	}
 
+	public function paths_provider() {
+		yield 'plugin' => [ WP_PLUGIN_DIR . '/my-plugin/', '/var/www/html/wp-content/plugins/my-plugin/' ];
+		yield 'theme' => [ get_theme_file_path() . '/', get_theme_file_path() . '/' ];
+		yield 'mu-plugin' => [ WPMU_PLUGIN_DIR . '/my-plugin/', '/var/www/html/wp-content/mu-plugins/my-plugin/' ];
+		yield 'content' => [ WP_CONTENT_DIR . '/stuff/', '/var/www/html/wp-content/stuff/' ];
+		yield 'root' => [ ABSPATH . 'stuff/', '/var/www/html/stuff/' ];
+		yield 'relative' => [ 'my-plugin/', '/var/www/html/wp-content/plugins/my-plugin/' ];
+	}
+
+	/**
+	 * @test
+	 * @dataProvider paths_provider
+	 */
+	public function should_set_root_path_correctly( $path, $expected ) {
+		Config::set_path( $path );
+		$this->assertEquals( $expected, Config::get_path( $path ), Config::get_path( $path ) );
+	}
+
 	/**
 	 * @test
 	 */
@@ -30,6 +48,15 @@ class ConfigTest extends AssetTestCase {
 		Config::set_path( dirname( dirname( __DIR__ ) ) );
 
 		$this->assertEquals( WP_PLUGIN_DIR . '/assets/', Config::get_path() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function should_set_path_outside_of_themes_and_plugins() {
+		Config::set_path( ABSPATH . 'foo/' );
+
+		$this->assertEquals( '/var/www/html/foo/', Config::get_path() );
 	}
 
 	/**

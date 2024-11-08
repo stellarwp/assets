@@ -146,6 +146,7 @@ class Config {
 		static::$root_path           = '';
 		static::$path_urls           = [];
 		static::$version             = '';
+		Utils::clear_runtime_cache();
 	}
 
 	/**
@@ -196,6 +197,7 @@ class Config {
 	 * Normalizes a path.
 	 *
 	 * @since 1.4.0
+	 * @since 1.4.1 Allow for paths that are not in the plugin or theme directory.
 	 *
 	 * @param string $path The path to normalize.
 	 *
@@ -211,9 +213,10 @@ class Config {
 		if (
 			$plugins_content_dir_position === false
 			&& $themes_content_dir_position === false
+			&& strpos( $path, '/' ) !== 0
 		) {
-			// Default to plugins.
-			$path = $plugin_dir . $path;
+			// Default to plugins if a relative path is provided.
+			$path = trailingslashit( $plugin_dir ) . $path;
 		} elseif ( $plugins_content_dir_position !== false ) {
 			$path = substr( $path, $plugins_content_dir_position );
 		} elseif ( $themes_content_dir_position !== false ) {
