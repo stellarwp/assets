@@ -35,6 +35,15 @@ class ConfigTest extends AssetTestCase {
 	/**
 	 * @test
 	 */
+	public function should_set_path_outside_of_themes_and_plugins() {
+		Config::set_path( ABSPATH . 'foo/' );
+
+		$this->assertEquals( '/var/www/html/foo/', Config::get_path() );
+	}
+
+	/**
+	 * @test
+	 */
 	public function should_set_relative_asset_path() {
 		Config::set_relative_asset_path( 'src/resources' );
 
