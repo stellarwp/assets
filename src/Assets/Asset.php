@@ -304,6 +304,7 @@ class Asset {
 	 * Adds the asset to a group path.
 	 *
 	 * @since 1.4.0
+	 * @since 1.4.2 Also sets the usage of the Asset directory prefix based on the group path.
 	 *
 	 * @return static
 	 */
