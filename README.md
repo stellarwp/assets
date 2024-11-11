@@ -82,8 +82,24 @@ add_action( 'plugins_loaded', function() {
 Now you can specify "group paths" in your application. This enables you to load assets which are stored in locations outside of your path set through `Config::set_path( PATH_TO_YOUR_PROJECT_ROOT );`
 
 ```php
-Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path' );
+Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path', true );
 ```
+
+**Note**: Specifying the 4th parameter of `add_group_path` method as `true`, means that all the assets that belong to the specified `group-path-slug` will have their paths prefixed with `css` or `js`.
+
+For example:
+
+```php
+Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path', true );
+
+Asset::add( 'another-style', 'css/another.css' )
+	->add_to_group_path( 'group-path-slug' );
+
+// This asset's would be found in GROUP_PATH_ROOT . 'group/path/relevant/path' . '/css/css/another.css'
+```
+
+If you don't want the above to happen you would either specify false or leave the 4th parameter to its default state. Then the asset of the above example would be found in:
+`GROUP_PATH_ROOT . 'group/path/relevant/path' . '/css/another.css'`
 
 ## Register and enqueue assets
 

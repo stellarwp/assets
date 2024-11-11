@@ -148,7 +148,7 @@ class AssetsTest extends AssetTestCase {
 		Config::set_version( '1.1.0' );
 		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
 		Config::set_relative_asset_path( 'tests/_data/' );
-		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', '_data/fake-feature' );
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', '_data/fake-feature', true );
 
 		foreach ( array_keys( $slugs ) as $slug ) {
 			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
@@ -158,6 +158,47 @@ class AssetsTest extends AssetTestCase {
 		foreach ( $slugs as $slug => $data ) {
 			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
 			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/' );
+		}
+	}
+
+	/**
+	 * @test
+	 *
+	 * @dataProvider constantProvider
+	 */
+	public function it_should_get_the_correct_url_when_wp_content_dir_and_wp_content_url_are_diff_and_assets_are_in_asset_group_without_prefixing( $id, $constants ) {
+		$slugs = [
+			'fake1' => [ true, false ],
+			'fake2' => [ false, false ],
+			'fake3' => [ true, true ]
+		];
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Assets::init()->remove( $slug . '-script' );
+			Assets::init()->remove( $slug . '-style' );
+		}
+
+		foreach ( $constants as $constant => $value ) {
+			$this->set_const_value( $constant, $value );
+			$this->assertEquals( $value, constant( $constant ) );
+		}
+
+		Config::reset();
+
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/assets/tests', '_data/fake-feature' );
+
+		foreach ( array_keys( $slugs ) as $slug ) {
+			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
+			Asset::add( $slug . '-style', $slug . '.css' )->add_to_group_path( 'fake-group-path' );
+		}
+
+		foreach ( $slugs as $slug => $data ) {
+			$this->assert_minified_found( $slug, true, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/', false, false );
+			$this->assert_minified_found( $slug, false, $data['0'], $data['1'], $id, 'fake-group-path', '/assets/tests/_data/fake-feature/', false, false );
 		}
 	}
 
@@ -190,7 +231,7 @@ class AssetsTest extends AssetTestCase {
 		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
 		Config::set_relative_asset_path( 'tests/_data/' );
 		// Now our scripts are using a path that does not actually exist in the filesystem. So we can't expect it to figure out minified vs un-minified. So we are adding a new param.
-		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/another-plugin/ecp', 'random/feature' );
+		Config::add_group_path( 'fake-group-path', constant( 'WP_PLUGIN_DIR' ) . '/another-plugin/ecp', 'random/feature', true );
 
 		foreach ( array_keys( $slugs ) as $slug ) {
 			Asset::add( $slug . '-script', $slug . '.js' )->add_to_group_path( 'fake-group-path' );
@@ -902,11 +943,13 @@ SCRIPT,
 	 * @param string $id
 	 * @param string $add_to_path_group
 	 * @param string $group_path_path
+	 * @param bool   $wont_figure_out_min_vs_unmin
+	 * @param bool   $should_prefix
 	 */
-	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '', $add_to_path_group = '', $group_path_path = '', $wont_figure_out_min_vs_unmin = false ) {
+	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '', $add_to_path_group = '', $group_path_path = '', $wont_figure_out_min_vs_unmin = false, $should_prefix = true ) {
 		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
 
-		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $is_js ? 'js' : 'css' ) . '/' . $slug_prefix );
+		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $should_prefix ? ( $is_js ? 'js' : 'css' ) : '' ) . '/' . $slug_prefix );
 
 		$urls = [];
 
