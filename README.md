@@ -85,7 +85,7 @@ Now you can specify "group paths" in your application. This enables you to load 
 Config::add_group_path( 'group-path-slug', GROUP_PATH_ROOT, 'group/path/relevant/path', true );
 ```
 
-**Note**: Specifying the 4th parameter of add_group_path method as true, means that all the assets that belong to the specified `group-path-slug` will have their paths prefixed with `css` or `js`.
+**Note**: Specifying the 4th parameter of `add_group_path` method as `true`, means that all the assets that belong to the specified `group-path-slug` will have their paths prefixed with `css` or `js`.
 
 For example:
 
