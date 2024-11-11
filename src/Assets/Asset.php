@@ -310,6 +310,8 @@ class Asset {
 	public function add_to_group_path( string $group_path_name ) {
 		$this->group_path_name = $group_path_name;
 
+		$this->prefix_asset_directory( Config::is_group_path_using_asset_directory_prefix( $this->group_path_name ) );
+
 		return $this;
 	}
 

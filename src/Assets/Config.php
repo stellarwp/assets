@@ -70,22 +70,36 @@ class Config {
 	}
 
 	/**
+	 * Gets whether the group is using the asset directory prefix.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @return bool
+	 */
+	public static function is_group_path_using_asset_directory_prefix( string $group ): bool {
+		return ( static::$group_paths[ $group ] ?? [] )['prefix'] ?? false;
+	}
+
+	/**
 	 * Adds a group path.
 	 *
 	 * @since 1.4.0
+	 * @since 1.4.2 Added the ability to specify whether the group path is using the asset directory prefix.
 	 *
 	 * @throws RuntimeException If the root or relative path is not specified.
 	 *
-	 * @param string $group_path_slug The slug of the group path.
-	 * @param string $root            The root path of the group.
-	 * @param string $relative        The relative path of the group.
+	 * @param string $group_path_slug                 The slug of the group path.
+	 * @param string $root                            The root path of the group.
+	 * @param string $relative                        The relative path of the group.
+	 * @param bool   $is_using_asset_directory_prefix Whether the group path is using the asset directory prefix.
 	 *
 	 * @return void
 	 */
-	public static function add_group_path( string $group_path_slug, string $root, string $relative ): void {
+	public static function add_group_path( string $group_path_slug, string $root, string $relative, bool $is_using_asset_directory_prefix = false ): void {
 		static::$group_paths[ $group_path_slug ] = [
 			'root'     => self::normalize_path( $root ),
 			'relative' => trailingslashit( $relative ),
+			'prefix'   => $is_using_asset_directory_prefix,
 		];
 	}
 
