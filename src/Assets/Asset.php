@@ -622,13 +622,13 @@ class Asset {
 
 		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
-		if ( $script_debug && file_exists( wp_normalize_path( $root_path . $resource_path . $resource ) ) ) {
+		if ( $script_debug && is_file( wp_normalize_path( $root_path . $resource_path . $resource ) ) ) {
 			return $original_url;
 		}
 
 		$minified_abs_file_path = wp_normalize_path( $root_path . $minified_file_path );
 
-		if ( ! file_exists( $minified_abs_file_path ) ) {
+		if ( ! is_file( $minified_abs_file_path ) ) {
 			return $original_url;
 		}
 
@@ -1140,7 +1140,7 @@ class Asset {
 			return false;
 		}
 
-		return file_exists( $asset_file_path );
+		return is_file( $asset_file_path );
 	}
 
 	/**
@@ -1381,7 +1381,7 @@ class Asset {
 			$file_path = wp_normalize_path( "{$base_dir}/{$partial_path}" );
 			$file_url  = "{$base_url}/{$partial_path}";
 
-			if ( file_exists( $file_path ) ) {
+			if ( is_file( $file_path ) ) {
 				return $file_url;
 			}
 		}

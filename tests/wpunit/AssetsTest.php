@@ -971,7 +971,7 @@ SCRIPT,
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
 
 		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 || $wont_figure_out_min_vs_unmin ) {
-			// If we are testing outside of the actual plugin directory, the file_exists will always fail.
+			// If we are testing outside of the actual plugin directory, the `is_file` check will always fail.
 			// In installations where this set up is the actual, the file should exist.
 			// In this case it will always fail to locate mins.
 			$urls = array_map(
