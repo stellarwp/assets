@@ -186,6 +186,12 @@ class Asset {
 	 * 2. If a path group is set, that will be used.
 	 * 3. Otherwise, the root path will be used.
 	 *
+	 * In the case where the `$group_path_over_root_path` property is true, the order of priority will change to this:
+	 *
+	 * 1. If a specific root path is set, that will be used.
+	 * 2. Otherwise, the root path will be used.
+	 * 3. If a path group is set, that will be used.
+	 *
 	 * @var string
 	 */
 	protected string $group_path_name = '';
