@@ -277,6 +277,17 @@ class Asset {
 	protected ?string $version = null;
 
 	/**
+	 * Whether to use the group path over the root path.
+	 * This flag will be raised when the asset is added to a group path
+	 * and lowered when it's removed from it.
+	 *
+	 * @since TBD
+	 *
+	 * @var bool
+	 */
+	private $group_path_over_root_path = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string      $slug      The asset slug.
@@ -312,6 +323,8 @@ class Asset {
 		$this->group_path_name = $group_path_name;
 
 		$this->prefix_asset_directory( Config::is_group_path_using_asset_directory_prefix( $this->group_path_name ) );
+
+		$this->group_path_over_root_path = true;
 
 		return $this;
 	}
@@ -478,6 +491,20 @@ class Asset {
 		 * @param Asset                $asset The Asset object.
 		 */
 		return (array) apply_filters( "stellarwp/assets/{$hook_prefix}/resource_path_data", $data, $this->get_slug(), $this );
+	}
+
+	/**
+	 * Removes the asset from a group.
+	 *
+	 * This method is the inverse of the `add_to_group_path` method.
+	 *
+	 * @param string $group_path_name The name of the group path to remove the asset from.
+	 *
+	 * @return void The asset is removed from the specified group path.
+	 */
+	public function remove_from_group_path( string $group_path_name ): void {
+		$this->group_path_over_root_path = false;
+		$this->group_path_name           = '';
 	}
 
 	/**
@@ -958,13 +985,19 @@ class Asset {
 			return $this->root_path;
 		}
 
+		if ( $this->group_path_over_root_path ) {
+			$group_path = Config::get_path_of_group_path( $this->group_path_name );
+
+			return $group_path ?: $this->root_path;
+		}
+
 		if ( $this->root_path !== Config::get_path() ) {
 			return $this->root_path;
 		}
 
 		$group_path = Config::get_path_of_group_path( $this->group_path_name );
 
-		return $group_path ? $group_path : $this->root_path;
+		return $group_path ?: $this->root_path;
 	}
 
 	/**
