@@ -1788,10 +1788,6 @@ class Asset {
 	 * @return static
 	 */
 	public function do_register() {
-		if ( $this->is_registered() ) {
-			return $this;
-		}
-
 		$this->register_asset( $this->get_url(), $this->get_dependencies(), $this->get_version(), $this->is_js() ? $this->is_in_footer() : $this->get_media() );
 		$this->set_as_registered();
 
@@ -1819,24 +1815,26 @@ class Asset {
 	 * Set the asset enqueue status to false.
 	 *
 	 * @since 1.0.0
+	 * @since TBD - Actually dequeues the asset.
 	 *
 	 * @return static
 	 */
 	public function set_as_unenqueued() {
 		$this->is_enqueued = false;
-		return $this;
+		return $this->dequeue_asset();
 	}
 
 	/**
 	 * Set the asset registration status to false.
 	 *
 	 * @since 1.0.0
+	 * @since TBD - Actually deregisters the asset.
 	 *
 	 * @return static
 	 */
 	public function set_as_unregistered() {
 		$this->is_registered = false;
-		return $this;
+		return $this->deregister_asset();
 	}
 
 	/**
