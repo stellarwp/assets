@@ -726,7 +726,13 @@ class Assets {
 			return false;
 		}
 
-		$this->get( $slug )->dequeue_asset()->deregister_asset();
+		$asset = $this->get( $slug );
+
+		if ( ! $asset instanceof Asset ) {
+			return true;
+		}
+
+		$asset->dequeue_asset()->deregister_asset();
 
 		unset( $this->assets[ $slug ] );
 

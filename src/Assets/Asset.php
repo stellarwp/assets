@@ -5,6 +5,13 @@ namespace StellarWP\Assets;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * @method self print_assets()
+ * @method self enqueue_asset()
+ * @method self register_asset( string $url, array $dependencies = [], string $version = null, mixed $in_footer_or_media )
+ * @method self dequeue_asset()
+ * @method self deregister_asset()
+ */
 class Asset {
 	/**
 	 * @var array The asset action.
