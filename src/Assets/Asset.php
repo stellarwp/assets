@@ -186,6 +186,12 @@ class Asset {
 	 * 2. If a path group is set, that will be used.
 	 * 3. Otherwise, the root path will be used.
 	 *
+	 * In the case where the `$group_path_over_root_path` property is true, the order of priority will change to this:
+	 *
+	 * 1. If a path group is set, that will be used.
+	 * 2. If a specific root path is set, that will be used.
+	 * 3. Otherwise, the root path will be used.
+	 *
 	 * @var string
 	 */
 	protected string $group_path_name = '';
@@ -277,6 +283,17 @@ class Asset {
 	protected ?string $version = null;
 
 	/**
+	 * Whether to use the group path over the root path.
+	 * This flag will be raised when the asset is added to a group path
+	 * and lowered when it's removed from it.
+	 *
+	 * @since TBD
+	 *
+	 * @var bool
+	 */
+	private $group_path_over_root_path = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string      $slug      The asset slug.
@@ -312,6 +329,8 @@ class Asset {
 		$this->group_path_name = $group_path_name;
 
 		$this->prefix_asset_directory( Config::is_group_path_using_asset_directory_prefix( $this->group_path_name ) );
+
+		$this->group_path_over_root_path = true;
 
 		return $this;
 	}
@@ -481,6 +500,20 @@ class Asset {
 	}
 
 	/**
+	 * Removes the asset from a group.
+	 *
+	 * This method is the inverse of the `add_to_group_path` method.
+	 *
+	 * @param string $group_path_name The name of the group path to remove the asset from.
+	 *
+	 * @return void The asset is removed from the specified group path.
+	 */
+	public function remove_from_group_path( string $group_path_name ): void {
+		$this->group_path_over_root_path = false;
+		$this->group_path_name           = '';
+	}
+
+	/**
 	 * Builds the base asset URL.
 	 *
 	 * @since 1.0.0
@@ -589,13 +622,13 @@ class Asset {
 
 		$script_debug = defined( 'SCRIPT_DEBUG' ) && Utils::is_truthy( SCRIPT_DEBUG );
 
-		if ( $script_debug && file_exists( wp_normalize_path( $root_path . $resource_path . $resource ) ) ) {
+		if ( $script_debug && is_file( wp_normalize_path( $root_path . $resource_path . $resource ) ) ) {
 			return $original_url;
 		}
 
 		$minified_abs_file_path = wp_normalize_path( $root_path . $minified_file_path );
 
-		if ( ! file_exists( $minified_abs_file_path ) ) {
+		if ( ! is_file( $minified_abs_file_path ) ) {
 			return $original_url;
 		}
 
@@ -958,13 +991,19 @@ class Asset {
 			return $this->root_path;
 		}
 
+		if ( $this->group_path_over_root_path ) {
+			$group_path = Config::get_path_of_group_path( $this->group_path_name );
+
+			return $group_path ?: $this->root_path;
+		}
+
 		if ( $this->root_path !== Config::get_path() ) {
 			return $this->root_path;
 		}
 
 		$group_path = Config::get_path_of_group_path( $this->group_path_name );
 
-		return $group_path ? $group_path : $this->root_path;
+		return $group_path ?: $this->root_path;
 	}
 
 	/**
@@ -1101,7 +1140,7 @@ class Asset {
 			return false;
 		}
 
-		return file_exists( $asset_file_path );
+		return is_file( $asset_file_path );
 	}
 
 	/**
@@ -1342,7 +1381,7 @@ class Asset {
 			$file_path = wp_normalize_path( "{$base_dir}/{$partial_path}" );
 			$file_url  = "{$base_url}/{$partial_path}";
 
-			if ( file_exists( $file_path ) ) {
+			if ( is_file( $file_path ) ) {
 				return $file_url;
 			}
 		}
