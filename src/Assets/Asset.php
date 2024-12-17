@@ -3,6 +3,7 @@
 namespace StellarWP\Assets;
 
 use InvalidArgumentException;
+use RuntimeException;
 
 class Asset {
 	/**
@@ -1693,6 +1694,121 @@ class Asset {
 	 */
 	public function set_as_registered() {
 		$this->is_registered = true;
+		return $this;
+	}
+
+	/**
+	 * Gives us the option to call any wp_*_script or wp_*_style function
+	 * on the asset.
+	 *
+	 * example: $asset->register_asset( ...$args ); will call wp_register_script( $slug, ...$args ); or
+	 * wp_register_style( $slug, ...$args ); based on if the asset is JS or CSS type.
+	 *
+	 * @since TBD
+	 *
+	 * @return static
+	 */
+	public function __call( $method, $args ) {
+		if ( ! strstr( $method, 'asset' ) ) {
+			throw new RuntimeException( "Method {$method} does not exist." );
+		}
+
+		$method = 'wp_' . str_replace( 'asset', $this->get_script_or_style(), $method );
+
+		if ( ! function_exists( $method ) ) {
+			throw new RuntimeException( "Method {$method} does not exist." );
+		}
+
+		$method( $this->get_slug(), ...$args );
+
+		return $this;
+	}
+
+	/**
+	 * Check if the asset is something.
+	 *
+	 * In the background uses wp_script_is or wp_style_is.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $what The what to check against.
+	 *
+	 * @return bool
+	 */
+	public function asset_is( string $what ): bool {
+		return ( 'wp_' . $this->get_script_or_style() . '_is' )( $this->get_slug(), $what );
+	}
+
+	/**
+	 * Get the script or style based on the asset type.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
+	protected function get_script_or_style(): string {
+		return 'js' === $this->get_type() ? 'script' : 'style';
+	}
+
+	/**
+	 * Prints the asset
+	 *
+	 * @since TBD
+	 *
+	 * @return static
+	 */
+	public function do_print() {
+		if ( $this->should_print() && ! $this->is_printed() ) {
+			$this->set_as_printed();
+			$this->print_assets();
+		}
+
+		// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
+		$this->enqueue_asset();
+
+		if ( ! $this->is_css() ) {
+			return $this;
+		}
+
+		foreach ( $this->get_style_data() as $key => $value ) {
+			wp_style_add_data( $this->get_slug(), $key, $value );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Performs the asset registration in WP.
+	 *
+	 * @since TBD
+	 *
+	 * @return static
+	 */
+	public function do_register() {
+		if ( $this->is_registered() ) {
+			return $this;
+		}
+
+		$this->register_asset( $this->get_url(), $this->get_dependencies(), $this->get_version(), $this->is_js() ? $this->is_in_footer() : $this->get_media() );
+		$this->set_as_registered();
+
+		if ( $this->is_js() ) {
+			if ( empty( $this->get_translation_path() ) || empty( $this->get_textdomain() ) ) {
+				return $this;
+			}
+
+			wp_set_script_translations( $this->get_slug(), $this->get_textdomain(), $this->get_translation_path() );
+			return $this;
+		}
+
+
+		$style_data = $this->get_style_data();
+		if ( $style_data ) {
+			foreach ( $style_data as $datum_key => $datum_value ) {
+				wp_style_add_data( $this->get_slug(), $datum_key, $datum_value );
+			}
+		}
+
 		return $this;
 	}
 

@@ -643,27 +643,7 @@ class Assets {
 			return;
 		}
 
-		if ( 'js' === $asset->get_type() ) {
-			if ( $asset->should_print() && ! $asset->is_printed() ) {
-				$asset->set_as_printed();
-				wp_print_scripts( [ $slug ] );
-			}
-			// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
-			wp_enqueue_script( $slug );
-		} else {
-			if ( $asset->should_print() && ! $asset->is_printed() ) {
-				$asset->set_as_printed();
-				wp_print_styles( [ $slug ] );
-			}
-
-			// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
-			wp_enqueue_style( $slug );
-
-			$style_data = $asset->get_style_data();
-			foreach ( $style_data as $key => $value ) {
-				wp_style_add_data( $slug, $key, $value );
-			}
-		}
+		$asset->do_print();
 
 		if ( ! empty( $asset->get_after_enqueue() ) && is_callable( $asset->get_after_enqueue() ) ) {
 			call_user_func_array( $asset->get_after_enqueue(), [ $asset ] );
@@ -713,49 +693,7 @@ class Assets {
 				continue;
 			}
 
-			$asset_slug = $asset->get_slug();
-
-			if ( 'js' === $asset->get_type() ) {
-				// Script is already registered.
-				if ( wp_script_is( $asset_slug, 'registered' ) ) {
-					continue;
-				}
-
-				wp_register_script( $asset_slug, $asset->get_url(), $asset->get_dependencies(), $asset->get_version(), $asset->is_in_footer() );
-
-				// Register that this asset is actually registered on the WP methods.
-				// @phpstan-ignore-next-line
-				if ( wp_script_is( $asset_slug, 'registered' ) ) {
-					$asset->set_as_registered();
-				}
-
-				if (
-					! empty( $asset->get_translation_path() )
-					&& ! empty( $asset->get_textdomain() )
-				) {
-					wp_set_script_translations( $asset_slug, $asset->get_textdomain(), $asset->get_translation_path() );
-				}
-			} else {
-				// Style is already registered.
-				if ( wp_style_is( $asset_slug, 'registered' ) ) {
-					continue;
-				}
-
-				wp_register_style( $asset_slug, $asset->get_url(), $asset->get_dependencies(), $asset->get_version(), $asset->get_media() );
-
-				// Register that this asset is actually registered on the WP methods.
-				// @phpstan-ignore-next-line
-				if ( wp_style_is( $asset_slug, 'registered' ) ) {
-					$asset->set_as_registered();
-				}
-
-				$style_data = $asset->get_style_data();
-				if ( $style_data ) {
-					foreach ( $style_data as $datum_key => $datum_value ) {
-						wp_style_add_data( $asset_slug, $datum_key, $datum_value );
-					}
-				}
-			}
+			$asset->do_register();
 
 			// If we don't have an action we don't even register the action to enqueue.
 			if ( empty( $asset->get_action() ) ) {
@@ -788,15 +726,7 @@ class Assets {
 			return false;
 		}
 
-		$type = $this->get( $slug )->get_type();
-
-		if ( $type === 'css' ) {
-			wp_dequeue_style( $slug );
-			wp_deregister_style( $slug );
-		} else {
-			wp_dequeue_script( $slug );
-			wp_deregister_script( $slug );
-		}
+		$this->get( $slug )->dequeue_asset()->deregister_asset();
 
 		unset( $this->assets[ $slug ] );
 
@@ -836,9 +766,8 @@ class Assets {
 			if ( $asset->is_registered() ) {
 				continue;
 			}
-			'js' === $asset->get_type()
-				? wp_register_script( $slug, $asset->get_file(), $asset->get_dependencies(), $asset->get_version() )
-				: wp_register_style( $slug, $asset->get_file(), $asset->get_dependencies(), $asset->get_version() );
+
+			$asset->register_asset( $asset->get_file(), $asset->get_dependencies(), $asset->get_version() );
 		}
 
 		ob_start();
