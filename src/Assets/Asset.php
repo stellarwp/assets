@@ -269,6 +269,8 @@ class Asset {
 	/**
 	 * Whether or not to attempt to load an .asset.php file.
 	 *
+	 * By default is true for scripts and false for styles.
+	 *
 	 * @since 1.3.1
 	 *
 	 * @var bool
@@ -1173,12 +1175,14 @@ class Asset {
 	 * Set the asset type.
 	 *
 	 * @since 1.0.0
+	 * @since TBD - For css files, we dont want to use asset file for dependencies by default.
 	 */
 	protected function infer_type() {
 		if ( substr( $this->file, -3, 3 ) === '.js' ) {
 			$this->type = 'js';
 		} elseif ( substr( $this->file, -4, 4 ) === '.css' ) {
 			$this->type = 'css';
+			$this->use_asset_file( false );
 		}
 	}
 
