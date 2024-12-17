@@ -1821,7 +1821,8 @@ class Asset {
 	 */
 	public function set_as_unenqueued() {
 		$this->is_enqueued = false;
-		return $this->dequeue_asset();
+		$this->dequeue_asset();
+		return $this;
 	}
 
 	/**
@@ -1834,7 +1835,8 @@ class Asset {
 	 */
 	public function set_as_unregistered() {
 		$this->is_registered = false;
-		return $this->deregister_asset();
+		$this->deregister_asset();
+		return $this;
 	}
 
 	/**
