@@ -257,11 +257,31 @@ class EnqueueCSSCest {
 		$I->dontSeeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/css/fake.css?ver=1.0.0', 'media' => 'screen' ] );
 	}
 
+	public function it_should_enqueue_css_on_default_version_when_using_register_with_js( AcceptanceTester $I ) {
+		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
+		$code .= <<<PHP
+		add_action( 'wp_enqueue_scripts', function() {
+			Asset::add( 'something-css' . uniqid(), 'something.css' )
+				->set_path( 'tests/_data/build' )
+				->enqueue_on( 'wp_enqueue_scripts' )
+				->register_with_js();
+		}, 100 );
+		PHP;
+
+		$I->haveMuPlugin( 'enqueue.php', $code );
+
+
+		$I->amOnPage( '/' );
+		$I->seeElement( 'link', [ 'href' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.css?ver=1.0.0' ] );
+		$I->seeElement( 'script', [ 'src' => 'http://wordpress.test/wp-content/plugins/assets/tests/_data/build/something.js?ver=1.0.0' ] );
+	}
+
 	public function it_should_enqueue_js_when_using_register_with_js( AcceptanceTester $I ) {
 		$code = file_get_contents( codecept_data_dir( 'enqueue-template.php' ) );
 		$code .= <<<PHP
 		add_action( 'wp_enqueue_scripts', function() {
 			Asset::add( 'something-css' . uniqid(), 'something.css' )
+				->use_asset_file( true )
 				->set_path( 'tests/_data/build' )
 				->enqueue_on( 'wp_enqueue_scripts' )
 				->register_with_js();

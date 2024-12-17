@@ -637,28 +637,36 @@ SCRIPT,
 	/**
 	 * @test
 	 */
-	public function it_should_use_include_css_asset_file_dependencies_when_no_dependencies_are_set(): void {
+	public function it_should_not_use_include_css_asset_file_dependencies_when_no_dependencies_are_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
 
-		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
+		$this->assertEmpty( $asset->get_dependencies() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_use_include_css_asset_file_dependencies_when_no_dependencies_are_set(): void {
+		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' )->use_asset_file( true );
+
+		$this->assertEquals( ['some-dependency'], $asset->get_dependencies() );
 	}
 
 	/**
 	 * @test
 	 */
 	public function it_should_use_include_css_asset_file_dependencies_when_dependencies_are_set(): void {
-		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
+		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' )->use_asset_file( true );
 		$asset->set_dependencies( 'fake1' );
 
-		$this->assertContains( 'fake1', $asset->get_dependencies() );
-		$this->assertContains( 'some-dependency', $asset->get_dependencies() );
+		$this->assertEquals( [ 'some-dependency', 'fake1' ], $asset->get_dependencies() );
 	}
 
 	/**
 	 * @test
 	 */
 	public function it_should_use_include_css_asset_file_dependencies_when_dependencies_are_set_as_callable(): void {
-		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
+		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' )->use_asset_file( true );
 		$asset->set_dependencies( static function() {
 			return [ 'fake1' ];
 		} );
@@ -670,8 +678,17 @@ SCRIPT,
 	/**
 	 * @test
 	 */
-	public function it_should_use_css_asset_file_version_when_no_version_is_set(): void {
+	public function it_should_not_use_css_asset_file_version_when_no_version_is_set(): void {
 		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' );
+
+		$this->assertEquals( '1.0.0', $asset->get_version() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_use_css_asset_file_version_when_no_version_is_set(): void {
+		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css' )->use_asset_file( true );
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
@@ -680,7 +697,7 @@ SCRIPT,
 	 * @test
 	 */
 	public function it_should_use_css_asset_file_version_when_version_is_set(): void {
-		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css', '1.0' );
+		$asset = Asset::add( 'my-style' . uniqid(), 'fake4.css', '1.0' )->use_asset_file( true );
 
 		$this->assertEquals( '12345', $asset->get_version() );
 	}
