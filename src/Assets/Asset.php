@@ -3,10 +3,9 @@
 namespace StellarWP\Assets;
 
 use InvalidArgumentException;
-use RuntimeException;
 
 /**
- * Class Asset
+ * Class Asset.
  */
 class Asset {
 	/**
@@ -1775,7 +1774,7 @@ class Asset {
 	 *
 	 * In the background uses wp_script_is or wp_style_is.
 	 *
-	 * @since TBD
+	 * @since 1.4.4
 	 *
 	 * @param string $what The what to check against.
 	 *
@@ -1788,7 +1787,7 @@ class Asset {
 	/**
 	 * Get the script or style based on the asset type.
 	 *
-	 * @since TBD
+	 * @since 1.4.4
 	 *
 	 * @return string
 	 */
@@ -1799,7 +1798,7 @@ class Asset {
 	/**
 	 * Prints the asset
 	 *
-	 * @since TBD
+	 * @since 1.4.4
 	 *
 	 * @return static
 	 */
@@ -1826,7 +1825,7 @@ class Asset {
 	/**
 	 * Performs the asset registration in WP.
 	 *
-	 * @since TBD
+	 * @since 1.4.4
 	 *
 	 * @return static
 	 */
@@ -1858,7 +1857,7 @@ class Asset {
 	 * Set the asset enqueue status to false.
 	 *
 	 * @since 1.0.0
-	 * @since TBD - Actually dequeues the asset.
+	 * @since 1.4.4 - Actually dequeues the asset.
 	 *
 	 * @return static
 	 */
@@ -1872,7 +1871,7 @@ class Asset {
 	 * Set the asset registration status to false.
 	 *
 	 * @since 1.0.0
-	 * @since TBD - Actually deregisters the asset.
+	 * @since 1.4.4 - Actually deregisters the asset.
 	 *
 	 * @return static
 	 */
