@@ -6,11 +6,7 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * @method self print_assets()
- * @method self enqueue_asset()
- * @method self register_asset( string $url, array $dependencies = [], string $version = null, mixed $in_footer_or_media )
- * @method self dequeue_asset()
- * @method self deregister_asset()
+ * Class Asset
  */
 class Asset {
 	/**
@@ -1705,29 +1701,72 @@ class Asset {
 	}
 
 	/**
-	 * Gives us the option to call any wp_*_script or wp_*_style function
-	 * on the asset.
+	 * Prints the asset using wp_print_scripts or wp_print_styles.
 	 *
-	 * example: $asset->register_asset( ...$args ); will call wp_register_script( $slug, ...$args ); or
-	 * wp_register_style( $slug, ...$args ); based on if the asset is JS or CSS type.
-	 *
-	 * @since TBD
+	 * @since 1.4.4
 	 *
 	 * @return static
 	 */
-	public function __call( $method, $args ) {
-		if ( ! strstr( $method, 'asset' ) ) {
-			throw new RuntimeException( "Method {$method} does not exist." );
-		}
+	public function print_asset() {
+		$method = 'wp_print_' . $this->get_script_or_style() . 's';
+		$method( $this->get_slug() );
+		return $this;
+	}
 
-		$method = 'wp_' . str_replace( 'asset', $this->get_script_or_style(), $method );
+	/**
+	 * Enqueues the asset using wp_enqueue_script or wp_enqueue_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function enqueue_asset() {
+		$method = 'wp_enqueue_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
+		return $this;
+	}
 
-		if ( ! function_exists( $method ) ) {
-			throw new RuntimeException( "Method {$method} does not exist." );
-		}
+	/**
+	 * Registers the asset using wp_register_script or wp_register_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @param string      $url                The URL to the asset.
+	 * @param array       $dependencies       The dependencies for the asset.
+	 * @param string      $version            The version of the asset.
+	 * @param bool|string $in_footer_or_media Whether to enqueue in the footer or the media type for the asset.
+	 *
+	 * @return static
+	 */
+	public function register_asset( string $url, array $dependencies = [], string $version = null, $in_footer_or_media ) {
+		$method = 'wp_register_' . $this->get_script_or_style();
+		$method( $this->get_slug(), $url, $dependencies, $version, $in_footer_or_media );
+		return $this;
+	}
 
-		$method( $this->get_slug(), ...$args );
+	/**
+	 * Dequeues the asset using wp_dequeue_script or wp_dequeue_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function dequeue_asset() {
+		$method = 'wp_dequeue_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
+		return $this;
+	}
 
+	/**
+	 * Deregisters the asset using wp_deregister_script or wp_deregister_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function deregister_asset() {
+		$method = 'wp_deregister_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
 		return $this;
 	}
 
@@ -1767,7 +1806,7 @@ class Asset {
 	public function do_print() {
 		if ( $this->should_print() && ! $this->is_printed() ) {
 			$this->set_as_printed();
-			$this->print_assets();
+			$this->print_asset();
 		}
 
 		// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
