@@ -269,6 +269,8 @@ class Asset {
 	/**
 	 * Whether or not to attempt to load an .asset.php file.
 	 *
+	 * By default is true for scripts and false for styles.
+	 *
 	 * @since 1.3.1
 	 *
 	 * @var bool
@@ -287,7 +289,7 @@ class Asset {
 	 * This flag will be raised when the asset is added to a group path
 	 * and lowered when it's removed from it.
 	 *
-	 * @since TBD
+	 * @since 1.4.3
 	 *
 	 * @var bool
 	 */
@@ -1173,12 +1175,14 @@ class Asset {
 	 * Set the asset type.
 	 *
 	 * @since 1.0.0
+	 * @since 1.4.4 - For css files, we dont want to use asset file for dependencies by default.
 	 */
 	protected function infer_type() {
 		if ( substr( $this->file, -3, 3 ) === '.js' ) {
 			$this->type = 'js';
 		} elseif ( substr( $this->file, -4, 4 ) === '.css' ) {
 			$this->type = 'css';
+			$this->use_asset_file( false );
 		}
 	}
 
@@ -1530,7 +1534,7 @@ class Asset {
 	/**
 	 * Set the asset file path for the asset.
 	 *
-	 * @since TBD
+	 * @since 1.3.0
 	 *
 	 * @param string $path The partial path to the asset.
 	 *
