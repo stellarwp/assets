@@ -1737,7 +1737,12 @@ class Asset {
 	 *
 	 * @return static
 	 */
-	public function register_asset( string $url, array $dependencies = [], string $version = null, $in_footer_or_media = 'all' ) {
+	public function register_asset( string $url = '', array $dependencies = [], string $version = null, $in_footer_or_media = 'all' ) {
+		$url = $url ? $url : $this->get_url();
+		$dependencies = $dependencies ? $dependencies : $this->get_dependencies();
+		$version = $version ?? $this->get_version();
+		$in_footer_or_media = $in_footer_or_media ? $in_footer_or_media : ( $this->is_js() ? $this->is_in_footer() : $this->get_media() );
+
 		$method = 'wp_register_' . $this->get_script_or_style();
 		$method( $this->get_slug(), $url, $dependencies, $version, $in_footer_or_media );
 		return $this;
