@@ -289,7 +289,7 @@ class Asset {
 	 * This flag will be raised when the asset is added to a group path
 	 * and lowered when it's removed from it.
 	 *
-	 * @since TBD
+	 * @since 1.4.3
 	 *
 	 * @var bool
 	 */
@@ -1175,7 +1175,7 @@ class Asset {
 	 * Set the asset type.
 	 *
 	 * @since 1.0.0
-	 * @since TBD - For css files, we dont want to use asset file for dependencies by default.
+	 * @since 1.4.4 - For css files, we dont want to use asset file for dependencies by default.
 	 */
 	protected function infer_type() {
 		if ( substr( $this->file, -3, 3 ) === '.js' ) {
@@ -1534,7 +1534,7 @@ class Asset {
 	/**
 	 * Set the asset file path for the asset.
 	 *
-	 * @since TBD
+	 * @since 1.3.0
 	 *
 	 * @param string $path The partial path to the asset.
 	 *
