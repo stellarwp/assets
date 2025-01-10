@@ -1738,7 +1738,7 @@ class Asset {
 	 *
 	 * @return static
 	 */
-	public function register_asset( string $url, array $dependencies = [], string $version = null, $in_footer_or_media ) {
+	public function register_asset( string $url, array $dependencies = [], string $version = null, $in_footer_or_media = 'all' ) {
 		$method = 'wp_register_' . $this->get_script_or_style();
 		$method( $this->get_slug(), $url, $dependencies, $version, $in_footer_or_media );
 		return $this;
