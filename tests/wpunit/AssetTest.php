@@ -106,4 +106,78 @@ class AssetTest extends AssetTestCase {
 		$this->assertEquals( [ 'jquery' ], $checker( $asset->get_slug() ) );
 		$this->assertEquals( [ 'jquery' ], $asset->get_dependencies() );
 	}
+
+	public function test_it_print_asset() {
+		Config::reset();
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+
+		$asset_js = new Asset( 'test-script', 'fake.js', '1.0.0' );
+		$asset_css = new Asset( 'test-style', 'fake.css', '1.0.0' );
+
+		ob_start();
+		$asset_js->register_asset();
+		$asset_css->register_asset();
+		$asset_js->print_asset();
+		$asset_css->print_asset();
+		$this->assertEquals(
+			'<script src="' . plugins_url( '/assets/tests/_data/js/fake.js?ver=1.0.0' ) . '" id="test-script-js"></script>
+<link rel=\'stylesheet\' id=\'test-style-css\' href=\'' . plugins_url( '/assets/tests/_data/css/fake.css?ver=1.0.0' ) . '\' media=\'all\' />
+',
+			ob_get_clean()
+		);
+	}
+
+	public function test_it_enqueues_asset() {
+		Config::reset();
+		Config::set_hook_prefix( 'bork' );
+		Config::set_version( '1.1.0' );
+		Config::set_path( constant( 'WP_PLUGIN_DIR' ) . '/assets' );
+		Config::set_relative_asset_path( 'tests/_data/' );
+
+		$asset_js = new Asset( 'test-script', 'fake.js', '1.0.0' );
+		$asset_css = new Asset( 'test-style', 'fake.css', '1.0.0' );
+
+		$asset_js->register_asset();
+		$asset_css->register_asset();
+
+		$this->assertTrue( wp_script_is( 'test-script', 'registered' ) );
+		$this->assertSame( $asset_js->asset_is( 'registered' ), wp_script_is( 'test-script', 'registered' ) );
+		$this->assertTrue( wp_style_is( 'test-style', 'registered' ) );
+		$this->assertSame( $asset_css->asset_is( 'registered' ), wp_style_is( 'test-style', 'registered' ) );
+
+		$asset_js->enqueue_asset();
+		$asset_css->enqueue_asset();
+
+		$this->assertTrue( wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertSame( $asset_js->asset_is( 'enqueued' ), wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'test-style', 'enqueued' ) );
+		$this->assertSame( $asset_css->asset_is( 'enqueued' ), wp_style_is( 'test-style', 'enqueued' ) );
+
+		$asset_js->dequeue_asset();
+		$asset_css->dequeue_asset();
+
+		$this->assertFalse( wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertSame( $asset_js->asset_is( 'enqueued' ), wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertFalse( wp_style_is( 'test-style', 'enqueued' ) );
+		$this->assertSame( $asset_css->asset_is( 'enqueued' ), wp_style_is( 'test-style', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'test-script', 'registered' ) );
+		$this->assertSame( $asset_js->asset_is( 'registered' ), wp_script_is( 'test-script', 'registered' ) );
+		$this->assertTrue( wp_style_is( 'test-style', 'registered' ) );
+		$this->assertSame( $asset_css->asset_is( 'registered' ), wp_style_is( 'test-style', 'registered' ) );
+
+		$asset_js->deregister_asset();
+		$asset_css->deregister_asset();
+
+		$this->assertFalse( wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertSame( $asset_js->asset_is( 'enqueued' ), wp_script_is( 'test-script', 'enqueued' ) );
+		$this->assertFalse( wp_style_is( 'test-style', 'enqueued' ) );
+		$this->assertSame( $asset_css->asset_is( 'enqueued' ), wp_style_is( 'test-style', 'enqueued' ) );
+		$this->assertFalse( wp_script_is( 'test-script', 'registered' ) );
+		$this->assertSame( $asset_js->asset_is( 'registered' ), wp_script_is( 'test-script', 'registered' ) );
+		$this->assertFalse( wp_style_is( 'test-style', 'registered' ) );
+		$this->assertSame( $asset_css->asset_is( 'registered' ), wp_style_is( 'test-style', 'registered' ) );
+	}
 }
