@@ -405,7 +405,7 @@ class AssetsTest extends AssetTestCase {
 		     ->register();
 
 		$this->assertEquals( <<< SCRIPT
-<script id='my-first-script-js-extra'>
+<script id="my-first-script-js-extra">
 var boomshakalakaProjectFirstScriptData = {"animal":"cat","color":"orange"};
 </script>
 
@@ -413,7 +413,7 @@ SCRIPT,
 			apply_filters( 'script_loader_tag', '', 'my-first-script' )
 		);
 		$this->assertEquals( <<< SCRIPT
-<script id='my-second-script-js-extra'>
+<script id="my-second-script-js-extra">
 var boomshakalakaProjectSecondScriptData = {"animal":"dog","color":"green"};
 </script>
 
@@ -422,7 +422,7 @@ SCRIPT,
 		);
 
 		$this->assertEquals( <<< SCRIPT
-<script id='my-second-script-mod-js-extra'>
+<script id="my-second-script-mod-js-extra">
 var boomshakalakaProjectSecondScriptModData = {"animal":"horse"};
 </script>
 
@@ -504,7 +504,7 @@ SCRIPT,
 
 		$apply_filters = apply_filters( 'script_loader_tag', '', 'my-test-script' );
 		$this->assertEquals( <<< SCRIPT
-<script id='my-test-script-js-extra'>
+<script id="my-test-script-js-extra">
 var boomshakalakaProjectTestScriptData = {"animal":"cat","color":"orange"};
 </script>
 <script id="my-test-script-ns-extra">
@@ -552,7 +552,7 @@ SCRIPT,
 
 		$apply_filters = apply_filters( 'script_loader_tag', '', 'my-script-with-closure-data' );
 		$this->assertEquals( <<< SCRIPT
-<script id='my-script-with-closure-data-js-extra'>
+<script id="my-script-with-closure-data-js-extra">
 var scriptWithClosureData = {"animal":"cat","color":"orange"};
 </script>
 <script id="my-script-with-closure-data-ns-extra">
@@ -587,9 +587,9 @@ SCRIPT,
 		ob_start();
 		do_action( 'test_action' );
 		$this->assertEquals( <<< SCRIPT
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script.js?ver=1.0.0' id='my-deps-base-script-js'></script>
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script.js?ver=1.0.0' id='my-deps-vendor-script-js'></script>
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script.js?ver=1.0.0' id='my-deps-dependent-script-js'></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script.js?ver=1.0.0" id="my-deps-base-script-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script.js?ver=1.0.0" id="my-deps-vendor-script-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script.js?ver=1.0.0" id="my-deps-dependent-script-js"></script>
 
 SCRIPT,
 			ob_get_clean()
@@ -625,9 +625,9 @@ SCRIPT,
 		ob_start();
 		do_action( 'test_action_2' );
 		$this->assertEquals( <<< SCRIPT
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script-2.js?ver=1.0.0' id='my-base-script-2-js'></script>
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script-2.js?ver=1.0.0' id='my-vendor-script-2-js'></script>
-<script src='http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script-2.js?ver=1.0.0' id='my-dependent-script-2-js'></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/base-script-2.js?ver=1.0.0" id="my-base-script-2-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/vendor-script-2.js?ver=1.0.0" id="my-vendor-script-2-js"></script>
+<script src="http://wordpress.test/wp-content/plugins/assets/tests/_data/js/dependent-script-2.js?ver=1.0.0" id="my-dependent-script-2-js"></script>
 
 SCRIPT,
 			ob_get_clean()
