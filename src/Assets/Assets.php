@@ -688,9 +688,16 @@ class Assets {
 		)
 		) {
 			// Registering the asset now would trigger a doing_it_wrong notice: queue the assets to be registered later.
+			if ( $assets === null ) {
+				return;
+			}
 
 			if ( ! is_array( $assets ) ) {
-				$assets = [ $assets ];
+				if ( ! $assets instanceof Asset ) {
+					throw new \InvalidArgumentException( 'Assets in register_in_wp() must be of type Asset' );
+				}
+
+				$assets = [ $assets->get_slug() => $assets ];
 			}
 
 			// Register later, avoid the doing_it_wrong notice.
