@@ -3,6 +3,11 @@
   "description": "A library for managing asset registration and enqueuing in WordPress.",
   "type": "library",
   "license": "GPL-2.0",
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
   "autoload": {
     "psr-4": {
       "StellarWP\\Assets\\": "src/Assets/"
@@ -24,7 +29,9 @@
     }
   ],
   "minimum-stability": "stable",
-  "require": {},
+  "require": {
+    "php": ">=7.4"
+  },
   "require-dev": {
     "codeception/module-asserts": "^1.0",
     "codeception/module-cli": "^1.0",
