@@ -2,6 +2,8 @@
 
 namespace StellarWP\Assets;
 
+use InvalidArgumentException;
+
 class Assets {
 	/**
 	 * @var ?Assets
@@ -693,15 +695,17 @@ class Assets {
 			}
 
 			if ( ! is_array( $assets ) ) {
-				if ( ! $assets instanceof Asset ) {
-					throw new \InvalidArgumentException( 'Assets in register_in_wp() must be of type Asset' );
-				}
-
-				$assets = [ $assets->get_slug() => $assets ];
+				$assets = [ $assets ];
 			}
 
-			// Register later, avoid the doing_it_wrong notice.
-			$this->assets = array_merge( $this->assets, $assets );
+			foreach ( $assets as $asset ) {
+				if ( ! $asset instanceof Asset ) {
+					throw new InvalidArgumentException( 'Assets in register_in_wp() must be of type Asset' );
+				}
+
+				// Register later, avoid the doing_it_wrong notice.
+				$this->assets[ $asset->get_slug() ] = $asset;
+			}
 
 			return;
 		}
@@ -715,6 +719,10 @@ class Assets {
 		}
 
 		foreach ( $assets as $asset ) {
+			if ( ! $asset instanceof Asset ) {
+				throw new InvalidArgumentException( 'Assets in register_in_wp() must be of type Asset' );
+			}
+
 			// Asset is already registered.
 			if ( $asset->is_registered() ) {
 				continue;
