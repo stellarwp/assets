@@ -91,7 +91,7 @@ class AssetsTest extends AssetTestCase {
 		$assets = Assets::init();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid parameter passed to register_in_wp' );
+		$this->expectExceptionMessage( 'Assets in register_in_wp() must be of type Asset' );
 
 		$assets->register_in_wp( $fixture() );
 	}
