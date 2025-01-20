@@ -4,6 +4,10 @@ namespace StellarWP\Assets;
 
 use StellarWP\Assets\Tests\AssetTestCase;
 use PHPUnit\Framework\Assert;
+use stdClass;
+use Closure;
+use Generator;
+use InvalidArgumentException;
 
 class AssetsTest extends AssetTestCase {
 	/**
@@ -41,6 +45,55 @@ class AssetsTest extends AssetTestCase {
 		}
 
 		self::$uopz_redefines = [];
+	}
+
+	public function it_should_accept_instance_of_asset_or_array_of_assets_in_register_in_wp() {
+		$asset_1 = Asset::add( 'fake1-script', 'fake1.js' );
+		$asset_2 = Asset::add( 'fake1-style', 'fake1.css' );
+		$asset_3 = Asset::add( 'fake2-script', 'fake2.js' );
+		$asset_4 = Asset::add( 'fake2-style', 'fake2.css' );
+		$asset_5 = Asset::add( 'fake3-script', 'fake3.js' );
+
+		$assets = Assets::init();
+
+		$this->assertFalse( $asset_1->is_registered() );
+		$assets->register_in_wp( $asset_1 );
+		$this->assertTrue( $asset_1->is_registered() );
+
+		$this->assertFalse( $asset_2->is_registered() );
+		$this->assertFalse( $asset_3->is_registered() );
+		$this->assertFalse( $asset_4->is_registered() );
+		$this->assertFalse( $asset_5->is_registered() );
+		$assets->register_in_wp( [ $asset_2, $asset_3, $asset_4, $asset_5 ] );
+		$this->assertTrue( $asset_2->is_registered() );
+		$this->assertTrue( $asset_3->is_registered() );
+		$this->assertTrue( $asset_4->is_registered() );
+		$this->assertTrue( $asset_5->is_registered() );
+	}
+
+	public function invalid_params_for_register_in_wp_provider(): Generator {
+		yield 'string'         => [ fn() => 'string' ];
+		yield 'int'            => [ fn() => 1 ];
+		yield 'float'          => [ fn() => 1.1 ];
+		yield 'bool - true'    => [ fn() => true ];
+		yield 'bool - false'   => [ fn() => false ];
+		yield 'null'           => [ fn() => null ];
+		yield 'object'         => [ fn() => new stdClass() ];
+		yield 'array'          => [ fn() => [] ];
+		yield 'array - mixed'  => [ fn () => [ Asset::add( 'fake1-script', 'fake1.js' ), 'string' ] ];
+	}
+
+	/**
+	 * @test
+	 * @dataProvider invalid_params_for_register_in_wp_provider
+	 */
+	public function it_should_throw_exception_when_invalid_params_are_passed_to_register_in_wp( Closure $fixture ) {
+		$assets = Assets::init();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Invalid parameter passed to register_in_wp' );
+
+		$assets->register_in_wp( $fixture() );
 	}
 
 	/**
