@@ -678,8 +678,9 @@ class Assets {
 	 * Register the Assets on the correct hooks.
 	 *
 	 * @since 1.0.0
+	 * @since 1.4.5 Ensure the method accepts only `null` or an `Asset` instance or an array of `Asset[]` instances.
 	 *
-	 * @param array|Asset|null $assets Array of asset objects, single asset object, or null.
+	 * @param Asset[]|Asset|null $assets Array of asset objects, single asset object, or null.
 	 *
 	 * @return void
 	 */
