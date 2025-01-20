@@ -56,6 +56,9 @@ class AssetsTest extends AssetTestCase {
 
 		$assets = Assets::init();
 
+		$assets->register_in_wp( null ); // No problemo... nothing happens though.
+		$assets->register_in_wp( [] ); // No problemo... nothing happens though.
+
 		$this->assertFalse( $asset_1->is_registered() );
 		$assets->register_in_wp( $asset_1 );
 		$this->assertTrue( $asset_1->is_registered() );
@@ -77,9 +80,7 @@ class AssetsTest extends AssetTestCase {
 		yield 'float'          => [ fn() => 1.1 ];
 		yield 'bool - true'    => [ fn() => true ];
 		yield 'bool - false'   => [ fn() => false ];
-		yield 'null'           => [ fn() => null ];
 		yield 'object'         => [ fn() => new stdClass() ];
-		yield 'array'          => [ fn() => [] ];
 		yield 'array - mixed'  => [ fn () => [ Asset::add( 'fake1-script', 'fake1.js' ), 'string' ] ];
 	}
 
