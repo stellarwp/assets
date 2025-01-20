@@ -4,6 +4,9 @@ namespace StellarWP\Assets;
 
 use InvalidArgumentException;
 
+/**
+ * Class Asset.
+ */
 class Asset {
 	/**
 	 * @var array The asset action.
@@ -1697,14 +1700,175 @@ class Asset {
 	}
 
 	/**
+	 * Prints the asset using wp_print_scripts or wp_print_styles.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function print_asset() {
+		$method = 'wp_print_' . $this->get_script_or_style() . 's';
+		$method( $this->get_slug() );
+		return $this;
+	}
+
+	/**
+	 * Enqueues the asset using wp_enqueue_script or wp_enqueue_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function enqueue_asset() {
+		$method = 'wp_enqueue_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
+		return $this;
+	}
+
+	/**
+	 * Registers the asset using wp_register_script or wp_register_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @param string      $url                The URL to the asset.
+	 * @param array       $dependencies       The dependencies for the asset.
+	 * @param string      $version            The version of the asset.
+	 * @param bool|string $in_footer_or_media Whether to enqueue in the footer or the media type for the asset.
+	 *
+	 * @return static
+	 */
+	public function register_asset( string $url = '', array $dependencies = [], string $version = null, $in_footer_or_media = 'all' ) {
+		$url = $url ? $url : $this->get_url();
+		$dependencies = $dependencies ? $dependencies : $this->get_dependencies();
+		$version = $version ?? $this->get_version();
+		$in_footer_or_media = $in_footer_or_media ? $in_footer_or_media : ( $this->is_js() ? $this->is_in_footer() : $this->get_media() );
+
+		$method = 'wp_register_' . $this->get_script_or_style();
+		$method( $this->get_slug(), $url, $dependencies, $version, $in_footer_or_media );
+		return $this;
+	}
+
+	/**
+	 * Dequeues the asset using wp_dequeue_script or wp_dequeue_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function dequeue_asset() {
+		$method = 'wp_dequeue_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
+		return $this;
+	}
+
+	/**
+	 * Deregisters the asset using wp_deregister_script or wp_deregister_style.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function deregister_asset() {
+		$method = 'wp_deregister_' . $this->get_script_or_style();
+		$method( $this->get_slug() );
+		return $this;
+	}
+
+	/**
+	 * Check if the asset is something.
+	 *
+	 * In the background uses wp_script_is or wp_style_is.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @param string $what The what to check against.
+	 *
+	 * @return bool
+	 */
+	public function asset_is( string $what ): bool {
+		return ( 'wp_' . $this->get_script_or_style() . '_is' )( $this->get_slug(), $what );
+	}
+
+	/**
+	 * Get the script or style based on the asset type.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return string
+	 */
+	protected function get_script_or_style(): string {
+		return 'js' === $this->get_type() ? 'script' : 'style';
+	}
+
+	/**
+	 * Prints the asset
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function do_print() {
+		if ( $this->should_print() && ! $this->is_printed() ) {
+			$this->set_as_printed();
+			$this->print_asset();
+		}
+
+		// We print first, and tell the system it was enqueued, WP is smart not to do it twice.
+		$this->enqueue_asset();
+
+		if ( ! $this->is_css() ) {
+			return $this;
+		}
+
+		foreach ( $this->get_style_data() as $key => $value ) {
+			wp_style_add_data( $this->get_slug(), $key, $value );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Performs the asset registration in WP.
+	 *
+	 * @since 1.4.4
+	 *
+	 * @return static
+	 */
+	public function do_register() {
+		$this->register_asset( $this->get_url(), $this->get_dependencies(), $this->get_version(), $this->is_js() ? $this->is_in_footer() : $this->get_media() );
+		$this->set_as_registered();
+
+		if ( $this->is_js() ) {
+			if ( empty( $this->get_translation_path() ) || empty( $this->get_textdomain() ) ) {
+				return $this;
+			}
+
+			wp_set_script_translations( $this->get_slug(), $this->get_textdomain(), $this->get_translation_path() );
+			return $this;
+		}
+
+
+		$style_data = $this->get_style_data();
+		if ( $style_data ) {
+			foreach ( $style_data as $datum_key => $datum_value ) {
+				wp_style_add_data( $this->get_slug(), $datum_key, $datum_value );
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Set the asset enqueue status to false.
 	 *
 	 * @since 1.0.0
+	 * @since 1.4.4 - Actually dequeues the asset.
 	 *
 	 * @return static
 	 */
 	public function set_as_unenqueued() {
 		$this->is_enqueued = false;
+		$this->dequeue_asset();
 		return $this;
 	}
 
@@ -1712,11 +1876,13 @@ class Asset {
 	 * Set the asset registration status to false.
 	 *
 	 * @since 1.0.0
+	 * @since 1.4.4 - Actually deregisters the asset.
 	 *
 	 * @return static
 	 */
 	public function set_as_unregistered() {
 		$this->is_registered = false;
+		$this->deregister_asset();
 		return $this;
 	}
 
