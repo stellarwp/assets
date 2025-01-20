@@ -691,7 +691,7 @@ class Assets {
 		)
 		) {
 			// Registering the asset now would trigger a doing_it_wrong notice: queue the assets to be registered later.
-			if ( $assets === null ) {
+			if ( $assets === null || empty( $assets ) ) {
 				return;
 			}
 
@@ -711,12 +711,16 @@ class Assets {
 			return;
 		}
 
-		if ( is_null( $assets ) ) {
+		if ( null === $assets ) {
 			$assets = $this->get();
 		}
 
 		if ( ! is_array( $assets ) ) {
 			$assets = [ $assets ];
+		}
+
+		if ( empty( $assets ) ) {
+			return;
 		}
 
 		foreach ( $assets as $asset ) {
