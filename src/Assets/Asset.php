@@ -1123,7 +1123,16 @@ class Asset {
 			return (string) $asset_file_contents['version'];
 		}
 
-		return $this->version;
+		$hook_prefix = Config::get_hook_prefix();
+
+		/**
+		 * Filters the asset version when it doesn't come from an asset file.
+		 *
+		 * @param string $version The asset version.
+		 * @param string $slug    The asset slug.
+		 * @param Asset  $asset   The Asset object.
+		 */
+		return (string) apply_filters( "stellarwp/assets/{$hook_prefix}/version", $this->version, $this->slug, $this );
 	}
 
 	/**
