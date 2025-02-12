@@ -1128,8 +1128,6 @@ class Asset {
 		/**
 		 * Filters the asset version when it doesn't come from an asset file.
 		 *
-		 * @since TBD
-		 *
 		 * @param string $version The asset version.
 		 * @param string $slug    The asset slug.
 		 * @param Asset  $asset   The Asset object.
