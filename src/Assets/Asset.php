@@ -1123,7 +1123,16 @@ class Asset {
 			return (string) $asset_file_contents['version'];
 		}
 
-		return $this->version;
+		/**
+		 * Filters the asset version when it doesn't come from an asset file.
+		 *
+		 * @since TBD
+		 *
+		 * @param string $version The asset version.
+		 * @param string $slug    The asset slug.
+		 * @param Asset  $asset   The Asset object.
+		 */
+		return (string) apply_filters( 'stellarwp/assets/asset/version', $this->version, $this->slug, $this );
 	}
 
 	/**
