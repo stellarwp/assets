@@ -1138,11 +1138,10 @@ class Asset {
 		}
 
 		$min_relative_path = $this->get_min_path();
-		if ( $min_relative_path === $resource_path ) {
-			return preg_replace( '#(.*).(js|css)#', '$1.min.$2', $path );
-		}
+		$min_path = $min_relative_path === $this->get_path() ? preg_replace( '#(.*).(js|css)#', '$1.min.$2', $path ) : $root_path . $min_relative_path . $resource;
+		$min_path = wp_normalize_path( $min_path );
 
-		return wp_normalize_path( $root_path . $min_relative_path . $resource );
+		return file_exists( $min_path ) ? $min_path : $path;
 	}
 
 	/**
