@@ -1127,7 +1127,7 @@ class Asset {
 
 		$root_path       = $this->get_root_path();
 
-		$path = $root_path . $resource_path . $resource;
+		$path = wp_normalize_path( $root_path . $resource_path . $resource );
 
 		if ( ! $use_min_if_available ) {
 			return $path;
@@ -1142,7 +1142,7 @@ class Asset {
 			return preg_replace( '#(.*).(js|css)#', '$1.min.$2', $path );
 		}
 
-		return $root_path . $min_relative_path . $resource;
+		return wp_normalize_path( $root_path . $min_relative_path . $resource );
 	}
 
 	/**
