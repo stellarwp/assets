@@ -1114,7 +1114,7 @@ class Asset {
 	/**
 	 * Get the asset's full path - considering if minified exists.
 	 *
-	 * @since TBD
+	 * @since 1.4.6
 	 *
 	 * @param bool $use_min_if_available
 	 *
