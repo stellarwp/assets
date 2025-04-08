@@ -1020,8 +1020,9 @@ SCRIPT,
 	protected function assert_minified_found( $slug_prefix, $is_js = true, $has_min = true, $has_only_min = false, $id = '', $add_to_path_group = '', $group_path_path = '', $wont_figure_out_min_vs_unmin = false, $should_prefix = true ) {
 		$asset = Assets::init()->get( $slug_prefix . '-' . ( $is_js ? 'script' : 'style' ) );
 
-		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $should_prefix ? ( $is_js ? 'js' : 'css' ) : '' ) . '/' . $slug_prefix );
+		$url = plugins_url( ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $should_prefix ? ( $is_js ? 'js/' : 'css/' ) : '' ) . $slug_prefix );
 
+		$path = wp_normalize_path( WP_PLUGIN_DIR . ( $group_path_path ? $group_path_path : '/assets/tests/_data/' ) . ( $should_prefix ? ( $is_js ? 'js/' : 'css/' ) : '' ) . $slug_prefix );
 		$urls = [];
 
 		$this->set_const_value( 'SCRIPT_DEBUG', false );
@@ -1031,12 +1032,17 @@ SCRIPT,
 		if ( $has_only_min ) {
 			$urls[] = $url . '.min' . ( $is_js ? '.js' : '.css' );
 			$urls[] = $url . '.min' . ( $is_js ? '.js' : '.css' );
+			$temp_path = $path . '.min' . ( $is_js ? '.js' : '.css' );
+			$path = file_exists( $temp_path ) ? $temp_path : $path . ( $is_js ? '.js' : '.css' );
 		} elseif ( $has_min ) {
 			$urls[] = $url . ( $is_js ? '.min.js' : '.min.css' );
 			$urls[] = $url . ( $is_js ? '.js' : '.css' );
+			$temp_path = $path . '.min' . ( $is_js ? '.js' : '.css' );
+			$path = file_exists( $temp_path ) ? $temp_path : $path . ( $is_js ? '.js' : '.css' );
 		} else {
 			$urls[] = $url . ( $is_js ? '.js' : '.css' );
 			$urls[] = $url . ( $is_js ? '.js' : '.css' );
+			$path .= $is_js ? '.js' : '.css';
 		}
 
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
@@ -1076,6 +1082,8 @@ SCRIPT,
 			$asset->get_url(),
 			$id
 		);
+
+		$this->assertEquals( $path, $asset->get_full_resource_path() );
 	}
 
 	/**

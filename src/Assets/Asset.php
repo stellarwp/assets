@@ -1112,6 +1112,39 @@ class Asset {
 	}
 
 	/**
+	 * Get the asset's full path - considering if minified exists.
+	 *
+	 * @since 1.4.6
+	 *
+	 * @param bool $use_min_if_available
+	 *
+	 * @return string
+	 */
+	public function get_full_resource_path( bool $use_min_if_available = true ): string {
+		$resource_path_data = $this->build_resource_path_data();
+		$resource           = $resource_path_data['resource'];
+		$resource_path      = $resource_path_data['resource_path'];
+
+		$root_path       = $this->get_root_path();
+
+		$path = wp_normalize_path( $root_path . $resource_path . $resource );
+
+		if ( ! $use_min_if_available ) {
+			return $path;
+		}
+
+		if ( strstr( $path, '.min.' . $this->get_type() ) ) {
+			return $path;
+		}
+
+		$min_relative_path = $this->get_min_path();
+		$min_path = $min_relative_path === $this->get_path() ? preg_replace( '#(.*).(js|css)#', '$1.min.$2', $path ) : $root_path . $min_relative_path . $resource;
+		$min_path = wp_normalize_path( $min_path );
+
+		return file_exists( $min_path ) ? $min_path : $path;
+	}
+
+	/**
 	 * Get the asset version.
 	 *
 	 * @return string
