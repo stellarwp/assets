@@ -878,7 +878,7 @@ class Asset {
 			);
 		}
 
-		return $dependencies;
+		return (array) $dependencies;
 	}
 
 	/**
@@ -1791,7 +1791,7 @@ class Asset {
 		if ( $dependencies[0] && is_callable( $dependencies[0] ) ) {
 			$this->dependencies = $dependencies[0];
 		} else {
-			$this->dependencies = $dependencies;
+			$this->dependencies = (array) $dependencies;
 		}
 
 		return $this;
