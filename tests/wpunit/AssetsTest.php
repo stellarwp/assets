@@ -298,6 +298,14 @@ class AssetsTest extends AssetTestCase {
 		}
 	}
 
+	/**
+	 * @test
+	 */
+	public function it_should_return_url_as_the_full_resource_path_when_the_path_is_a_url() {
+		$asset = Asset::add( 'fake-script', 'https://example.com/fake.js' );
+		$this->assertEquals( 'https://example.com/fake.js', $asset->get_full_resource_path() );
+	}
+
 	public function constantProvider() {
 		$data = [
 			[
