@@ -1127,7 +1127,11 @@ class Asset {
 			return '';
 		}
 
-		if ( str_starts_with( $resource_path_data['resource'], 'http://' ) || str_starts_with( $resource_path_data['resource'], 'https://' ) || str_starts_with( $resource_path_data['resource'], '//' ) ) {
+		if (
+			str_starts_with( $resource_path_data['resource'], 'http://' ) ||
+			str_starts_with( $resource_path_data['resource'], 'https://' ) ||
+			str_starts_with( $resource_path_data['resource'], '//' )
+		) {
 			return $resource_path_data['resource'];
 		}
 		$resource           = $resource_path_data['resource'];
