@@ -1115,6 +1115,7 @@ class Asset {
 	 * Get the asset's full path - considering if minified exists.
 	 *
 	 * @since 1.4.6
+	 * @since 1.4.7 When the path is a URL, return the URL.
 	 *
 	 * @param bool $use_min_if_available
 	 *
@@ -1122,6 +1123,17 @@ class Asset {
 	 */
 	public function get_full_resource_path( bool $use_min_if_available = true ): string {
 		$resource_path_data = $this->build_resource_path_data();
+		if ( empty( $resource_path_data['resource'] ) ) {
+			return '';
+		}
+
+		if (
+			str_starts_with( $resource_path_data['resource'], 'http://' ) ||
+			str_starts_with( $resource_path_data['resource'], 'https://' ) ||
+			str_starts_with( $resource_path_data['resource'], '//' )
+		) {
+			return $resource_path_data['resource'];
+		}
 		$resource           = $resource_path_data['resource'];
 		$resource_path      = $resource_path_data['resource_path'];
 
