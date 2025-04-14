@@ -78,28 +78,28 @@ class Asset {
 	protected array $groups = [];
 
 	/**
-	 * Should the asset be loaded in the footer?
+	 * Whether the asset be loaded in the footer.
 	 *
 	 * @var bool
 	 */
 	protected bool $in_footer = true;
 
 	/**
-	 * Should the asset be marked as async?
+	 * Whether the asset be marked as async.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_async = false;
 
 	/**
-	 * Should the asset be marked as deferred?
+	 * Whether the asset be marked as deferred.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_deferred = false;
 
 	/**
-	 * Is the asset enqueued?
+	 * Whether the asset has been enqueued.
 	 *
 	 * @var bool
 	 */
@@ -113,21 +113,21 @@ class Asset {
 	protected bool $is_module = false;
 
 	/**
-	 * Is the asset printed?
+	 * Whether the asset has been printed.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_printed = false;
 
 	/**
-	 * Is the asset registered?
+	 * Whether the asset has been registered.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_registered = false;
 
 	/**
-	 * Is the asset a vendor asset?
+	 * Whether this is a vendor asset.
 	 *
 	 * @var bool
 	 */
@@ -534,7 +534,7 @@ class Asset {
 		$url = $plugin_base_url . $resource_path . $resource;
 
 		/**
-		 * Filters the asset URL
+		 * Filters the asset URL.
 		 *
 		 * @param string $url   Asset URL.
 		 * @param string $slug  Asset slug.
