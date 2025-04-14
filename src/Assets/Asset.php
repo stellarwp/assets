@@ -681,11 +681,11 @@ class Asset {
 		$source_type = $this->get_type();
 
 		if ( $clone_type === $source_type ) {
-			throw new \InvalidArgumentException( 'The clone type must be different from the source type.' );
+			throw new InvalidArgumentException( 'The clone type must be different from the source type.' );
 		}
 
 		if ( ! in_array( $clone_type, [ 'css', 'js' ], true ) ) {
-			throw new \InvalidArgumentException( 'The clone type must be either "css" or "js".' );
+			throw new InvalidArgumentException( 'The clone type must be either "css" or "js".' );
 		}
 
 		$slug  = $this->slug;
