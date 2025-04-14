@@ -66,12 +66,12 @@ class VendorAsset extends Asset {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param bool $use_min_if_available (Unused) Use the minified version of the asset if available.
+	 * @param bool $_unused (Unused) Use the minified version of the asset if available.
 	 *
 	 * @return string
 	 * @throws LogicException If the URL has a placeholder but no version is provided.
 	 */
-	public function get_url( bool $use_min_if_available = true ): string {
+	public function get_url( bool $_unused = true ): string {
 		$has_version = null !== $this->version;
 		if ( ! $has_version && $this->url_has_placeholder( $this->url ) ) {
 			throw new LogicException( 'A URL with a placeholder must have a version provided.' );
@@ -125,5 +125,110 @@ class VendorAsset extends Asset {
 	 */
 	protected function url_has_placeholder( string $url ): bool {
 		return false !== strpos( $url, '%s' );
+	}
+
+	// ---------------------------------------------
+	// NO-OP or UNUSED METHODS
+	// ---------------------------------------------
+
+	/**
+	 * Get the asset asset file path.
+	 *
+	 * @return string
+	 */
+	public function get_asset_file_path(): string {
+		return '';
+	}
+
+	/**
+	 * Get the asset min path.
+	 *
+	 * @return string
+	 */
+	public function get_min_path(): string {
+		return '';
+	}
+
+	/**
+	 * Get the asset min path.
+	 *
+	 * @return string
+	 */
+	public function get_path(): string {
+		return '';
+	}
+
+	/**
+	 * Gets the root path for the resource.
+	 *
+	 * @return ?string
+	 */
+	public function get_root_path(): ?string {
+		return '';
+	}
+
+	/**
+	 * Get the asset translation path.
+	 *
+	 * @return string
+	 */
+	public function get_translation_path(): string {
+		return '';
+	}
+
+	/**
+	 * Get the asset's full path - considering if minified exists.
+	 *
+	 * @param bool $_unused
+	 *
+	 * @return string
+	 */
+	public function get_full_resource_path( bool $_unused = true ): string {
+		return $this->get_url( $_unused );
+	}
+
+	/**
+	 * Set the asset file path for the asset.
+	 *
+	 * @param string $path The partial path to the asset.
+	 *
+	 * @return static
+	 */
+	public function set_asset_file( string $path ) {
+		return $this;
+	}
+
+	/**
+	 * Set the directory where asset should be retrieved.
+	 *
+	 * @param ?string $path   The path to the minified file.
+	 * @param ?bool   $prefix Whether to prefix files automatically by type (e.g. js/ for JS). Defaults to true.
+	 *
+	 * @return $this
+	 */
+	public function set_path( ?string $path = null, $prefix = null ) {
+		return $this;
+	}
+
+	/**
+	 * Set the directory where min files should be retrieved.
+	 *
+	 * @param ?string $path The path to the minified file.
+	 *
+	 * @return $this
+	 */
+	public function set_min_path( ?string $path = null ) {
+		return $this;
+	}
+
+	/**
+	 * Set whether or not to use an .asset.php file.
+	 *
+	 * @param boolean $_unused Whether to use an .asset.php file.
+	 *
+	 * @return self
+	 */
+	public function use_asset_file( bool $_unused = true ): self {
+		return $this;
 	}
 }
