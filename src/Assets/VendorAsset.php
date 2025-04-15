@@ -44,6 +44,24 @@ class VendorAsset extends Asset {
 	}
 
 	/**
+	 * Registers a vendor asset.
+	 *
+	 * @param string  $slug    The asset slug.
+	 * @param string  $url     The asset file path.
+	 * @param ?string $type    The asset type.
+	 * @param ?string $version The asset version.
+	 */
+	public static function add( string $slug, string $url, ?string $type = null, ?string $version = null ) {
+		$instance = new self( $slug, $url, $type ?? 'js' );
+
+		if ( null !== $version ) {
+			$instance->set_version( $version );
+		}
+
+		return Assets::init()->add( $instance );
+	}
+
+	/**
 	 * Set the asset version.
 	 *
 	 * @param string $version The asset version.
