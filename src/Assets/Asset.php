@@ -345,7 +345,7 @@ class Asset {
 	 * @param string|null $version   The asset version.
 	 * @param string|null $root_path The path to the root of the plugin.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function add( string $slug, string $file, string $version = null, $root_path = null ) {
 		return Assets::init()->add( new self( $slug, $file, $version, $root_path ) );

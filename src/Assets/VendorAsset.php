@@ -6,6 +6,7 @@ namespace StellarWP\Assets;
 
 use InvalidArgumentException;
 use LogicException;
+use RuntimeException;
 
 class VendorAsset extends Asset {
 
@@ -51,7 +52,7 @@ class VendorAsset extends Asset {
 	 * @param ?string $type    The asset type.
 	 * @param ?string $version The asset version.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function add( string $slug, string $url, ?string $type = null, $version = null ) {
 		$instance = new self( $slug, $url, $type ?? 'js' );
@@ -60,7 +61,12 @@ class VendorAsset extends Asset {
 			$instance->set_version( (string) $version );
 		}
 
-		return Assets::init()->add( $instance );
+		$registered = Assets::init()->add( $instance );
+		if ( ! $registered instanceof self ) {
+			throw new RuntimeException( 'The asset was already registered as a different type.' );
+		}
+
+		return $registered;
 	}
 
 	/**
