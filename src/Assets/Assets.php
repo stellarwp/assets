@@ -114,17 +114,16 @@ class Assets {
 	 *
 	 */
 	public function add( Asset $asset ) {
-		// Prevent weird stuff here.
+		// Check if the slug is registered, and if so return the previously-registerd Asset.
 		$slug = $asset->get_slug();
 
 		if ( $this->exists( $slug ) ) {
 			return $this->get( $slug );
 		}
 
-		// Set the Asset on the array of notices.
+		// Add the asset to the array of assets.
 		$this->assets[ $slug ] = $asset;
 
-		// Return the Slug because it might be modified.
 		return $asset;
 	}
 
