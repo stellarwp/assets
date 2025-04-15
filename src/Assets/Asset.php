@@ -78,21 +78,21 @@ class Asset {
 	protected array $groups = [];
 
 	/**
-	 * Whether the asset be loaded in the footer.
+	 * Whether the asset should be loaded in the footer.
 	 *
 	 * @var bool
 	 */
 	protected bool $in_footer = true;
 
 	/**
-	 * Whether the asset be marked as async.
+	 * Whether the asset should be marked as async.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_async = false;
 
 	/**
-	 * Whether the asset be marked as deferred.
+	 * Whether the asset should be marked as deferred.
 	 *
 	 * @var bool
 	 */
