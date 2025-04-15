@@ -17,6 +17,13 @@ class VendorAsset extends Asset {
 	protected bool $is_vendor = true;
 
 	/**
+	 * Whether to attempt to load an .asset.php file.
+	 *
+	 * @var bool
+	 */
+	protected bool $use_asset_file = false;
+
+	/**
 	 * VendorAsset constructor.
 	 *
 	 * @param string $slug The asset slug.
@@ -137,6 +144,15 @@ class VendorAsset extends Asset {
 	 * @return string
 	 */
 	public function get_asset_file_path(): string {
+		return '';
+	}
+
+	/**
+	 * Get the asset file.
+	 *
+	 * @return string
+	 */
+	public function get_file(): string {
 		return '';
 	}
 
