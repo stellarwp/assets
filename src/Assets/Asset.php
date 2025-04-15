@@ -78,28 +78,28 @@ class Asset {
 	protected array $groups = [];
 
 	/**
-	 * Should the asset be loaded in the footer?
+	 * Whether the asset should be loaded in the footer.
 	 *
 	 * @var bool
 	 */
 	protected bool $in_footer = true;
 
 	/**
-	 * Should the asset be marked as async?
+	 * Whether the asset should be marked as async.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_async = false;
 
 	/**
-	 * Should the asset be marked as deferred?
+	 * Whether the asset should be marked as deferred.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_deferred = false;
 
 	/**
-	 * Is the asset enqueued?
+	 * Whether the asset has been enqueued.
 	 *
 	 * @var bool
 	 */
@@ -113,21 +113,21 @@ class Asset {
 	protected bool $is_module = false;
 
 	/**
-	 * Is the asset printed?
+	 * Whether the asset has been printed.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_printed = false;
 
 	/**
-	 * Is the asset registered?
+	 * Whether the asset has been registered.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_registered = false;
 
 	/**
-	 * Is the asset a vendor asset?
+	 * Whether this is a vendor asset.
 	 *
 	 * @var bool
 	 */
@@ -344,6 +344,8 @@ class Asset {
 	 * @param string      $file      The asset file path.
 	 * @param string|null $version   The asset version.
 	 * @param string|null $root_path The path to the root of the plugin.
+	 *
+	 * @return self
 	 */
 	public static function add( string $slug, string $file, string $version = null, $root_path = null ) {
 		return Assets::init()->add( new self( $slug, $file, $version, $root_path ) );
@@ -534,7 +536,7 @@ class Asset {
 		$url = $plugin_base_url . $resource_path . $resource;
 
 		/**
-		 * Filters the asset URL
+		 * Filters the asset URL.
 		 *
 		 * @param string $url   Asset URL.
 		 * @param string $slug  Asset slug.
@@ -681,11 +683,11 @@ class Asset {
 		$source_type = $this->get_type();
 
 		if ( $clone_type === $source_type ) {
-			throw new \InvalidArgumentException( 'The clone type must be different from the source type.' );
+			throw new InvalidArgumentException( 'The clone type must be different from the source type.' );
 		}
 
 		if ( ! in_array( $clone_type, [ 'css', 'js' ], true ) ) {
-			throw new \InvalidArgumentException( 'The clone type must be either "css" or "js".' );
+			throw new InvalidArgumentException( 'The clone type must be either "css" or "js".' );
 		}
 
 		$slug  = $this->slug;
