@@ -51,11 +51,11 @@ class VendorAsset extends Asset {
 	 * @param ?string $type    The asset type.
 	 * @param ?string $version The asset version.
 	 */
-	public static function add( string $slug, string $url, ?string $type = null, ?string $version = null ) {
+	public static function add( string $slug, string $url, ?string $type = null, $version = null ) {
 		$instance = new self( $slug, $url, $type ?? 'js' );
 
 		if ( null !== $version ) {
-			$instance->set_version( $version );
+			$instance->set_version( (string) $version );
 		}
 
 		return Assets::init()->add( $instance );
