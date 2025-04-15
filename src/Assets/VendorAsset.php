@@ -50,6 +50,8 @@ class VendorAsset extends Asset {
 	 * @param string  $url     The asset file path.
 	 * @param ?string $type    The asset type.
 	 * @param ?string $version The asset version.
+	 *
+	 * @return self
 	 */
 	public static function add( string $slug, string $url, ?string $type = null, $version = null ) {
 		$instance = new self( $slug, $url, $type ?? 'js' );

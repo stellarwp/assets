@@ -109,7 +109,7 @@ class Assets {
 	 *
 	 * @param Asset $asset Register an asset.
 	 *
-	 * @return Asset|false The registered object or false on error.
+	 * @return Asset|VendorAsset The registered object or false on error.
 	 * @since 1.0.0
 	 *
 	 */
@@ -192,7 +192,7 @@ class Assets {
 	 * @param string|array $slug Slug of the Asset.
 	 * @param boolean $sort If we should do any sorting before returning.
 	 *
-	 * @return array|Asset Array of asset objects, single asset object, or null if looking for a single asset but
+	 * @return array|Asset|VendorAsset Array of asset objects, single asset object, or null if looking for a single asset but
 	 *                           it was not in the array of objects.
 	 * @since 1.0.0
 	 *
