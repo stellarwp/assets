@@ -74,7 +74,7 @@ class VendorAsset extends Asset {
 	 *
 	 * @param string $version The asset version.
 	 *
-	 * @return $this
+	 * @return static
 	 */
 	public function set_version( string $version ): self {
 		$this->version = $version;
@@ -138,8 +138,8 @@ class VendorAsset extends Asset {
 	/**
 	 * Get the formatted version of the URL.
 	 *
-	 * This will replace the version placeholder in the URL with the actual version. If there
-	 * is no placeholder, it will append the version as a query string.
+	 * This will replace the version placeholder in the URL with the actual version.
+	 * If there is no placeholder, it will append the version as a query string.
 	 *
 	 * @return string
 	 */
@@ -246,7 +246,7 @@ class VendorAsset extends Asset {
 	 * @param ?string $path   The path to the minified file.
 	 * @param ?bool   $prefix Whether to prefix files automatically by type (e.g. js/ for JS). Defaults to true.
 	 *
-	 * @return $this
+	 * @return static
 	 */
 	public function set_path( ?string $path = null, $prefix = null ) {
 		return $this;
@@ -257,7 +257,7 @@ class VendorAsset extends Asset {
 	 *
 	 * @param ?string $path The path to the minified file.
 	 *
-	 * @return $this
+	 * @return static
 	 */
 	public function set_min_path( ?string $path = null ) {
 		return $this;
@@ -268,7 +268,7 @@ class VendorAsset extends Asset {
 	 *
 	 * @param boolean $_unused Whether to use an .asset.php file.
 	 *
-	 * @return self
+	 * @return static
 	 */
 	public function use_asset_file( bool $_unused = true ): self {
 		return $this;

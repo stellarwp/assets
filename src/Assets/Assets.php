@@ -109,12 +109,12 @@ class Assets {
 	 *
 	 * @param Asset $asset Register an asset.
 	 *
-	 * @return Asset|VendorAsset The registered object or false on error.
+	 * @return Asset|VendorAsset The registered object.
 	 * @since 1.0.0
 	 *
 	 */
 	public function add( Asset $asset ) {
-		// Check if the slug is registered, and if so return the previously-registerd Asset.
+		// Check if the slug is registered, and if so return the previously-registered Asset.
 		$slug = $asset->get_slug();
 
 		if ( $this->exists( $slug ) ) {
