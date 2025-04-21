@@ -109,22 +109,21 @@ class Assets {
 	 *
 	 * @param Asset $asset Register an asset.
 	 *
-	 * @return Asset|false The registered object or false on error.
+	 * @return Asset|VendorAsset The registered object.
 	 * @since 1.0.0
 	 *
 	 */
 	public function add( Asset $asset ) {
-		// Prevent weird stuff here.
+		// Check if the slug is registered, and if so return the previously-registered Asset.
 		$slug = $asset->get_slug();
 
 		if ( $this->exists( $slug ) ) {
 			return $this->get( $slug );
 		}
 
-		// Set the Asset on the array of notices.
+		// Add the asset to the array of assets.
 		$this->assets[ $slug ] = $asset;
 
-		// Return the Slug because it might be modified.
 		return $asset;
 	}
 
@@ -193,7 +192,7 @@ class Assets {
 	 * @param string|array $slug Slug of the Asset.
 	 * @param boolean $sort If we should do any sorting before returning.
 	 *
-	 * @return array|Asset Array of asset objects, single asset object, or null if looking for a single asset but
+	 * @return array|Asset|VendorAsset Array of asset objects, single asset object, or null if looking for a single asset but
 	 *                           it was not in the array of objects.
 	 * @since 1.0.0
 	 *
