@@ -99,6 +99,11 @@ class Config {
 		/**
 		 * Allows for the group path to be filtered.
 		 *
+		 * This filters allows plugins/themes using the library to modify the root path
+		 * to follow symlinks. The library itself can't handle this on its own,
+		 * because it's not possible to be aware of where the library is placed relative
+		 * to the actual WordPress plugins or themes directories.
+		 *
 		 * @since 1.4.9
 		 *
 		 * @param array  $group_path      The group path data.
