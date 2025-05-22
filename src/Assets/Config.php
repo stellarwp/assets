@@ -85,6 +85,7 @@ class Config {
 	 *
 	 * @since 1.4.0
 	 * @since 1.4.2 Added the ability to specify whether the group path is using the asset directory prefix.
+	 * @since 1.4.10 Added the hook prefix to the filter.
 	 *
 	 * @throws RuntimeException If the root or relative path is not specified.
 	 *
@@ -96,6 +97,8 @@ class Config {
 	 * @return void
 	 */
 	public static function add_group_path( string $group_path_slug, string $root, string $relative, bool $is_using_asset_directory_prefix = false ): void {
+		$hook_prefix = static::get_hook_prefix();
+
 		/**
 		 * Allows for the group path to be filtered.
 		 *
@@ -110,7 +113,7 @@ class Config {
 		 * @param string $group_path_slug The slug of the group path.
 		 */
 		static::$group_paths[ $group_path_slug ] = apply_filters(
-			'stellarwp/assets/group_path',
+			"stellarwp/assets/{$hook_prefix}/group_path",
 			[
 				'root'     => self::normalize_path( $root ),
 				'relative' => trailingslashit( $relative ),

@@ -107,6 +107,7 @@ class ConfigTest extends AssetTestCase {
 	 * @test
 	 */
 	public function should_add_group_paths() {
+		Config::set_hook_prefix( 'bork' );
 		Config::add_group_path( 'my-group-path-1', dirname( __DIR__, 2) . '/src/feature-1', 'app-1', true );
 		Config::add_group_path( 'my-group-path-2', dirname( __DIR__, 2) . '/src/feature-2', 'app-2', false );
 
