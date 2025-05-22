@@ -101,7 +101,7 @@ class Config {
 		 *
 		 * @since 1.4.9
 		 *
-		 * @param array  $group_path The group path data.
+		 * @param array  $group_path      The group path data.
 		 * @param string $group_path_slug The slug of the group path.
 		 */
 		static::$group_paths[ $group_path_slug ] = apply_filters(
