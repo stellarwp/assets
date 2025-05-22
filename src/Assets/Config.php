@@ -99,7 +99,7 @@ class Config {
 		/**
 		 * Allows for the group path to be filtered.
 		 *
-		 * @since 1.4.3
+		 * @since 1.4.9
 		 *
 		 * @param array  $group_path The group path data.
 		 * @param string $group_path_slug The slug of the group path.
