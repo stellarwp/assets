@@ -628,7 +628,7 @@ class Assets {
 		 * @since 1.0.0
 		 *
 		 */
-		$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue", $enqueue, $asset );
+		$enqueue = $enqueue && (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue", $enqueue, $asset );
 
 		/**
 		 * Allows developers to hook-in and prevent an asset from being loaded.
@@ -639,7 +639,7 @@ class Assets {
 		 * @since 1.0.0
 		 *
 		 */
-		$enqueue = (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue_{$slug}", $enqueue, $asset );
+		$enqueue = $enqueue && (bool) apply_filters( "stellarwp/assets/{$hook_prefix}/enqueue_{$slug}", $enqueue, $asset );
 
 		if ( ! $enqueue && ! $force_enqueue ) {
 			return;
