@@ -96,11 +96,23 @@ class Config {
 	 * @return void
 	 */
 	public static function add_group_path( string $group_path_slug, string $root, string $relative, bool $is_using_asset_directory_prefix = false ): void {
-		static::$group_paths[ $group_path_slug ] = [
-			'root'     => self::normalize_path( $root ),
-			'relative' => trailingslashit( $relative ),
-			'prefix'   => $is_using_asset_directory_prefix,
-		];
+		/**
+		 * Allows for the group path to be filtered.
+		 *
+		 * @since 1.4.3
+		 *
+		 * @param array  $group_path The group path data.
+		 * @param string $group_path_slug The slug of the group path.
+		 */
+		static::$group_paths[ $group_path_slug ] = apply_filters(
+			'stellarwp/assets/group_path',
+			[
+				'root'     => self::normalize_path( $root ),
+				'relative' => trailingslashit( $relative ),
+				'prefix'   => $is_using_asset_directory_prefix,
+			],
+			$group_path_slug
+		);
 	}
 
 	/**
