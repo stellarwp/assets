@@ -190,13 +190,19 @@ class Assets {
 	/**
 	 * Get the Asset Object configuration.
 	 *
-	 * @param string|array $slug Slug of the Asset.
-	 * @param boolean $sort If we should do any sorting before returning.
+	 * @param string|string[]|null $slug Slug of the Asset, array of slugs, or null for all assets.
+	 * @param bool                 $sort If we should do any sorting before returning.
 	 *
-	 * @return array|Asset Array of asset objects, single asset object, or null if looking for a single asset but
-	 *                           it was not in the array of objects.
+	 * @return Asset[]|Asset|null Array of asset objects, a single Asset object, or null if looking
+	 *     for a single Asset but it was not found.
+	 *
+	 * @phpstan-return (
+	 *     $slug is null ? array<string, Asset> :
+	 *     ($slug is string ? Asset|null :
+	 *     ($slug is array ? array<string, Asset> : mixed))
+	 * )
+	 *
 	 * @since 1.0.0
-	 *
 	 */
 	public function get( $slug = null, $sort = true ) {
 		$obj = $this;
@@ -249,11 +255,7 @@ class Assets {
 		// Prevent weird stuff here.
 		$slug = sanitize_key( $slug );
 
-		if ( ! empty( $this->assets[ $slug ] ) ) {
-			return $this->assets[ $slug ];
-		}
-
-		return [];
+		return $this->assets[ $slug ] ?? null;
 	}
 
 	/**
@@ -696,7 +698,7 @@ class Assets {
 		)
 		) {
 			// Registering the asset now would trigger a doing_it_wrong notice: queue the assets to be registered later.
-			if ( $assets === null || empty( $assets ) ) {
+			if ( empty( $assets ) ) {
 				return;
 			}
 
@@ -829,9 +831,32 @@ class Assets {
 	}
 
 	/**
-	 * Prints the `script` (JS) and `link` (CSS) HTML tags associated with one or more assets groups.
+	 * Remove all assets.
 	 *
-	 * The method will force the scripts and styles to print overriding their registration and conditional.
+	 * @since 1.5.0
+	 *
+	 * @return int The number of assets successfully removed.
+	 */
+	public function remove_all() {
+		$removed = 0;
+
+		foreach ( $this->assets as $slug => $asset ) {
+			if ( ! $this->remove( $slug ) ) {
+				continue;
+			}
+
+			++$removed;
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * Prints the `script` (JS) and `link` (CSS) HTML tags associated with one or more assets
+	 * groups.
+	 *
+	 * The method will force the scripts and styles to print overriding their registration and
+	 * conditional.
 	 *
 	 * @since 1.0.0
 	 *
