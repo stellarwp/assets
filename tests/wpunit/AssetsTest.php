@@ -26,9 +26,11 @@ class AssetsTest extends AssetTestCase {
 		Config::set_relative_asset_path( 'tests/_data/' );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	protected function tearDown() {
+		// Remove all assets.
+		Assets::init()->remove_all();
 		Config::reset();
+		parent::tearDown();
 	}
 
 	/**
@@ -47,6 +49,9 @@ class AssetsTest extends AssetTestCase {
 		self::$uopz_redefines = [];
 	}
 
+	/**
+	 * @test
+	 */
 	public function it_should_accept_instance_of_asset_or_array_of_assets_in_register_in_wp() {
 		$asset_1 = Asset::add( 'fake1-script', 'fake1.js' );
 		$asset_2 = Asset::add( 'fake1-style', 'fake1.css' );
@@ -56,8 +61,8 @@ class AssetsTest extends AssetTestCase {
 
 		$assets = Assets::init();
 
-		$assets->register_in_wp( null ); // No problemo... nothing happens though.
-		$assets->register_in_wp( [] ); // No problemo... nothing happens though.
+		// An empty array should not cause any assets to be registered.
+		$assets->register_in_wp( [] );
 
 		$this->assertFalse( $asset_1->is_registered() );
 		$assets->register_in_wp( $asset_1 );
@@ -72,6 +77,75 @@ class AssetsTest extends AssetTestCase {
 		$this->assertTrue( $asset_3->is_registered() );
 		$this->assertTrue( $asset_4->is_registered() );
 		$this->assertTrue( $asset_5->is_registered() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_remove_all_assets() {
+		Asset::add( 'asset-1', 'asset-1.js' );
+		Asset::add( 'asset-2', 'asset-2.js' );
+		Asset::add( 'asset-3', 'asset-3.js' );
+
+		$assets = Assets::init();
+
+		$this->assertCount( 3, $assets->get() );
+		$this->assertSame( 3, $assets->remove_all() );
+		$this->assertCount( 0, $assets->get() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_return_null_when_single_asset_not_found() {
+		Asset::add( 'asset-1', 'asset-1.js' );
+		Asset::add( 'asset-2', 'asset-2.js' );
+		Asset::add( 'asset-3', 'asset-3.js' );
+
+		$result = Assets::init()->get( 'unknown-slug' );
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_return_empty_array_when_no_assets() {
+		$result = Assets::init()->get();
+		$this->assertSame( [], $result );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_gets_single_asset() {
+		Asset::add( 'my-single-asset', 'my-single-asset.js' );
+		$result = Assets::init()->get( 'my-single-asset' );
+		$this->assertInstanceOf( Asset::class, $result );
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_gets_a_subset_of_assets() {
+		Asset::add( 'asset-1', 'asset-1.js' );
+		Asset::add( 'asset-2', 'asset-2.js' );
+		Asset::add( 'asset-3', 'asset-3.js' );
+
+		$assets = Assets::init();
+
+		$result = $assets->get( ['asset-2', 'asset-3'] );
+		$this->assertIsArray( $result );
+		$this->assertCount( 2, $result );
+		$this->assertArrayNotHasKey( 'asset-1', $result );
+		$this->assertArrayHasKey( 'asset-2', $result );
+		$this->assertArrayHasKey( 'asset-3', $result );
+
+		$single = $assets->get( ['asset-1'] );
+		$this->assertIsArray( $single );
+		$this->assertCount( 1, $single );
+		$this->assertArrayHasKey( 'asset-1', $single );
+		$this->assertArrayNotHasKey( 'asset-2', $single );
+		$this->assertArrayNotHasKey( 'asset-3', $single );
 	}
 
 	public function invalid_params_for_register_in_wp_provider(): Generator {
@@ -121,7 +195,7 @@ class AssetsTest extends AssetTestCase {
 		$slugs = [
 			'fake1' => [ true, false ],
 			'fake2' => [ false, false ],
-			'fake3' => [ true, true ]
+			'fake3' => [ true, true ],
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -143,7 +217,7 @@ class AssetsTest extends AssetTestCase {
 		$slugs = [
 			'fake1' => [ 'has_min' => true, 'has_only_min' => false ],
 			'fake2' => [ 'has_min' => false, 'has_only_min' => false ],
-			'fake3' => [ 'has_min' => true, 'has_only_min' => true ]
+			'fake3' => [ 'has_min' => true, 'has_only_min' => true ],
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -183,7 +257,7 @@ class AssetsTest extends AssetTestCase {
 		$slugs = [
 			'fake1' => [ true, false ],
 			'fake2' => [ false, false ],
-			'fake3' => [ true, true ]
+			'fake3' => [ true, true ],
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -224,7 +298,7 @@ class AssetsTest extends AssetTestCase {
 		$slugs = [
 			'fake1' => [ true, false ],
 			'fake2' => [ false, false ],
-			'fake3' => [ true, true ]
+			'fake3' => [ true, true ],
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -265,7 +339,7 @@ class AssetsTest extends AssetTestCase {
 		$slugs = [
 			'fake1' => [ 'has_min' => true, 'has_only_min' => false ],
 			'fake2' => [ 'has_min' => false, 'has_only_min' => false ],
-			'fake3' => [ 'has_min' => true, 'has_only_min' => true ]
+			'fake3' => [ 'has_min' => true, 'has_only_min' => true ],
 		];
 
 		foreach ( array_keys( $slugs ) as $slug ) {
@@ -462,7 +536,7 @@ class AssetsTest extends AssetTestCase {
 		     ->register();
 		Asset::add( 'my-second-script-mod', 'second-script-mod.js' )
 		     ->add_localize_script( 'boomshakalakaProjectSecondScriptModData', [
-			     'animal' => 'horse'
+			     'animal' => 'horse',
 		     ] )
 		     ->register();
 
@@ -513,7 +587,7 @@ SCRIPT,
 		     ->register();
 		Asset::add( 'my-second-ns-script-mod', 'second-script-mod.js' )
 		     ->add_localize_script( 'boomshakalaka.project.secondScriptData', [
-			     'animal' => 'horse'
+			     'animal' => 'horse',
 		     ] )
 		     ->register();
 
