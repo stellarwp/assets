@@ -156,7 +156,15 @@ class Config {
 
 		if ( empty( static::$path_urls[ $key ] ) ) {
 			$bases = Utils::get_bases();
-			static::$path_urls[ $key ] = trailingslashit( strtr($path, array_combine(wp_list_pluck( $bases, 'base_dir' ), wp_list_pluck( $bases, 'base_url' ) ) ) );
+			static::$path_urls[ $key ] = trailingslashit(
+				strtr(
+					$path,
+					array_combine(
+						wp_list_pluck( $bases, 'base_dir' ),
+						wp_list_pluck( $bases, 'base_url' )
+					)
+				)
+			);
 
 		}
 
