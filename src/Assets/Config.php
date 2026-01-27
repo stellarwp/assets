@@ -159,8 +159,8 @@ class Config {
 		if ( empty( static::$path_urls[ $key ] ) ) {
 			$bases = Utils::get_bases();
 
-			$base_dirs = wp_list_pluck( $bases, 'base_dir' );
-			$base_urls = wp_list_pluck( $bases, 'base_url' );
+			$base_dirs = array_column( $bases, 'base_dir' );
+			$base_urls = array_column( $bases, 'base_url' );
 
 			uasort( $base_dirs, function( $a, $b ) {
 				return strlen( $b ) <=> strlen( $a );
