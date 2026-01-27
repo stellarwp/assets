@@ -464,6 +464,16 @@ class AssetsTest extends AssetTestCase {
 					'WP_PLUGIN_URL'  => 'http://wordpress.test/wp-content/addons',
 				],
 			],
+			[
+				'rare case',
+				[
+					'ABSPATH' => '/wordpress.test/',
+					'WP_CONTENT_DIR' => '/wordpress.test/wp-content',
+					'WP_CONTENT_URL' => 'http://wordpress.test/wp-content',
+					'WP_PLUGIN_DIR' => '/wordpress.test/wp-content/plugins',
+					'WP_PLUGIN_URL' => 'http://wordpress.test/wp-content/plugins',
+				],
+			],
 		];
 
 		foreach ( $data as $d ) {
@@ -1129,7 +1139,7 @@ SCRIPT,
 
 		$plugins_path = str_replace( constant( 'WP_CONTENT_DIR' ), '', constant( 'WP_PLUGIN_DIR' ) );
 
-		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 || $wont_figure_out_min_vs_unmin ) {
+		if ( constant( 'WP_PLUGIN_DIR' ) !== constant( 'WP_CONTENT_DIR' ) . $plugins_path || strpos( constant( 'ABSPATH' ), 'C:') === 0 || strpos( constant( 'ABSPATH' ), '/wordpress.test/') === 0 || $wont_figure_out_min_vs_unmin ) {
 			// If we are testing outside of the actual plugin directory, the `is_file` check will always fail.
 			// In installations where this set up is the actual, the file should exist.
 			// In this case it will always fail to locate mins.
