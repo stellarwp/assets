@@ -148,7 +148,7 @@ class Config {
 	/**
 	 * Gets the root path of the project.
 	 *
-	 * @since 1.4.12
+	 * @since 1.5.1
 	 *
 	 * @return string
 	 */
