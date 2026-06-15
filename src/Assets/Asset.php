@@ -298,6 +298,9 @@ class Asset {
 	/**
 	 * Constructor.
 	 *
+	 * @since 1.0.0
+	 * @since 1.5.2 Added nullable type hints for the version and root path parameters.
+	 *
 	 * @param string      $slug      The asset slug.
 	 * @param string      $file      The asset file path.
 	 * @param string|null $version   The asset version.
@@ -339,6 +342,9 @@ class Asset {
 
 	/**
 	 * Registers an asset.
+	 *
+	 * @since 1.0.0
+	 * @since 1.5.2 Added nullable type hints for the version and root path parameters.
 	 *
 	 * @param string      $slug      The asset slug.
 	 * @param string      $file      The asset file path.
