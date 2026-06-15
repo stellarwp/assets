@@ -303,7 +303,7 @@ class Asset {
 	 * @param string|null $version   The asset version.
 	 * @param string|null $root_path The path to the root of the plugin.
 	 */
-	public function __construct( string $slug, string $file, string $version = null, string $root_path = null ) {
+	public function __construct( string $slug, string $file, ?string $version = null, ?string $root_path = null ) {
 		$this->slug      = sanitize_key( $slug );
 		$this->file      = $file;
 		$this->version   = $version ?? Config::get_version();
