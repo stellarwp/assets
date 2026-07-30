@@ -99,6 +99,8 @@ class Assets {
 	 * @param string $file The asset file path.
 	 * @param string|null $version The asset version.
 	 * @param string|null $plugin_path The path to the root of the plugin.
+	 *
+	 * @since 1.5.3 Added nullable type hints for the version and plugin path parameters.
 	 */
 	public static function asset( string $slug, string $file, ?string $version = null, ?string $plugin_path = null ) {
 		return static::init()->add( new Asset( $slug, $file, $version, $plugin_path ) );
