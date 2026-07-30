@@ -100,7 +100,7 @@ class Assets {
 	 * @param string|null $version The asset version.
 	 * @param string|null $plugin_path The path to the root of the plugin.
 	 */
-	public static function asset( string $slug, string $file, string $version = null, string $plugin_path = null ) {
+	public static function asset( string $slug, string $file, ?string $version = null, ?string $plugin_path = null ) {
 		return static::init()->add( new Asset( $slug, $file, $version, $plugin_path ) );
 	}
 
